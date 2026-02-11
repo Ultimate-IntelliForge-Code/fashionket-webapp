@@ -1,30 +1,30 @@
-import React from 'react'
-import { Link } from '@tanstack/react-router'
+import React from "react";
+import { Link } from "@tanstack/react-router";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { ArrowLeft, ShoppingBag } from 'lucide-react'
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { ArrowLeft, ShoppingBag } from "lucide-react";
 
 interface AuthFormWrapperProps {
-  title: React.ReactNode
-  description: string
-  children: React.ReactNode
-  backLink?: string
-  backText?: string
-  footer?: React.ReactNode
+  title: React.ReactNode;
+  description: string;
+  children: React.ReactNode;
+  backLink?: string;
+  backText?: string;
+  footer?: React.ReactNode;
 }
 
 export const AuthFormWrapper: React.FC<AuthFormWrapperProps> = ({
   title,
   description,
   children,
-  backLink = '/',
-  backText = 'Back to home',
+  backLink = "/",
+  backText = "Back to home",
   footer,
 }) => {
   return (
@@ -46,20 +46,10 @@ export const AuthFormWrapper: React.FC<AuthFormWrapperProps> = ({
                 to="/"
                 className="flex items-center justify-center gap-3 group text-center p-2"
               >
-                <div className="relative">
-                  <div className="absolute -inset-1 bg-gradient-to-r from-mmp-accent to-mmp-secondary rounded-lg blur opacity-20 group-hover:opacity-30 transition duration-1000 group-hover:duration-200" />
-                  <div className="relative p-2 bg-mmp-primary2 rounded-lg">
-                    <ShoppingBag className="h-6 w-6 text-mmp-secondary" />
-                  </div>
-                </div>
-                <div className="flex flex-col">
-                  <span className="text-xl md:text-2xl font-bold bg-gradient-to-r from-mmp-neutral via-mmp-secondary to-mmp-accent bg-clip-text text-transparent">
-                    FashionKet
-                  </span>
-                  <span className="text-xs text-mmp-secondary font-medium hidden md:block">
-                    Curated Excellence
-                  </span>
-                </div>
+                <img
+                  src="/logo.png"
+                  alt="FashionKet Logo"
+                />
               </Link>
               <div>{title}</div>
             </CardTitle>
@@ -76,5 +66,5 @@ export const AuthFormWrapper: React.FC<AuthFormWrapperProps> = ({
         </Card>
       </div>
     </div>
-  )
-}
+  );
+};

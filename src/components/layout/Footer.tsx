@@ -1,4 +1,4 @@
-import { Link } from '@tanstack/react-router'
+import { Link } from "@tanstack/react-router";
 import {
   Facebook,
   Twitter,
@@ -14,79 +14,79 @@ import {
   ChevronRight,
   Globe,
   MessageCircle,
-} from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Separator } from '@/components/ui/separator'
-import { Badge } from '@/components/ui/badge'
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Separator } from "@/components/ui/separator";
+import { Badge } from "@/components/ui/badge";
 
 const footerLinks = {
   shop: [
-    { title: 'New Arrivals', href: '/new-arrivals' },
-    { title: 'Trending Now', href: '/trending' },
-    { title: 'Best Sellers', href: '/best-sellers' },
-    { title: 'Sale & Offers', href: '/sale' },
-    { title: 'Luxury Collection', href: '/luxury' },
+    { title: "New Arrivals", href: "/new-arrivals" },
+    { title: "Trending Now", href: "/trending" },
+    { title: "Best Sellers", href: "/best-sellers" },
+    { title: "Sale & Offers", href: "/sale" },
+    { title: "Luxury Collection", href: "/luxury" },
   ],
   categories: [
-    { title: "Men's Fashion", href: '/category/mens-fashion' },
-    { title: "Women's Fashion", href: '/category/womens-fashion' },
-    { title: 'Accessories', href: '/category/accessories' },
-    { title: 'Footwear', href: '/category/footwear' },
-    { title: 'Watches & Jewelry', href: '/category/jewelry' },
+    { title: "Men's Fashion", href: "/category/mens-fashion" },
+    { title: "Women's Fashion", href: "/category/womens-fashion" },
+    { title: "Accessories", href: "/category/accessories" },
+    { title: "Footwear", href: "/category/footwear" },
+    { title: "Watches & Jewelry", href: "/category/jewelry" },
   ],
   company: [
-    { title: 'About Us', href: '/about' },
-    { title: 'Careers', href: '/careers' },
-    { title: 'Press & Media', href: '/press' },
-    { title: 'Sustainability', href: '/sustainability' },
-    { title: 'Affiliate Program', href: '/affiliate' },
+    { title: "About Us", href: "/about" },
+    { title: "Careers", href: "/careers" },
+    { title: "Press & Media", href: "/press" },
+    { title: "Sustainability", href: "/sustainability" },
+    { title: "Affiliate Program", href: "/affiliate" },
   ],
   support: [
-    { title: 'Help Center', href: '/help' },
-    { title: 'Shipping Policy', href: '/shipping' },
-    { title: 'Returns & Exchanges', href: '/returns' },
-    { title: 'Size Guide', href: '/size-guide' },
-    { title: 'Contact Us', href: '/contact' },
+    { title: "Help Center", href: "/help" },
+    { title: "Shipping Policy", href: "/shipping" },
+    { title: "Returns & Exchanges", href: "/returns" },
+    { title: "Size Guide", href: "/size-guide" },
+    { title: "Contact Us", href: "/contact" },
   ],
-}
+};
 
 const socialLinks = [
   {
     icon: Facebook,
-    href: 'https://facebook.com/fashionket',
-    label: 'Facebook',
+    href: "https://facebook.com/fashionket",
+    label: "Facebook",
   },
-  { icon: Twitter, href: 'https://twitter.com/fashionket', label: 'Twitter' },
+  { icon: Twitter, href: "https://twitter.com/fashionket", label: "Twitter" },
   {
     icon: Instagram,
-    href: 'https://instagram.com/fashionket',
-    label: 'Instagram',
+    href: "https://instagram.com/fashionket",
+    label: "Instagram",
   },
-  { icon: Youtube, href: 'https://youtube.com/fashionket', label: 'YouTube' },
+  { icon: Youtube, href: "https://youtube.com/fashionket", label: "YouTube" },
   {
     icon: Linkedin,
-    href: 'https://linkedin.com/company/fashionket',
-    label: 'LinkedIn',
+    href: "https://linkedin.com/company/fashionket",
+    label: "LinkedIn",
   },
-]
+];
 
 const contactInfo = [
-  { icon: Phone, text: '+1 (555) 123-4567', href: 'tel:+15551234567' },
+  { icon: Phone, text: "+1 (555) 123-4567", href: "tel:+15551234567" },
   {
     icon: Mail,
-    text: 'support@fashionket.com',
-    href: 'mailto:support@fashionket.com',
+    text: "support@fashionket.com",
+    href: "mailto:support@fashionket.com",
   },
   {
     icon: MapPin,
-    text: '123 Fashion Ave, New York, NY 10001',
-    href: 'https://maps.google.com',
+    text: "123 Fashion Ave, New York, NY 10001",
+    href: "https://maps.google.com",
   },
-]
+];
 
 export default function Footer() {
-  const currentYear = new Date().getFullYear()
+  const currentYear = new Date().getFullYear();
 
   return (
     <footer className="bg-mmp-primary2 text-mmp-neutral">
@@ -96,19 +96,10 @@ export default function Footer() {
           {/* Brand Column */}
           <div className="lg:col-span-4">
             <Link to="/" className="inline-block mb-6">
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-gradient-to-r from-mmp-accent to-mmp-secondary">
-                  <Sparkles className="h-6 w-6 text-white" />
-                </div>
-                <div>
-                  <h2 className="text-2xl font-bold bg-gradient-to-r from-mmp-neutral via-mmp-secondary to-mmp-accent bg-clip-text text-transparent">
-                    FashionKet
-                  </h2>
-                  <p className="text-xs text-mmp-neutral/60">
-                    Redefining Fashion
-                  </p>
-                </div>
-              </div>
+              <img
+                  src="/logo.png"
+                  alt="FashionKet Logo"
+                />
             </Link>
 
             <p className="text-mmp-neutral/70 mb-6 max-w-md">
@@ -181,11 +172,7 @@ export default function Footer() {
                 >
                   <Link to="/vendor/login">Login</Link>
                 </Button>
-                <Button
-                  variant="ghost"
-                  className="px-5"
-                  asChild
-                >
+                <Button variant="ghost" className="px-5" asChild>
                   <Link to="/vendor/register">Register</Link>
                 </Button>
               </div>
@@ -201,18 +188,18 @@ export default function Footer() {
                   </h4>
                   <div className="space-y-3">
                     {contactInfo.map((info, index) => {
-                      const Icon = info.icon
+                      const Icon = info.icon;
                       return (
                         <Link
                           key={index}
                           to={info.href}
                           className="flex items-center gap-3 text-mmp-neutral/70 hover:text-mmp-secondary transition-colors group"
                           target={
-                            info.href.startsWith('http') ? '_blank' : undefined
+                            info.href.startsWith("http") ? "_blank" : undefined
                           }
                           rel={
-                            info.href.startsWith('http')
-                              ? 'noopener noreferrer'
+                            info.href.startsWith("http")
+                              ? "noopener noreferrer"
                               : undefined
                           }
                         >
@@ -221,7 +208,7 @@ export default function Footer() {
                           </div>
                           <span className="text-sm">{info.text}</span>
                         </Link>
-                      )
+                      );
                     })}
                   </div>
                 </div>
@@ -236,7 +223,7 @@ export default function Footer() {
                     <div>
                       <div className="flex gap-3 mb-4">
                         {socialLinks.map((social) => {
-                          const Icon = social.icon
+                          const Icon = social.icon;
                           return (
                             <Link
                               key={social.label}
@@ -248,7 +235,7 @@ export default function Footer() {
                             >
                               <Icon className="h-5 w-5 text-mmp-neutral/70 group-hover:text-white transition-colors" />
                             </Link>
-                          )
+                          );
                         })}
                       </div>
                     </div>
@@ -348,11 +335,11 @@ export default function Footer() {
               {/* Payment Methods */}
               <div className="flex items-center gap-2">
                 <span className="text-mmp-neutral/60 pr-2">
-                  Payments Platform:{' '}
+                  Payments Platform:{" "}
                 </span>
                 <div className="w-8 h-5 bg-mmp-primary/20 rounded flex items-center justify-center">
                   <span className="text-xs font-bold text-mmp-neutral/50">
-                    {' '}
+                    {" "}
                     PayStack
                   </span>
                 </div>
@@ -382,5 +369,5 @@ export default function Footer() {
         </div>
       </div>
     </footer>
-  )
+  );
 }
