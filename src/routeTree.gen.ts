@@ -301,8 +301,8 @@ export interface FileRoutesByFullPath {
   '/categories/$slug': typeof rootRootLayoutCategoriesSlugRoute
   '/products/$slug': typeof rootRootLayoutProductsSlugRoute
   '/admin/': typeof adminAdminAdminLayoutIndexRoute
-  '/categories': typeof rootRootLayoutCategoriesIndexRoute
-  '/products': typeof rootRootLayoutProductsIndexRoute
+  '/categories/': typeof rootRootLayoutCategoriesIndexRoute
+  '/products/': typeof rootRootLayoutProductsIndexRoute
   '/vendor/': typeof vendorVendorVendorLayoutIndexRoute
   '/cart/checkout': typeof rootRootLayoutAuthenticatedCartCheckoutRoute
   '/cart/payment-status': typeof rootRootLayoutAuthenticatedCartPaymentStatusRoute
@@ -310,13 +310,13 @@ export interface FileRoutesByFullPath {
   '/vendor/orders/$orderId': typeof vendorVendorVendorLayoutOrdersOrderIdRoute
   '/vendor/products/$slug': typeof vendorVendorVendorLayoutProductsSlugRoute
   '/vendor/products/new': typeof vendorVendorVendorLayoutProductsNewRoute
-  '/account': typeof rootRootLayoutAuthenticatedAccountIndexRoute
-  '/cart': typeof rootRootLayoutAuthenticatedCartIndexRoute
-  '/orders': typeof rootRootLayoutAuthenticatedOrdersIndexRoute
-  '/vendor/orders': typeof vendorVendorVendorLayoutOrdersIndexRoute
-  '/vendor/products': typeof vendorVendorVendorLayoutProductsIndexRoute
-  '/vendor/settings': typeof vendorVendorVendorLayoutSettingsIndexRoute
-  '/vendor/wallet': typeof vendorVendorVendorLayoutWalletIndexRoute
+  '/account/': typeof rootRootLayoutAuthenticatedAccountIndexRoute
+  '/cart/': typeof rootRootLayoutAuthenticatedCartIndexRoute
+  '/orders/': typeof rootRootLayoutAuthenticatedOrdersIndexRoute
+  '/vendor/orders/': typeof vendorVendorVendorLayoutOrdersIndexRoute
+  '/vendor/products/': typeof vendorVendorVendorLayoutProductsIndexRoute
+  '/vendor/settings/': typeof vendorVendorVendorLayoutSettingsIndexRoute
+  '/vendor/wallet/': typeof vendorVendorVendorLayoutWalletIndexRoute
 }
 export interface FileRoutesByTo {
   '/forgot-password': typeof authAuthForgotPasswordRoute
@@ -425,8 +425,8 @@ export interface FileRouteTypes {
     | '/categories/$slug'
     | '/products/$slug'
     | '/admin/'
-    | '/categories'
-    | '/products'
+    | '/categories/'
+    | '/products/'
     | '/vendor/'
     | '/cart/checkout'
     | '/cart/payment-status'
@@ -434,13 +434,13 @@ export interface FileRouteTypes {
     | '/vendor/orders/$orderId'
     | '/vendor/products/$slug'
     | '/vendor/products/new'
-    | '/account'
-    | '/cart'
-    | '/orders'
-    | '/vendor/orders'
-    | '/vendor/products'
-    | '/vendor/settings'
-    | '/vendor/wallet'
+    | '/account/'
+    | '/cart/'
+    | '/orders/'
+    | '/vendor/orders/'
+    | '/vendor/products/'
+    | '/vendor/settings/'
+    | '/vendor/wallet/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/forgot-password'
@@ -648,14 +648,14 @@ declare module '@tanstack/react-router' {
     '/(root)/_rootLayout/products/': {
       id: '/(root)/_rootLayout/products/'
       path: '/products'
-      fullPath: '/products'
+      fullPath: '/products/'
       preLoaderRoute: typeof rootRootLayoutProductsIndexRouteImport
       parentRoute: typeof rootRootLayoutRoute
     }
     '/(root)/_rootLayout/categories/': {
       id: '/(root)/_rootLayout/categories/'
       path: '/categories'
-      fullPath: '/categories'
+      fullPath: '/categories/'
       preLoaderRoute: typeof rootRootLayoutCategoriesIndexRouteImport
       parentRoute: typeof rootRootLayoutRoute
     }
@@ -732,49 +732,49 @@ declare module '@tanstack/react-router' {
     '/(vendor)/vendor/_vendorLayout/wallet/': {
       id: '/(vendor)/vendor/_vendorLayout/wallet/'
       path: '/wallet'
-      fullPath: '/vendor/wallet'
+      fullPath: '/vendor/wallet/'
       preLoaderRoute: typeof vendorVendorVendorLayoutWalletIndexRouteImport
       parentRoute: typeof vendorVendorVendorLayoutRoute
     }
     '/(vendor)/vendor/_vendorLayout/settings/': {
       id: '/(vendor)/vendor/_vendorLayout/settings/'
       path: '/settings'
-      fullPath: '/vendor/settings'
+      fullPath: '/vendor/settings/'
       preLoaderRoute: typeof vendorVendorVendorLayoutSettingsIndexRouteImport
       parentRoute: typeof vendorVendorVendorLayoutRoute
     }
     '/(vendor)/vendor/_vendorLayout/products/': {
       id: '/(vendor)/vendor/_vendorLayout/products/'
       path: '/products'
-      fullPath: '/vendor/products'
+      fullPath: '/vendor/products/'
       preLoaderRoute: typeof vendorVendorVendorLayoutProductsIndexRouteImport
       parentRoute: typeof vendorVendorVendorLayoutRoute
     }
     '/(vendor)/vendor/_vendorLayout/orders/': {
       id: '/(vendor)/vendor/_vendorLayout/orders/'
       path: '/orders'
-      fullPath: '/vendor/orders'
+      fullPath: '/vendor/orders/'
       preLoaderRoute: typeof vendorVendorVendorLayoutOrdersIndexRouteImport
       parentRoute: typeof vendorVendorVendorLayoutRoute
     }
     '/(root)/_rootLayout/_authenticated/orders/': {
       id: '/(root)/_rootLayout/_authenticated/orders/'
       path: '/orders'
-      fullPath: '/orders'
+      fullPath: '/orders/'
       preLoaderRoute: typeof rootRootLayoutAuthenticatedOrdersIndexRouteImport
       parentRoute: typeof rootRootLayoutAuthenticatedRoute
     }
     '/(root)/_rootLayout/_authenticated/cart/': {
       id: '/(root)/_rootLayout/_authenticated/cart/'
       path: '/cart'
-      fullPath: '/cart'
+      fullPath: '/cart/'
       preLoaderRoute: typeof rootRootLayoutAuthenticatedCartIndexRouteImport
       parentRoute: typeof rootRootLayoutAuthenticatedRoute
     }
     '/(root)/_rootLayout/_authenticated/account/': {
       id: '/(root)/_rootLayout/_authenticated/account/'
       path: '/account'
-      fullPath: '/account'
+      fullPath: '/account/'
       preLoaderRoute: typeof rootRootLayoutAuthenticatedAccountIndexRouteImport
       parentRoute: typeof rootRootLayoutAuthenticatedRoute
     }
@@ -975,3 +975,12 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}

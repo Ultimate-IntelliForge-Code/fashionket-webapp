@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react'
-import { Link, useRouterState, useNavigate } from '@tanstack/react-router'
+import { useState, useEffect } from "react";
+import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
 import {
   Menu,
   Search,
@@ -17,17 +17,17 @@ import {
   Shield,
   Bell,
   TrendingUp,
-} from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { Input } from '@/components/ui/input'
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import {
   Sheet,
   SheetContent,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
-} from '@/components/ui/sheet'
+} from "@/components/ui/sheet";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -36,96 +36,96 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
   DropdownMenuGroup,
-} from '@/components/ui/dropdown-menu'
-import { Separator } from '@/components/ui/separator'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { useAuth } from '@/hooks'
-import { CartIcon } from '../cart'
-import { useLogout } from '@/api/queries'
+} from "@/components/ui/dropdown-menu";
+import { Separator } from "@/components/ui/separator";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useAuth } from "@/hooks";
+import { CartIcon } from "../cart";
+import { useLogout } from "@/api/queries";
 
 // Navigation links configuration
 const navLinks = [
-  { href: '/', title: 'Home', icon: Home },
-  { href: '/categories', title: 'Categories', icon: Tag },
-  { href: '/products', title: 'Products', icon: Package },
+  { href: "/", title: "Home", icon: Home },
+  { href: "/categories", title: "Categories", icon: Tag },
+  { href: "/products", title: "Products", icon: Package },
   // { href: '/new-arrivals', title: 'New Arrivals', icon: Sparkles },
-]
+];
 
 const userLinks = [
-  { href: '/account', title: 'My Profile', icon: User },
-  { href: '/orders', title: 'My Orders', icon: Package },
-  { href: '/wishlist', title: 'Wishlist', icon: Heart },
-  { href: '/settings', title: 'Settings', icon: Settings },
-]
+  { href: "/account", title: "My Profile", icon: User },
+  { href: "/orders", title: "My Orders", icon: Package },
+  { href: "/wishlist", title: "Wishlist", icon: Heart },
+  { href: "/settings", title: "Settings", icon: Settings },
+];
 
 const adminLinks = [
-  { href: '/admin', title: 'Dashboard', icon: TrendingUp },
-  { href: '/admin/products', title: 'Products', icon: Package },
-  { href: '/admin/orders', title: 'Orders', icon: ShoppingBag },
-  { href: '/admin/analytics', title: 'Analytics', icon: CreditCard },
-]
+  { href: "/admin", title: "Dashboard", icon: TrendingUp },
+  { href: "/admin/products", title: "Products", icon: Package },
+  { href: "/admin/orders", title: "Orders", icon: ShoppingBag },
+  { href: "/admin/analytics", title: "Analytics", icon: CreditCard },
+];
 
 export default function Header() {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false)
-  const [searchQuery, setSearchQuery] = useState('')
-  const [isSearchExpanded, setIsSearchExpanded] = useState(false)
-  const [isScrolled, setIsScrolled] = useState(false)
-  const router = useRouterState()
-  const navigate = useNavigate()
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isSearchExpanded, setIsSearchExpanded] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
+  const router = useRouterState();
+  const navigate = useNavigate();
 
-  const { user, isAuthenticated, isAdmin, logout } = useAuth()
-  const { isPending: isLoggingOut } = useLogout()
-  
+  const { user, isAuthenticated, isAdmin, logout } = useAuth();
+  const { isPending: isLoggingOut } = useLogout();
+
   // Handle scroll effect
   useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 10)
-    }
-    window.addEventListener('scroll', handleScroll)
-    return () => window.removeEventListener('scroll', handleScroll)
-  }, [])
+      setIsScrolled(window.scrollY > 10);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   // Check active route
   const isActive = (href: string) => {
-    return router.location.pathname === href
-  }
+    return router.location.pathname === href;
+  };
 
   const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
     if (searchQuery.trim()) {
-      navigate({ to: '/search', search: { q: searchQuery } })
-      setIsSearchExpanded(false)
+      navigate({ to: "/search", search: { q: searchQuery } });
+      setIsSearchExpanded(false);
     }
-  }
+  };
 
   const handleLogout = async () => {
     try {
-      await logout()
+      await logout();
     } catch (error) {
-      console.error('Logout failed:', error)
+      console.error("Logout failed:", error);
     }
-  }
+  };
 
   const handleAdminDashboard = () => {
-    navigate({ to: '/admin' })
-  }
+    navigate({ to: "/admin" });
+  };
 
   // User initials for avatar
   const getUserInitials = () => {
-    if (!user?.fullName) return 'U'
+    if (!user?.fullName) return "U";
     return user.fullName
-      .split(' ')
+      .split(" ")
       .map((n) => n[0])
-      .join('')
+      .join("")
       .toUpperCase()
-      .slice(0, 2)
-  }
+      .slice(0, 2);
+  };
 
   // User display name
   const getUserDisplayName = () => {
-    if (!user?.fullName) return 'Welcome!'
-    return user.fullName.split(' ')[0]
-  }
+    if (!user?.fullName) return "Welcome!";
+    return user.fullName.split(" ")[0];
+  };
 
   return (
     <>
@@ -157,8 +157,8 @@ export default function Header() {
       <header
         className={`sticky top-0 z-50 transition-all duration-300 ${
           isScrolled
-            ? 'bg-mmp-primary2/95 backdrop-blur-md shadow-2xl'
-            : 'bg-mmp-primary2'
+            ? "bg-mmp-primary2/45 backdrop-blur-md shadow-2xl"
+            : "bg-mmp-primary2"
         }`}
       >
         <div className="container mx-auto px-4">
@@ -188,16 +188,12 @@ export default function Header() {
                       <Link
                         to="/"
                         onClick={() => setIsSidebarOpen(false)}
-                        className="flex items-center gap-2 group"
+                        className="flex items-center"
                       >
-                        <div className="flex flex-col">
-                          <span className="text-2xl font-bold text-mmp-neutral tracking-tight">
-                            FashionKet
-                          </span>
-                          <span className="text-xs text-mmp-secondary font-medium">
-                            Premium Shopping
-                          </span>
-                        </div>
+                        <img
+                          src="/logo.png"
+                          alt="FashionKet Logo"
+                        />
                       </Link>
                     </SheetTitle>
                   </SheetHeader>
@@ -265,7 +261,7 @@ export default function Header() {
                           </h3>
                           <nav className="space-y-1">
                             {adminLinks.map((link) => {
-                              const Icon = link.icon
+                              const Icon = link.icon;
                               return (
                                 <Link
                                   key={link.href}
@@ -278,7 +274,7 @@ export default function Header() {
                                     {link.title}
                                   </span>
                                 </Link>
-                              )
+                              );
                             })}
                           </nav>
                         </div>
@@ -289,8 +285,8 @@ export default function Header() {
                     {/* Navigation Links */}
                     <nav className="space-y-1">
                       {navLinks.map((link) => {
-                        const Icon = link.icon
-                        const active = isActive(link.href)
+                        const Icon = link.icon;
+                        const active = isActive(link.href);
                         return (
                           <Link
                             key={link.href}
@@ -298,16 +294,16 @@ export default function Header() {
                             onClick={() => setIsSidebarOpen(false)}
                             className={`flex items-center justify-between p-4 rounded-xl transition-all group ${
                               active
-                                ? 'bg-gradient-to-r from-mmp-primary/30 to-mmp-accent/20 border-l-4 border-mmp-secondary'
-                                : 'hover:bg-mmp-primary/10'
+                                ? "bg-gradient-to-r from-mmp-primary/30 to-mmp-accent/20 border-l-4 border-mmp-secondary"
+                                : "hover:bg-mmp-primary/10"
                             }`}
                           >
                             <div className="flex items-center gap-4">
                               <div
                                 className={`p-2 rounded-lg ${
                                   active
-                                    ? 'bg-mmp-secondary text-white'
-                                    : 'bg-mmp-primary/20 text-mmp-neutral'
+                                    ? "bg-mmp-secondary text-white"
+                                    : "bg-mmp-primary/20 text-mmp-neutral"
                                 }`}
                               >
                                 <Icon className="h-5 w-5" />
@@ -315,8 +311,8 @@ export default function Header() {
                               <span
                                 className={`font-medium ${
                                   active
-                                    ? 'text-mmp-secondary'
-                                    : 'text-mmp-neutral'
+                                    ? "text-mmp-secondary"
+                                    : "text-mmp-neutral"
                                 }`}
                               >
                                 {link.title}
@@ -325,12 +321,12 @@ export default function Header() {
                             <ChevronRight
                               className={`h-4 w-4 transition-transform group-hover:translate-x-1 ${
                                 active
-                                  ? 'text-mmp-secondary'
-                                  : 'text-mmp-neutral/60'
+                                  ? "text-mmp-secondary"
+                                  : "text-mmp-neutral/60"
                               }`}
                             />
                           </Link>
-                        )
+                        );
                       })}
                     </nav>
 
@@ -340,8 +336,8 @@ export default function Header() {
                         <Separator className="my-6 bg-mmp-primary/30" />
                         <nav className="space-y-1">
                           {userLinks.map((link) => {
-                            const Icon = link.icon
-                            const active = isActive(link.href)
+                            const Icon = link.icon;
+                            const active = isActive(link.href);
                             return (
                               <Link
                                 key={link.href}
@@ -349,14 +345,14 @@ export default function Header() {
                                 onClick={() => setIsSidebarOpen(false)}
                                 className={`flex items-center gap-3 p-3 rounded-lg transition-colors ${
                                   active
-                                    ? 'bg-mmp-primary/20 text-mmp-secondary'
-                                    : 'hover:bg-mmp-primary/10 text-mmp-neutral'
+                                    ? "bg-mmp-primary/20 text-mmp-secondary"
+                                    : "hover:bg-mmp-primary/10 text-mmp-neutral"
                                 }`}
                               >
                                 <Icon className="h-5 w-5" />
                                 <span>{link.title}</span>
                               </Link>
-                            )
+                            );
                           })}
                         </nav>
                       </>
@@ -367,20 +363,10 @@ export default function Header() {
 
               {/* Logo */}
               <Link to="/" className="flex items-center gap-3 group">
-                <div className="relative">
-                  <div className="absolute -inset-1 bg-gradient-to-r from-mmp-accent to-mmp-secondary rounded-lg blur opacity-20 group-hover:opacity-30 transition duration-1000 group-hover:duration-200" />
-                  <div className="relative p-2 bg-mmp-primary2 rounded-lg">
-                    <ShoppingBag className="h-6 w-6 text-mmp-secondary" />
-                  </div>
-                </div>
-                <div className="flex flex-col">
-                  <span className="text-xl md:text-2xl font-bold bg-gradient-to-r from-mmp-neutral via-mmp-secondary to-mmp-accent bg-clip-text text-transparent">
-                    FashionKet
-                  </span>
-                  <span className="text-xs text-mmp-secondary font-medium hidden md:block">
-                    Curated Excellence
-                  </span>
-                </div>
+                <img
+                  src="/logo.png"
+                  alt="FashionKet Logo"
+                />
               </Link>
             </div>
 
@@ -388,7 +374,7 @@ export default function Header() {
             <div className="hidden lg:flex items-center justify-center flex-1">
               <nav className="flex items-center gap-1">
                 {navLinks.map((link) => {
-                  const active = isActive(link.href)
+                  const active = isActive(link.href);
                   return (
                     <Link
                       key={link.href}
@@ -396,9 +382,9 @@ export default function Header() {
                       className={`relative px-5 py-2.5 rounded-lg font-medium transition-all duration-200 ${
                         active
                           ? 'text-mmp-secondary [&.active]:after:content-[""] [&.active]:after:absolute [&.active]:after:bottom-0 [&.active]:after:left-1/2 [&.active]:after:-translate-x-1/2 [&.active]:after:w-1/2 [&.active]:after:h-0.5 [&.active]:after:bg-gradient-to-r [&.active]:after:from-mmp-accent [&.active]:after:to-mmp-secondary'
-                          : 'text-mmp-neutral/80 hover:text-mmp-secondary'
+                          : "text-mmp-neutral/80 hover:text-mmp-secondary"
                       }`}
-                      activeProps={{ className: 'active' }}
+                      activeProps={{ className: "active" }}
                     >
                       {link.title}
                       {active && (
@@ -410,7 +396,7 @@ export default function Header() {
                         </span>
                       )}
                     </Link>
-                  )
+                  );
                 })}
               </nav>
             </div>
@@ -603,7 +589,7 @@ export default function Header() {
                     {/* User Links */}
                     <DropdownMenuGroup>
                       {userLinks.map((link) => {
-                        const Icon = link.icon
+                        const Icon = link.icon;
                         return (
                           <DropdownMenuItem
                             key={link.href}
@@ -618,7 +604,7 @@ export default function Header() {
                               <span>{link.title}</span>
                             </Link>
                           </DropdownMenuItem>
-                        )
+                        );
                       })}
                     </DropdownMenuGroup>
 
@@ -630,7 +616,7 @@ export default function Header() {
                       disabled={isLoggingOut}
                     >
                       <LogOut className="h-4 w-4 mr-2" />
-                      <span>{isLoggingOut ? 'Logging out...' : 'Logout'}</span>
+                      <span>{isLoggingOut ? "Logging out..." : "Logout"}</span>
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -640,5 +626,5 @@ export default function Header() {
         </div>
       </header>
     </>
-  )
+  );
 }
