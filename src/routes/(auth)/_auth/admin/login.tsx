@@ -1,38 +1,38 @@
-import React from 'react'
-import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { z } from 'zod'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Checkbox } from '@/components/ui/checkbox'
-import { useAdminLogin } from '@/api/queries/auth.query'
-import { useAuth } from '@/hooks'
-import { AuthFormWrapper, GoogleAuthButton } from '@/components/auth'
-import { Eye, EyeOff, Building2 } from 'lucide-react'
-import { toast } from 'react-toastify'
+import React from "react";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
+import { useAdminLogin } from "@/api/queries/auth.query";
+import { useAuth } from "@/hooks";
+import { AuthFormWrapper, GoogleAuthButton } from "@/components/auth";
+import { Eye, EyeOff, Building2 } from "lucide-react";
+import { toast } from "react-toastify";
 
 const adminLoginSchema = z.object({
-  email: z.string().email('Invalid email address'),
-  password: z.string().min(1, 'Password is required'),
+  email: z.string().email("Invalid email address"),
+  password: z.string().min(1, "Password is required"),
   rememberMe: z.boolean().optional(),
-})
+});
 
-type AdminLoginFormData = z.infer<typeof adminLoginSchema>
+type AdminLoginFormData = z.infer<typeof adminLoginSchema>;
 
-export const Route = createFileRoute('/(auth)/_auth/admin/login')({
+export const Route = createFileRoute("/(auth)/_auth/admin/login")({
   component: AdminLoginPage,
   validateSearch: z.object({
     redirect: z.string().optional(),
   }),
-})
+});
 
 function AdminLoginPage() {
-  const navigate = useNavigate()
-  const [showPassword, setShowPassword] = React.useState(false)
-  const { mutate: login, isPending } = useAdminLogin()
-  const { setAuthAdmin } = useAuth()
+  const navigate = useNavigate();
+  const [showPassword, setShowPassword] = React.useState(false);
+  const { mutate: login, isPending } = useAdminLogin();
+  const { setAuthAdmin } = useAuth();
 
   const {
     register,
@@ -40,33 +40,33 @@ function AdminLoginPage() {
     formState: { errors },
     setError,
   } = useForm<AdminLoginFormData>({
-    resolver: zodResolver(adminLoginSchema),
+    resolver: zodResolver(adminLoginSchema as any),
     defaultValues: {
       rememberMe: false,
     },
-  })
+  });
 
   const onSubmit = async (data: AdminLoginFormData) => {
     try {
       login(data, {
         onSuccess: (response) => {
           if (response.success) {
-            setAuthAdmin(response.data)
-            toast.success('Welcome back!, Successfully logged in as admin.')
-            navigate({ to: '/admin' })
+            setAuthAdmin(response.data);
+            toast.success("Welcome back!, Successfully logged in as admin.");
+            navigate({ to: "/admin" });
           }
         },
         onError: (error: any) => {
-          toast.error(error.message || 'Login failed, Invalid credentials')
+          toast.error(error.message || "Login failed, Invalid credentials");
         },
-      })
+      });
     } catch (error: any) {
-      setError('root', {
-        type: 'manual',
-        message: error.message || 'Admin login failed. Please try again.',
-      })
+      setError("root", {
+        type: "manual",
+        message: error.message || "Admin login failed. Please try again.",
+      });
     }
-  }
+  };
 
   const footer = (
     <div className="text-center space-y-3">
@@ -79,7 +79,7 @@ function AdminLoginPage() {
         </Link>
       </div>
       <div className="text-sm text-gray-600">
-        Don't have an admin account?{' '}
+        Don't have an admin account?{" "}
         <Link
           to="/admin/register"
           className="font-medium text-mmp-primary hover:text-mmp-primary2 hover:underline"
@@ -88,7 +88,7 @@ function AdminLoginPage() {
         </Link>
       </div>
     </div>
-  )
+  );
 
   return (
     <AuthFormWrapper
@@ -124,8 +124,8 @@ function AdminLoginPage() {
             id="email"
             type="email"
             placeholder="admin@fashionket.com"
-            {...register('email')}
-            className={errors.email ? 'border-red-500' : 'border-gray-300'}
+            {...register("email")}
+            className={errors.email ? "border-red-500" : "border-gray-300"}
           />
           {errors.email && (
             <p className="text-sm text-red-500">{errors.email.message}</p>
@@ -139,20 +139,20 @@ function AdminLoginPage() {
           <div className="relative">
             <Input
               id="password"
-              type={showPassword ? 'text' : 'password'}
+              type={showPassword ? "text" : "password"}
               placeholder="••••••••"
-              {...register('password')}
+              {...register("password")}
               className={
                 errors.password
-                  ? 'border-red-500 pr-10'
-                  : 'border-gray-300 pr-10'
+                  ? "border-red-500 pr-10"
+                  : "border-gray-300 pr-10"
               }
             />
             <button
               type="button"
               className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
               onClick={() => setShowPassword(!showPassword)}
-              aria-label={showPassword ? 'Hide password' : 'Show password'}
+              aria-label={showPassword ? "Hide password" : "Show password"}
             >
               {showPassword ? (
                 <EyeOff className="h-4 w-4" />
@@ -168,7 +168,7 @@ function AdminLoginPage() {
 
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
-            <Checkbox id="rememberMe" {...register('rememberMe')} />
+            <Checkbox id="rememberMe" {...register("rememberMe")} />
             <Label
               htmlFor="rememberMe"
               className="text-sm font-normal text-gray-600 cursor-pointer"
@@ -190,7 +190,7 @@ function AdminLoginPage() {
               Signing in...
             </>
           ) : (
-            'Sign in as Admin'
+            "Sign in as Admin"
           )}
         </Button>
       </form>
@@ -206,5 +206,5 @@ function AdminLoginPage() {
 
       <GoogleAuthButton variant="admin" disabled={isPending} />
     </AuthFormWrapper>
-  )
+  );
 }
