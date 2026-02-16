@@ -69,7 +69,7 @@ const shippingAddressSchema = z.object({
 type ShippingAddressFormData = z.infer<typeof shippingAddressSchema>
 
 export const Route = createFileRoute(
-  '/(root)/_rootLayout/_authenticated/cart/checkout',
+  '/(root)/_rootLayout/_authenticated/checkout/',
 )({
   component: CheckoutPage,
   loader: async ({ context }) => {

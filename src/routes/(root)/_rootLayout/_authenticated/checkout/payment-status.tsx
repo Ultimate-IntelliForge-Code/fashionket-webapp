@@ -25,7 +25,7 @@ import { useOrderQuery } from '@/api/hooks'
 import { apiClient } from '@/api/client'
 
 export const Route = createFileRoute(
-  '/(root)/_rootLayout/_authenticated/cart/payment-status',
+  '/(root)/_rootLayout/_authenticated/checkout/payment-status',
 )({
   component: PaymentStatusPage,
   validateSearch: z.object({
@@ -115,7 +115,7 @@ function PaymentStatusPage() {
         startPaymentVerification(storedReference)
       } else {
         toast.error('No payment reference found')
-        navigate({ to: '/cart/checkout' })
+        navigate({ to: '/checkout' })
       }
     } else {
       startPaymentVerification(reference)
@@ -268,7 +268,7 @@ function PaymentStatusPage() {
   
   const handleRetryCheckout = () => {
     // Navigate back to checkout
-    navigate({ to: '/cart/checkout' })
+    navigate({ to: '/checkout' })
   }
   
   const handleViewOrder = () => {

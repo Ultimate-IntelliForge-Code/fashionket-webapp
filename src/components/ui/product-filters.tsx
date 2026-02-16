@@ -28,6 +28,8 @@ interface ProductFiltersProps {
   tags: string[];
   maxPrice: number;
   className?: string;
+  isMobile?: boolean;
+  onClose?: () => void;
 }
 
 export const ProductFilters: React.FC<ProductFiltersProps> = ({
@@ -37,6 +39,8 @@ export const ProductFilters: React.FC<ProductFiltersProps> = ({
   tags,
   maxPrice,
   className,
+  isMobile = false,
+  onClose,
 }) => {
   const [priceRange, setPriceRange] = React.useState<[number, number]>([
     filters.minPrice || 0,
@@ -68,12 +72,10 @@ export const ProductFilters: React.FC<ProductFiltersProps> = ({
   const handleSearchChange = (value: string) => {
     setSearchTerm(value);
 
-    // Clear previous timeout
     if (searchTimeoutRef.current) {
       clearTimeout(searchTimeoutRef.current);
     }
 
-    // Debounce search (wait 500ms after user stops typing)
     searchTimeoutRef.current = setTimeout(() => {
       onFilterChange({ search: value || undefined });
     }, 500);
@@ -107,6 +109,9 @@ export const ProductFilters: React.FC<ProductFiltersProps> = ({
       maxPrice: undefined,
       tags: undefined,
     });
+    if (isMobile && onClose) {
+      onClose();
+    }
   };
 
   const hasActiveFilters = 
@@ -121,25 +126,25 @@ export const ProductFilters: React.FC<ProductFiltersProps> = ({
     section: keyof typeof expandedSections;
     children: React.ReactNode;
   }> = ({ title, section, children }) => (
-    <div className="border-b border-gray-200 pb-6">
+    <div className="border-b border-gray-200 last:border-0">
       <button
         type="button"
-        className="flex w-full items-center justify-between py-3 text-left"
+        className="flex w-full items-center justify-between py-3 sm:py-4 text-left active:bg-gray-50 transition-colors rounded-lg px-1"
         onClick={() => toggleSection(section)}
       >
-        <span className="font-semibold text-gray-900">{title}</span>
+        <span className="font-semibold text-gray-900 text-sm sm:text-base">{title}</span>
         {expandedSections[section] ? (
-          <ChevronUp className="h-5 w-5 text-gray-500" />
+          <ChevronUp className="h-4 w-4 sm:h-5 sm:w-5 text-gray-500" />
         ) : (
-          <ChevronDown className="h-5 w-5 text-gray-500" />
+          <ChevronDown className="h-4 w-4 sm:h-5 sm:w-5 text-gray-500" />
         )}
       </button>
-      {expandedSections[section] && <div className="pt-2">{children}</div>}
+      {expandedSections[section] && <div className="pt-1 pb-3 sm:pb-4">{children}</div>}
     </div>
   );
 
   const filterContent = (
-    <div className="space-y-6">
+    <div className="space-y-1">
       {/* Search */}
       <FilterSection title="Search" section="search">
         <div className="relative">
@@ -149,7 +154,7 @@ export const ProductFilters: React.FC<ProductFiltersProps> = ({
             placeholder="Search products..."
             value={searchTerm}
             onChange={(e) => handleSearchChange(e.target.value)}
-            className="w-full pl-9"
+            className="w-full pl-9 h-9 sm:h-10 text-sm"
           />
         </div>
       </FilterSection>
@@ -184,7 +189,7 @@ export const ProductFilters: React.FC<ProductFiltersProps> = ({
                   }
                 }}
                 onBlur={handlePriceCommit}
-                className="mt-1"
+                className="mt-1 h-8 sm:h-9 text-sm"
               />
             </div>
             <span className="text-gray-400 pt-5">-</span>
@@ -205,7 +210,7 @@ export const ProductFilters: React.FC<ProductFiltersProps> = ({
                   }
                 }}
                 onBlur={handlePriceCommit}
-                className="mt-1"
+                className="mt-1 h-8 sm:h-9 text-sm"
               />
             </div>
           </div>
@@ -231,19 +236,20 @@ export const ProductFilters: React.FC<ProductFiltersProps> = ({
       {/* Brands */}
       {brands.length > 0 && (
         <FilterSection title="Brands" section="brand">
-          <div className="space-y-3 max-h-64 overflow-y-auto">
+          <div className="space-y-2 max-h-48 sm:max-h-64 overflow-y-auto pr-2">
             {brands.map((brand) => (
-              <div key={brand} className="flex items-center">
+              <div key={brand} className="flex items-center py-0.5">
                 <Checkbox
                   id={`brand-${brand}`}
                   checked={filters.brand === brand}
                   onCheckedChange={(checked) =>
                     onFilterChange({ brand: checked ? brand : undefined })
                   }
+                  className="h-4 w-4 sm:h-4 sm:w-4"
                 />
                 <Label
                   htmlFor={`brand-${brand}`}
-                  className="ml-3 cursor-pointer text-sm text-gray-700 hover:text-gray-900"
+                  className="ml-2 sm:ml-3 cursor-pointer text-xs sm:text-sm text-gray-700 hover:text-gray-900 flex-1 truncate"
                 >
                   {brand}
                 </Label>
@@ -256,7 +262,7 @@ export const ProductFilters: React.FC<ProductFiltersProps> = ({
       {/* Tags */}
       {tags.length > 0 && (
         <FilterSection title="Tags" section="tags">
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-1.5 sm:gap-2">
             {tags.map((tag) => (
               <Button
                 key={tag}
@@ -264,7 +270,7 @@ export const ProductFilters: React.FC<ProductFiltersProps> = ({
                 variant={filters.tags === tag ? 'default' : 'outline'}
                 size="sm"
                 className={cn(
-                  'rounded-full',
+                  'rounded-full h-7 sm:h-8 text-xs sm:text-sm px-2.5 sm:px-3',
                   filters.tags === tag
                     ? 'bg-mmp-primary text-white hover:bg-mmp-primary2'
                     : ''
@@ -280,18 +286,29 @@ export const ProductFilters: React.FC<ProductFiltersProps> = ({
         </FilterSection>
       )}
 
-      {/* Clear Filters */}
-      {hasActiveFilters && (
-        <Button
-          type="button"
-          variant="outline"
-          onClick={clearFilters}
-          className="w-full"
-        >
-          <X className="mr-2 h-4 w-4" />
-          Clear All Filters
-        </Button>
-      )}
+      {/* Action Buttons */}
+      <div className="pt-4 pb-2 flex gap-2">
+        {hasActiveFilters && (
+          <Button
+            type="button"
+            variant="outline"
+            onClick={clearFilters}
+            className="flex-1 h-9 sm:h-10 text-xs sm:text-sm"
+          >
+            <X className="mr-1.5 h-3.5 w-3.5" />
+            Clear All
+          </Button>
+        )}
+        {isMobile && onClose && (
+          <Button
+            type="button"
+            onClick={onClose}
+            className="flex-1 h-9 sm:h-10 text-xs sm:text-sm bg-mmp-primary hover:bg-mmp-primary2"
+          >
+            Apply Filters
+          </Button>
+        )}
+      </div>
     </div>
   );
 
@@ -300,16 +317,17 @@ export const ProductFilters: React.FC<ProductFiltersProps> = ({
       {/* Desktop Filters */}
       <div className={cn('hidden lg:block', className)}>
         <div className="sticky top-24">
-          <div className="mb-6 flex items-center justify-between">
-            <h3 className="text-lg font-semibold">Filters</h3>
+          <div className="mb-4 flex items-center justify-between">
+            <h3 className="text-lg font-semibold text-gray-900">Filters</h3>
             {hasActiveFilters && (
               <Button
                 type="button"
                 variant="ghost"
                 size="sm"
                 onClick={clearFilters}
+                className="text-xs h-8 px-2"
               >
-                Clear
+                Clear all
               </Button>
             )}
           </div>
@@ -321,21 +339,34 @@ export const ProductFilters: React.FC<ProductFiltersProps> = ({
       <div className="lg:hidden">
         <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
           <SheetTrigger asChild>
-            <Button variant="outline" className="w-full relative">
-              <Filter className="mr-2 h-4 w-4" />
+            <Button variant="outline" className="w-full relative h-9 sm:h-10 text-xs sm:text-sm">
+              <Filter className="mr-2 h-3.5 w-3.5 sm:h-4 sm:w-4" />
               Filters & Sort
               {hasActiveFilters && (
-                <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-mmp-primary text-xs font-bold text-white flex items-center justify-center">
-                  !
+                <span className="absolute -top-1 -right-1 h-4 w-4 sm:h-5 sm:w-5 rounded-full bg-mmp-primary text-[10px] sm:text-xs font-bold text-white flex items-center justify-center">
+                  {Object.keys(filters).filter(k => 
+                    filters[k as keyof IProductQueryFilters] && 
+                    !['categorySlug', 'page', 'limit', 'sortBy', 'sortOrder'].includes(k)
+                  ).length}
                 </span>
               )}
             </Button>
           </SheetTrigger>
-          <SheetContent side="left" className="w-[85vw] max-w-sm overflow-y-auto">
-            <SheetHeader>
-              <SheetTitle>Filters</SheetTitle>
+          <SheetContent side="left" className="w-[85vw] max-w-sm p-0 overflow-y-auto">
+            <SheetHeader className="sticky top-0 bg-white border-b border-gray-200 px-4 py-3">
+              <div className="flex items-center justify-between">
+                <SheetTitle className="text-lg">Filters</SheetTitle>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setMobileOpen(false)}
+                  className="h-8 w-8 p-0 rounded-full"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
             </SheetHeader>
-            <div className="py-6">{filterContent}</div>
+            <div className="p-4 pb-8">{filterContent}</div>
           </SheetContent>
         </Sheet>
       </div>

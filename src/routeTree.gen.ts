@@ -27,6 +27,7 @@ import { Route as adminAdminAdminLayoutRouteImport } from './routes/(admin)/admi
 import { Route as vendorVendorVendorLayoutIndexRouteImport } from './routes/(vendor)/vendor/_vendorLayout/index'
 import { Route as rootRootLayoutProductsIndexRouteImport } from './routes/(root)/_rootLayout/products/index'
 import { Route as rootRootLayoutCategoriesIndexRouteImport } from './routes/(root)/_rootLayout/categories/index'
+import { Route as rootRootLayoutCartIndexRouteImport } from './routes/(root)/_rootLayout/cart/index'
 import { Route as adminAdminAdminLayoutIndexRouteImport } from './routes/(admin)/admin/_adminLayout/index'
 import { Route as rootRootLayoutProductsSlugRouteImport } from './routes/(root)/_rootLayout/products/$slug'
 import { Route as rootRootLayoutCategoriesSlugRouteImport } from './routes/(root)/_rootLayout/categories/$slug'
@@ -42,14 +43,13 @@ import { Route as vendorVendorVendorLayoutSettingsIndexRouteImport } from './rou
 import { Route as vendorVendorVendorLayoutProductsIndexRouteImport } from './routes/(vendor)/vendor/_vendorLayout/products/index'
 import { Route as vendorVendorVendorLayoutOrdersIndexRouteImport } from './routes/(vendor)/vendor/_vendorLayout/orders/index'
 import { Route as rootRootLayoutAuthenticatedOrdersIndexRouteImport } from './routes/(root)/_rootLayout/_authenticated/orders/index'
-import { Route as rootRootLayoutAuthenticatedCartIndexRouteImport } from './routes/(root)/_rootLayout/_authenticated/cart/index'
+import { Route as rootRootLayoutAuthenticatedCheckoutIndexRouteImport } from './routes/(root)/_rootLayout/_authenticated/checkout/index'
 import { Route as rootRootLayoutAuthenticatedAccountIndexRouteImport } from './routes/(root)/_rootLayout/_authenticated/account/index'
 import { Route as vendorVendorVendorLayoutProductsNewRouteImport } from './routes/(vendor)/vendor/_vendorLayout/products/new'
 import { Route as vendorVendorVendorLayoutProductsSlugRouteImport } from './routes/(vendor)/vendor/_vendorLayout/products/$slug'
 import { Route as vendorVendorVendorLayoutOrdersOrderIdRouteImport } from './routes/(vendor)/vendor/_vendorLayout/orders/$orderId'
 import { Route as rootRootLayoutAuthenticatedOrdersOrderIdRouteImport } from './routes/(root)/_rootLayout/_authenticated/orders/$orderId'
-import { Route as rootRootLayoutAuthenticatedCartPaymentStatusRouteImport } from './routes/(root)/_rootLayout/_authenticated/cart/payment-status'
-import { Route as rootRootLayoutAuthenticatedCartCheckoutRouteImport } from './routes/(root)/_rootLayout/_authenticated/cart/checkout'
+import { Route as rootRootLayoutAuthenticatedCheckoutPaymentStatusRouteImport } from './routes/(root)/_rootLayout/_authenticated/checkout/payment-status'
 
 const rootRootLayoutRoute = rootRootLayoutRouteImport.update({
   id: '/(root)/_rootLayout',
@@ -143,6 +143,11 @@ const rootRootLayoutCategoriesIndexRoute =
     path: '/categories/',
     getParentRoute: () => rootRootLayoutRoute,
   } as any)
+const rootRootLayoutCartIndexRoute = rootRootLayoutCartIndexRouteImport.update({
+  id: '/cart/',
+  path: '/cart/',
+  getParentRoute: () => rootRootLayoutRoute,
+} as any)
 const adminAdminAdminLayoutIndexRoute =
   adminAdminAdminLayoutIndexRouteImport.update({
     id: '/',
@@ -229,10 +234,10 @@ const rootRootLayoutAuthenticatedOrdersIndexRoute =
     path: '/orders/',
     getParentRoute: () => rootRootLayoutAuthenticatedRoute,
   } as any)
-const rootRootLayoutAuthenticatedCartIndexRoute =
-  rootRootLayoutAuthenticatedCartIndexRouteImport.update({
-    id: '/cart/',
-    path: '/cart/',
+const rootRootLayoutAuthenticatedCheckoutIndexRoute =
+  rootRootLayoutAuthenticatedCheckoutIndexRouteImport.update({
+    id: '/checkout/',
+    path: '/checkout/',
     getParentRoute: () => rootRootLayoutAuthenticatedRoute,
   } as any)
 const rootRootLayoutAuthenticatedAccountIndexRoute =
@@ -265,16 +270,10 @@ const rootRootLayoutAuthenticatedOrdersOrderIdRoute =
     path: '/orders/$orderId',
     getParentRoute: () => rootRootLayoutAuthenticatedRoute,
   } as any)
-const rootRootLayoutAuthenticatedCartPaymentStatusRoute =
-  rootRootLayoutAuthenticatedCartPaymentStatusRouteImport.update({
-    id: '/cart/payment-status',
-    path: '/cart/payment-status',
-    getParentRoute: () => rootRootLayoutAuthenticatedRoute,
-  } as any)
-const rootRootLayoutAuthenticatedCartCheckoutRoute =
-  rootRootLayoutAuthenticatedCartCheckoutRouteImport.update({
-    id: '/cart/checkout',
-    path: '/cart/checkout',
+const rootRootLayoutAuthenticatedCheckoutPaymentStatusRoute =
+  rootRootLayoutAuthenticatedCheckoutPaymentStatusRouteImport.update({
+    id: '/checkout/payment-status',
+    path: '/checkout/payment-status',
     getParentRoute: () => rootRootLayoutAuthenticatedRoute,
   } as any)
 
@@ -301,17 +300,17 @@ export interface FileRoutesByFullPath {
   '/categories/$slug': typeof rootRootLayoutCategoriesSlugRoute
   '/products/$slug': typeof rootRootLayoutProductsSlugRoute
   '/admin/': typeof adminAdminAdminLayoutIndexRoute
+  '/cart/': typeof rootRootLayoutCartIndexRoute
   '/categories/': typeof rootRootLayoutCategoriesIndexRoute
   '/products/': typeof rootRootLayoutProductsIndexRoute
   '/vendor/': typeof vendorVendorVendorLayoutIndexRoute
-  '/cart/checkout': typeof rootRootLayoutAuthenticatedCartCheckoutRoute
-  '/cart/payment-status': typeof rootRootLayoutAuthenticatedCartPaymentStatusRoute
+  '/checkout/payment-status': typeof rootRootLayoutAuthenticatedCheckoutPaymentStatusRoute
   '/orders/$orderId': typeof rootRootLayoutAuthenticatedOrdersOrderIdRoute
   '/vendor/orders/$orderId': typeof vendorVendorVendorLayoutOrdersOrderIdRoute
   '/vendor/products/$slug': typeof vendorVendorVendorLayoutProductsSlugRoute
   '/vendor/products/new': typeof vendorVendorVendorLayoutProductsNewRoute
   '/account/': typeof rootRootLayoutAuthenticatedAccountIndexRoute
-  '/cart/': typeof rootRootLayoutAuthenticatedCartIndexRoute
+  '/checkout/': typeof rootRootLayoutAuthenticatedCheckoutIndexRoute
   '/orders/': typeof rootRootLayoutAuthenticatedOrdersIndexRoute
   '/vendor/orders/': typeof vendorVendorVendorLayoutOrdersIndexRoute
   '/vendor/products/': typeof vendorVendorVendorLayoutProductsIndexRoute
@@ -339,17 +338,17 @@ export interface FileRoutesByTo {
   '/categories/$slug': typeof rootRootLayoutCategoriesSlugRoute
   '/products/$slug': typeof rootRootLayoutProductsSlugRoute
   '/admin': typeof adminAdminAdminLayoutIndexRoute
+  '/cart': typeof rootRootLayoutCartIndexRoute
   '/categories': typeof rootRootLayoutCategoriesIndexRoute
   '/products': typeof rootRootLayoutProductsIndexRoute
   '/vendor': typeof vendorVendorVendorLayoutIndexRoute
-  '/cart/checkout': typeof rootRootLayoutAuthenticatedCartCheckoutRoute
-  '/cart/payment-status': typeof rootRootLayoutAuthenticatedCartPaymentStatusRoute
+  '/checkout/payment-status': typeof rootRootLayoutAuthenticatedCheckoutPaymentStatusRoute
   '/orders/$orderId': typeof rootRootLayoutAuthenticatedOrdersOrderIdRoute
   '/vendor/orders/$orderId': typeof vendorVendorVendorLayoutOrdersOrderIdRoute
   '/vendor/products/$slug': typeof vendorVendorVendorLayoutProductsSlugRoute
   '/vendor/products/new': typeof vendorVendorVendorLayoutProductsNewRoute
   '/account': typeof rootRootLayoutAuthenticatedAccountIndexRoute
-  '/cart': typeof rootRootLayoutAuthenticatedCartIndexRoute
+  '/checkout': typeof rootRootLayoutAuthenticatedCheckoutIndexRoute
   '/orders': typeof rootRootLayoutAuthenticatedOrdersIndexRoute
   '/vendor/orders': typeof vendorVendorVendorLayoutOrdersIndexRoute
   '/vendor/products': typeof vendorVendorVendorLayoutProductsIndexRoute
@@ -383,17 +382,17 @@ export interface FileRoutesById {
   '/(root)/_rootLayout/categories/$slug': typeof rootRootLayoutCategoriesSlugRoute
   '/(root)/_rootLayout/products/$slug': typeof rootRootLayoutProductsSlugRoute
   '/(admin)/admin/_adminLayout/': typeof adminAdminAdminLayoutIndexRoute
+  '/(root)/_rootLayout/cart/': typeof rootRootLayoutCartIndexRoute
   '/(root)/_rootLayout/categories/': typeof rootRootLayoutCategoriesIndexRoute
   '/(root)/_rootLayout/products/': typeof rootRootLayoutProductsIndexRoute
   '/(vendor)/vendor/_vendorLayout/': typeof vendorVendorVendorLayoutIndexRoute
-  '/(root)/_rootLayout/_authenticated/cart/checkout': typeof rootRootLayoutAuthenticatedCartCheckoutRoute
-  '/(root)/_rootLayout/_authenticated/cart/payment-status': typeof rootRootLayoutAuthenticatedCartPaymentStatusRoute
+  '/(root)/_rootLayout/_authenticated/checkout/payment-status': typeof rootRootLayoutAuthenticatedCheckoutPaymentStatusRoute
   '/(root)/_rootLayout/_authenticated/orders/$orderId': typeof rootRootLayoutAuthenticatedOrdersOrderIdRoute
   '/(vendor)/vendor/_vendorLayout/orders/$orderId': typeof vendorVendorVendorLayoutOrdersOrderIdRoute
   '/(vendor)/vendor/_vendorLayout/products/$slug': typeof vendorVendorVendorLayoutProductsSlugRoute
   '/(vendor)/vendor/_vendorLayout/products/new': typeof vendorVendorVendorLayoutProductsNewRoute
   '/(root)/_rootLayout/_authenticated/account/': typeof rootRootLayoutAuthenticatedAccountIndexRoute
-  '/(root)/_rootLayout/_authenticated/cart/': typeof rootRootLayoutAuthenticatedCartIndexRoute
+  '/(root)/_rootLayout/_authenticated/checkout/': typeof rootRootLayoutAuthenticatedCheckoutIndexRoute
   '/(root)/_rootLayout/_authenticated/orders/': typeof rootRootLayoutAuthenticatedOrdersIndexRoute
   '/(vendor)/vendor/_vendorLayout/orders/': typeof vendorVendorVendorLayoutOrdersIndexRoute
   '/(vendor)/vendor/_vendorLayout/products/': typeof vendorVendorVendorLayoutProductsIndexRoute
@@ -425,17 +424,17 @@ export interface FileRouteTypes {
     | '/categories/$slug'
     | '/products/$slug'
     | '/admin/'
+    | '/cart/'
     | '/categories/'
     | '/products/'
     | '/vendor/'
-    | '/cart/checkout'
-    | '/cart/payment-status'
+    | '/checkout/payment-status'
     | '/orders/$orderId'
     | '/vendor/orders/$orderId'
     | '/vendor/products/$slug'
     | '/vendor/products/new'
     | '/account/'
-    | '/cart/'
+    | '/checkout/'
     | '/orders/'
     | '/vendor/orders/'
     | '/vendor/products/'
@@ -463,17 +462,17 @@ export interface FileRouteTypes {
     | '/categories/$slug'
     | '/products/$slug'
     | '/admin'
+    | '/cart'
     | '/categories'
     | '/products'
     | '/vendor'
-    | '/cart/checkout'
-    | '/cart/payment-status'
+    | '/checkout/payment-status'
     | '/orders/$orderId'
     | '/vendor/orders/$orderId'
     | '/vendor/products/$slug'
     | '/vendor/products/new'
     | '/account'
-    | '/cart'
+    | '/checkout'
     | '/orders'
     | '/vendor/orders'
     | '/vendor/products'
@@ -506,17 +505,17 @@ export interface FileRouteTypes {
     | '/(root)/_rootLayout/categories/$slug'
     | '/(root)/_rootLayout/products/$slug'
     | '/(admin)/admin/_adminLayout/'
+    | '/(root)/_rootLayout/cart/'
     | '/(root)/_rootLayout/categories/'
     | '/(root)/_rootLayout/products/'
     | '/(vendor)/vendor/_vendorLayout/'
-    | '/(root)/_rootLayout/_authenticated/cart/checkout'
-    | '/(root)/_rootLayout/_authenticated/cart/payment-status'
+    | '/(root)/_rootLayout/_authenticated/checkout/payment-status'
     | '/(root)/_rootLayout/_authenticated/orders/$orderId'
     | '/(vendor)/vendor/_vendorLayout/orders/$orderId'
     | '/(vendor)/vendor/_vendorLayout/products/$slug'
     | '/(vendor)/vendor/_vendorLayout/products/new'
     | '/(root)/_rootLayout/_authenticated/account/'
-    | '/(root)/_rootLayout/_authenticated/cart/'
+    | '/(root)/_rootLayout/_authenticated/checkout/'
     | '/(root)/_rootLayout/_authenticated/orders/'
     | '/(vendor)/vendor/_vendorLayout/orders/'
     | '/(vendor)/vendor/_vendorLayout/products/'
@@ -659,6 +658,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof rootRootLayoutCategoriesIndexRouteImport
       parentRoute: typeof rootRootLayoutRoute
     }
+    '/(root)/_rootLayout/cart/': {
+      id: '/(root)/_rootLayout/cart/'
+      path: '/cart'
+      fullPath: '/cart/'
+      preLoaderRoute: typeof rootRootLayoutCartIndexRouteImport
+      parentRoute: typeof rootRootLayoutRoute
+    }
     '/(admin)/admin/_adminLayout/': {
       id: '/(admin)/admin/_adminLayout/'
       path: '/'
@@ -764,11 +770,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof rootRootLayoutAuthenticatedOrdersIndexRouteImport
       parentRoute: typeof rootRootLayoutAuthenticatedRoute
     }
-    '/(root)/_rootLayout/_authenticated/cart/': {
-      id: '/(root)/_rootLayout/_authenticated/cart/'
-      path: '/cart'
-      fullPath: '/cart/'
-      preLoaderRoute: typeof rootRootLayoutAuthenticatedCartIndexRouteImport
+    '/(root)/_rootLayout/_authenticated/checkout/': {
+      id: '/(root)/_rootLayout/_authenticated/checkout/'
+      path: '/checkout'
+      fullPath: '/checkout/'
+      preLoaderRoute: typeof rootRootLayoutAuthenticatedCheckoutIndexRouteImport
       parentRoute: typeof rootRootLayoutAuthenticatedRoute
     }
     '/(root)/_rootLayout/_authenticated/account/': {
@@ -806,18 +812,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof rootRootLayoutAuthenticatedOrdersOrderIdRouteImport
       parentRoute: typeof rootRootLayoutAuthenticatedRoute
     }
-    '/(root)/_rootLayout/_authenticated/cart/payment-status': {
-      id: '/(root)/_rootLayout/_authenticated/cart/payment-status'
-      path: '/cart/payment-status'
-      fullPath: '/cart/payment-status'
-      preLoaderRoute: typeof rootRootLayoutAuthenticatedCartPaymentStatusRouteImport
-      parentRoute: typeof rootRootLayoutAuthenticatedRoute
-    }
-    '/(root)/_rootLayout/_authenticated/cart/checkout': {
-      id: '/(root)/_rootLayout/_authenticated/cart/checkout'
-      path: '/cart/checkout'
-      fullPath: '/cart/checkout'
-      preLoaderRoute: typeof rootRootLayoutAuthenticatedCartCheckoutRouteImport
+    '/(root)/_rootLayout/_authenticated/checkout/payment-status': {
+      id: '/(root)/_rootLayout/_authenticated/checkout/payment-status'
+      path: '/checkout/payment-status'
+      fullPath: '/checkout/payment-status'
+      preLoaderRoute: typeof rootRootLayoutAuthenticatedCheckoutPaymentStatusRouteImport
       parentRoute: typeof rootRootLayoutAuthenticatedRoute
     }
   }
@@ -854,26 +853,23 @@ const authAuthRouteWithChildren = authAuthRoute._addFileChildren(
 )
 
 interface rootRootLayoutAuthenticatedRouteChildren {
-  rootRootLayoutAuthenticatedCartCheckoutRoute: typeof rootRootLayoutAuthenticatedCartCheckoutRoute
-  rootRootLayoutAuthenticatedCartPaymentStatusRoute: typeof rootRootLayoutAuthenticatedCartPaymentStatusRoute
+  rootRootLayoutAuthenticatedCheckoutPaymentStatusRoute: typeof rootRootLayoutAuthenticatedCheckoutPaymentStatusRoute
   rootRootLayoutAuthenticatedOrdersOrderIdRoute: typeof rootRootLayoutAuthenticatedOrdersOrderIdRoute
   rootRootLayoutAuthenticatedAccountIndexRoute: typeof rootRootLayoutAuthenticatedAccountIndexRoute
-  rootRootLayoutAuthenticatedCartIndexRoute: typeof rootRootLayoutAuthenticatedCartIndexRoute
+  rootRootLayoutAuthenticatedCheckoutIndexRoute: typeof rootRootLayoutAuthenticatedCheckoutIndexRoute
   rootRootLayoutAuthenticatedOrdersIndexRoute: typeof rootRootLayoutAuthenticatedOrdersIndexRoute
 }
 
 const rootRootLayoutAuthenticatedRouteChildren: rootRootLayoutAuthenticatedRouteChildren =
   {
-    rootRootLayoutAuthenticatedCartCheckoutRoute:
-      rootRootLayoutAuthenticatedCartCheckoutRoute,
-    rootRootLayoutAuthenticatedCartPaymentStatusRoute:
-      rootRootLayoutAuthenticatedCartPaymentStatusRoute,
+    rootRootLayoutAuthenticatedCheckoutPaymentStatusRoute:
+      rootRootLayoutAuthenticatedCheckoutPaymentStatusRoute,
     rootRootLayoutAuthenticatedOrdersOrderIdRoute:
       rootRootLayoutAuthenticatedOrdersOrderIdRoute,
     rootRootLayoutAuthenticatedAccountIndexRoute:
       rootRootLayoutAuthenticatedAccountIndexRoute,
-    rootRootLayoutAuthenticatedCartIndexRoute:
-      rootRootLayoutAuthenticatedCartIndexRoute,
+    rootRootLayoutAuthenticatedCheckoutIndexRoute:
+      rootRootLayoutAuthenticatedCheckoutIndexRoute,
     rootRootLayoutAuthenticatedOrdersIndexRoute:
       rootRootLayoutAuthenticatedOrdersIndexRoute,
   }
@@ -893,6 +889,7 @@ interface rootRootLayoutRouteChildren {
   rootRootLayoutIndexRoute: typeof rootRootLayoutIndexRoute
   rootRootLayoutCategoriesSlugRoute: typeof rootRootLayoutCategoriesSlugRoute
   rootRootLayoutProductsSlugRoute: typeof rootRootLayoutProductsSlugRoute
+  rootRootLayoutCartIndexRoute: typeof rootRootLayoutCartIndexRoute
   rootRootLayoutCategoriesIndexRoute: typeof rootRootLayoutCategoriesIndexRoute
   rootRootLayoutProductsIndexRoute: typeof rootRootLayoutProductsIndexRoute
 }
@@ -908,6 +905,7 @@ const rootRootLayoutRouteChildren: rootRootLayoutRouteChildren = {
   rootRootLayoutIndexRoute: rootRootLayoutIndexRoute,
   rootRootLayoutCategoriesSlugRoute: rootRootLayoutCategoriesSlugRoute,
   rootRootLayoutProductsSlugRoute: rootRootLayoutProductsSlugRoute,
+  rootRootLayoutCartIndexRoute: rootRootLayoutCartIndexRoute,
   rootRootLayoutCategoriesIndexRoute: rootRootLayoutCategoriesIndexRoute,
   rootRootLayoutProductsIndexRoute: rootRootLayoutProductsIndexRoute,
 }

@@ -1,6 +1,7 @@
+// Updated AddToCartButton with icon-only option
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { ShoppingBag, Loader2, Check } from 'lucide-react';
+import { ShoppingCart, Loader2, Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useCart } from '@/hooks';
 import type { IVariantOptions } from '@/types';
@@ -25,6 +26,7 @@ interface AddToCartButtonProps {
     | 'ghost'
     | 'link';
   showIcon?: boolean;
+  iconOnly?: boolean;
   disabled?: boolean;
   onAddSuccess?: () => void;
   onAddError?: (error: string) => void;
@@ -38,6 +40,7 @@ export const AddToCartButton: React.FC<AddToCartButtonProps> = ({
   size = 'default',
   variant = 'default',
   showIcon = true,
+  iconOnly = false,
   disabled = false,
   onAddSuccess,
   onAddError,
@@ -47,19 +50,17 @@ export const AddToCartButton: React.FC<AddToCartButtonProps> = ({
   const [showSuccess, setShowSuccess] = useState(false);
 
   const currentQuantity = getItemQuantity(product._id);
+  const isOutOfStock = product.stock === 0;
+  const isMaxReached = product.stock !== undefined && currentQuantity >= product.stock;
+  const isDisabled = disabled || isAdding || isOutOfStock || isMaxReached || cartLoading;
 
   const handleAddToCart = async () => {
-    if (isAdding || disabled) {
-      return;
-    }
+    if (isAdding || disabled) return;
 
-    // Validate stock before adding
     if (product.stock !== undefined) {
       const newTotal = currentQuantity + quantity;
       if (newTotal > product.stock) {
-        onAddError?.(
-          `Cannot add ${quantity} more. Only ${product.stock - currentQuantity} left in stock.`,
-        );
+        onAddError?.(`Only ${product.stock - currentQuantity} left in stock`);
         return;
       }
     }
@@ -78,29 +79,43 @@ export const AddToCartButton: React.FC<AddToCartButtonProps> = ({
       if (result.success) {
         setShowSuccess(true);
         onAddSuccess?.();
-
-        // Reset success indicator after 2 seconds
-        setTimeout(() => {
-          setShowSuccess(false);
-        }, 2000);
+        setTimeout(() => setShowSuccess(false), 2000);
       } else {
         onAddError?.(result.error || 'Failed to add to cart');
       }
     } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : 'Failed to add to cart';
-      onAddError?.(errorMessage);
+      onAddError?.(error instanceof Error ? error.message : 'Failed to add to cart');
     } finally {
       setIsAdding(false);
     }
   };
 
-  const isOutOfStock = product.stock === 0;
-  const isMaxReached =
-    product.stock !== undefined && currentQuantity >= product.stock;
-  const isDisabled =
-    disabled || isAdding || isOutOfStock || isMaxReached || cartLoading;
+  // Icon-only button for product cards
+  if (iconOnly) {
+    return (
+      <Button
+        onClick={handleAddToCart}
+        disabled={isDisabled || isOutOfStock}
+        size="icon"
+        variant="secondary"
+        className={cn(
+          "h-8 w-8 rounded-full bg-white hover:bg-mmp-primary hover:text-white shadow-sm border border-gray-200",
+          showSuccess && "bg-green-500 hover:bg-green-600 text-white border-green-500",
+          className
+        )}
+      >
+        {showSuccess ? (
+          <Check className="h-3.5 w-3.5" />
+        ) : isAdding ? (
+          <Loader2 className="h-3.5 w-3.5 animate-spin" />
+        ) : (
+          <ShoppingCart className="h-3.5 w-3.5" />
+        )}
+      </Button>
+    );
+  }
 
+  // Standard button
   return (
     <Button
       onClick={handleAddToCart}
@@ -116,22 +131,22 @@ export const AddToCartButton: React.FC<AddToCartButtonProps> = ({
     >
       {showSuccess ? (
         <>
-          <Check className="mr-2 h-4 w-4" />
-          Added!
+          <Check className={cn(showIcon && "mr-1.5", "h-3.5 w-3.5")} />
+          {!iconOnly && "Added"}
         </>
       ) : isAdding ? (
         <>
-          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-          Adding...
+          <Loader2 className={cn(showIcon && "mr-1.5", "h-3.5 w-3.5 animate-spin")} />
+          {!iconOnly && "Adding..."}
         </>
       ) : isOutOfStock ? (
-        'Out of Stock'
+        "Out of Stock"
       ) : isMaxReached ? (
-        'Max Quantity Reached'
+        "Max"
       ) : (
         <>
-          {showIcon && <ShoppingBag className="mr-2 h-4 w-4" />}
-          Add to Cart
+          {showIcon && <ShoppingCart className={cn(!iconOnly && "mr-1.5", "h-3.5 w-3.5")} />}
+          {!iconOnly && "Add to Cart"}
         </>
       )}
     </Button>
