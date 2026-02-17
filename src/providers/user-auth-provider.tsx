@@ -4,8 +4,8 @@ import { useValidateToken } from '@/api/queries/auth.query';
 import { useAuthStore } from '@/store/auth.store';
 import { UserRole } from '@/types';
 
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { setAuth, clearAuth, setLoading, setAuthVendor, setAuthAdmin } = useAuthStore();
+export const UserAuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { setAuth, clearAuth, setLoading } = useAuthStore();
   const { data: validationData, isLoading: isValidating } = useValidateToken();
   
   useTokenRefresh();
@@ -23,15 +23,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
        switch (user.role) {
          case UserRole.USER:
            setAuth(user) // ✅ IUser
-           break
- 
-         case UserRole.VENDOR:
-           setAuthVendor(user) // ✅ IVendor
-           break
- 
-         case UserRole.ADMIN:
-         case UserRole.SUPER_ADMIN:
-           setAuthAdmin(user) // ✅ IAdmin
            break
  
          default:

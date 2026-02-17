@@ -10,7 +10,6 @@ import "../styles.css";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "@/lib/queryClient";
 import { ToastContainer } from "react-toastify";
-import { AuthProvider } from "@/providers/auth-provider";
 import { QueryClient } from "@tanstack/react-query"; // Import the type
 
 // Define the type for your router context
@@ -46,9 +45,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       </head>
       <body>
         <QueryClientProvider client={queryClient}>
-          <AuthProvider>
             <main>{children}</main>
-          </AuthProvider>
           <ToastContainer
             position="top-center"
             autoClose={5000}

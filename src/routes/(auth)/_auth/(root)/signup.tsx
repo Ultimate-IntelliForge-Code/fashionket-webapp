@@ -48,7 +48,7 @@ function SignupPage() {
     setError,
     watch,
   } = useForm<SignupFormData>({
-    resolver: zodResolver(signupSchema),
+    resolver: zodResolver(signupSchema as any),
   });
 
   const password = watch('password');
