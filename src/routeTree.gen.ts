@@ -9,26 +9,34 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as VendorVendorLayoutRouteImport } from './routes/vendor/_vendorLayout'
+import { Route as AdminAdminLayoutRouteImport } from './routes/admin/_adminLayout'
 import { Route as rootRootLayoutRouteImport } from './routes/(root)/_rootLayout'
 import { Route as authAuthRouteImport } from './routes/(auth)/_auth'
+import { Route as VendorVendorLayoutIndexRouteImport } from './routes/vendor/_vendorLayout/index'
+import { Route as AdminAdminLayoutIndexRouteImport } from './routes/admin/_adminLayout/index'
 import { Route as rootRootLayoutIndexRouteImport } from './routes/(root)/_rootLayout/index'
-import { Route as vendorVendorVendorLayoutRouteImport } from './routes/vendor/_vendorLayout.tsx'
+import { Route as AdminAdminLayoutProductsRouteImport } from './routes/admin/_adminLayout/products'
 import { Route as rootRootLayoutTermsRouteImport } from './routes/(root)/_rootLayout/terms'
 import { Route as rootRootLayoutSearchRouteImport } from './routes/(root)/_rootLayout/search'
 import { Route as rootRootLayoutPrivacyRouteImport } from './routes/(root)/_rootLayout/privacy'
 import { Route as rootRootLayoutCookiesRouteImport } from './routes/(root)/_rootLayout/cookies'
 import { Route as rootRootLayoutContactRouteImport } from './routes/(root)/_rootLayout/contact'
 import { Route as rootRootLayoutAuthenticatedRouteImport } from './routes/(root)/_rootLayout/_authenticated'
-import { Route as authAuthSignupRouteImport } from './routes/(auth)/_auth/(root)/signup.tsx'
-import { Route as authAuthResetPasswordRouteImport } from './routes/(auth)/_auth/(root)/reset-password.tsx'
-import { Route as authAuthLoginRouteImport } from './routes/(auth)/_auth/(root)/login.tsx'
-import { Route as authAuthForgotPasswordRouteImport } from './routes/(auth)/_auth/(root)/forgot-password.tsx'
-import { Route as adminAdminAdminLayoutRouteImport } from './routes/admin/_adminLayout.tsx'
-import { Route as vendorVendorVendorLayoutIndexRouteImport } from './routes/vendor/_vendorLayout/index'
+import { Route as VendorVendorLayoutWalletIndexRouteImport } from './routes/vendor/_vendorLayout/wallet/index'
+import { Route as VendorVendorLayoutSettingsIndexRouteImport } from './routes/vendor/_vendorLayout/settings/index'
+import { Route as VendorVendorLayoutProductsIndexRouteImport } from './routes/vendor/_vendorLayout/products/index'
+import { Route as VendorVendorLayoutOrdersIndexRouteImport } from './routes/vendor/_vendorLayout/orders/index'
+import { Route as VendorVendorLayoutAccountIndexRouteImport } from './routes/vendor/_vendorLayout/account/index'
+import { Route as AdminAdminLayoutAccountIndexRouteImport } from './routes/admin/_adminLayout/account/index'
+import { Route as rootRootLayoutVendorsIndexRouteImport } from './routes/(root)/_rootLayout/vendors/index'
 import { Route as rootRootLayoutProductsIndexRouteImport } from './routes/(root)/_rootLayout/products/index'
 import { Route as rootRootLayoutCategoriesIndexRouteImport } from './routes/(root)/_rootLayout/categories/index'
 import { Route as rootRootLayoutCartIndexRouteImport } from './routes/(root)/_rootLayout/cart/index'
-import { Route as adminAdminAdminLayoutIndexRouteImport } from './routes/admin/_adminLayout/index'
+import { Route as VendorVendorLayoutProductsNewRouteImport } from './routes/vendor/_vendorLayout/products/new'
+import { Route as VendorVendorLayoutProductsSlugRouteImport } from './routes/vendor/_vendorLayout/products/$slug'
+import { Route as VendorVendorLayoutOrdersOrderIdRouteImport } from './routes/vendor/_vendorLayout/orders/$orderId'
+import { Route as rootRootLayoutVendorsSlugRouteImport } from './routes/(root)/_rootLayout/vendors/$slug'
 import { Route as rootRootLayoutProductsSlugRouteImport } from './routes/(root)/_rootLayout/products/$slug'
 import { Route as rootRootLayoutCategoriesSlugRouteImport } from './routes/(root)/_rootLayout/categories/$slug'
 import { Route as authAuthVendorRegisterRouteImport } from './routes/(auth)/_auth/vendor/register'
@@ -37,20 +45,26 @@ import { Route as authAuthAdminResetPasswordRouteImport } from './routes/(auth)/
 import { Route as authAuthAdminRegisterRouteImport } from './routes/(auth)/_auth/admin/register'
 import { Route as authAuthAdminLoginRouteImport } from './routes/(auth)/_auth/admin/login'
 import { Route as authAuthAdminForgotPasswordRouteImport } from './routes/(auth)/_auth/admin/forgot-password'
-import { Route as adminAdminAdminLayoutProductsRouteImport } from './routes/admin/_adminLayout/products.tsx'
-import { Route as vendorVendorVendorLayoutWalletIndexRouteImport } from './routes/vendor/_vendorLayout/wallet/index'
-import { Route as vendorVendorVendorLayoutSettingsIndexRouteImport } from './routes/vendor/_vendorLayout/settings/index'
-import { Route as vendorVendorVendorLayoutProductsIndexRouteImport } from './routes/vendor/_vendorLayout/products/index'
-import { Route as vendorVendorVendorLayoutOrdersIndexRouteImport } from './routes/vendor/_vendorLayout/orders/index'
+import { Route as authAuthrootSignupRouteImport } from './routes/(auth)/_auth/(root)/signup'
+import { Route as authAuthrootResetPasswordRouteImport } from './routes/(auth)/_auth/(root)/reset-password'
+import { Route as authAuthrootLoginRouteImport } from './routes/(auth)/_auth/(root)/login'
+import { Route as authAuthrootForgotPasswordRouteImport } from './routes/(auth)/_auth/(root)/forgot-password'
 import { Route as rootRootLayoutAuthenticatedOrdersIndexRouteImport } from './routes/(root)/_rootLayout/_authenticated/orders/index'
 import { Route as rootRootLayoutAuthenticatedCheckoutIndexRouteImport } from './routes/(root)/_rootLayout/_authenticated/checkout/index'
 import { Route as rootRootLayoutAuthenticatedAccountIndexRouteImport } from './routes/(root)/_rootLayout/_authenticated/account/index'
-import { Route as vendorVendorVendorLayoutProductsNewRouteImport } from './routes/vendor/_vendorLayout/products/new.tsx'
-import { Route as vendorVendorVendorLayoutProductsSlugRouteImport } from './routes/vendor/_vendorLayout/products/$slug.tsx'
-import { Route as vendorVendorVendorLayoutOrdersOrderIdRouteImport } from './routes/vendor/_vendorLayout/orders/$orderId.tsx'
 import { Route as rootRootLayoutAuthenticatedOrdersOrderIdRouteImport } from './routes/(root)/_rootLayout/_authenticated/orders/$orderId'
 import { Route as rootRootLayoutAuthenticatedCheckoutPaymentStatusRouteImport } from './routes/(root)/_rootLayout/_authenticated/checkout/payment-status'
 
+const VendorVendorLayoutRoute = VendorVendorLayoutRouteImport.update({
+  id: '/vendor/_vendorLayout',
+  path: '/vendor',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminAdminLayoutRoute = AdminAdminLayoutRouteImport.update({
+  id: '/admin/_adminLayout',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const rootRootLayoutRoute = rootRootLayoutRouteImport.update({
   id: '/(root)/_rootLayout',
   getParentRoute: () => rootRouteImport,
@@ -59,16 +73,26 @@ const authAuthRoute = authAuthRouteImport.update({
   id: '/(auth)/_auth',
   getParentRoute: () => rootRouteImport,
 } as any)
+const VendorVendorLayoutIndexRoute = VendorVendorLayoutIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => VendorVendorLayoutRoute,
+} as any)
+const AdminAdminLayoutIndexRoute = AdminAdminLayoutIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminAdminLayoutRoute,
+} as any)
 const rootRootLayoutIndexRoute = rootRootLayoutIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRootLayoutRoute,
 } as any)
-const vendorVendorVendorLayoutRoute =
-  vendorVendorVendorLayoutRouteImport.update({
-    id: '/(vendor)/vendor/_vendorLayout',
-    path: '/vendor',
-    getParentRoute: () => rootRouteImport,
+const AdminAdminLayoutProductsRoute =
+  AdminAdminLayoutProductsRouteImport.update({
+    id: '/products',
+    path: '/products',
+    getParentRoute: () => AdminAdminLayoutRoute,
   } as any)
 const rootRootLayoutTermsRoute = rootRootLayoutTermsRouteImport.update({
   id: '/terms',
@@ -100,36 +124,47 @@ const rootRootLayoutAuthenticatedRoute =
     id: '/_authenticated',
     getParentRoute: () => rootRootLayoutRoute,
   } as any)
-const authAuthSignupRoute = authAuthSignupRouteImport.update({
-  id: '/signup',
-  path: '/signup',
-  getParentRoute: () => authAuthRoute,
-} as any)
-const authAuthResetPasswordRoute = authAuthResetPasswordRouteImport.update({
-  id: '/reset-password',
-  path: '/reset-password',
-  getParentRoute: () => authAuthRoute,
-} as any)
-const authAuthLoginRoute = authAuthLoginRouteImport.update({
-  id: '/login',
-  path: '/login',
-  getParentRoute: () => authAuthRoute,
-} as any)
-const authAuthForgotPasswordRoute = authAuthForgotPasswordRouteImport.update({
-  id: '/forgot-password',
-  path: '/forgot-password',
-  getParentRoute: () => authAuthRoute,
-} as any)
-const adminAdminAdminLayoutRoute = adminAdminAdminLayoutRouteImport.update({
-  id: '/(admin)/admin/_adminLayout',
-  path: '/admin',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const vendorVendorVendorLayoutIndexRoute =
-  vendorVendorVendorLayoutIndexRouteImport.update({
-    id: '/',
-    path: '/',
-    getParentRoute: () => vendorVendorVendorLayoutRoute,
+const VendorVendorLayoutWalletIndexRoute =
+  VendorVendorLayoutWalletIndexRouteImport.update({
+    id: '/wallet/',
+    path: '/wallet/',
+    getParentRoute: () => VendorVendorLayoutRoute,
+  } as any)
+const VendorVendorLayoutSettingsIndexRoute =
+  VendorVendorLayoutSettingsIndexRouteImport.update({
+    id: '/settings/',
+    path: '/settings/',
+    getParentRoute: () => VendorVendorLayoutRoute,
+  } as any)
+const VendorVendorLayoutProductsIndexRoute =
+  VendorVendorLayoutProductsIndexRouteImport.update({
+    id: '/products/',
+    path: '/products/',
+    getParentRoute: () => VendorVendorLayoutRoute,
+  } as any)
+const VendorVendorLayoutOrdersIndexRoute =
+  VendorVendorLayoutOrdersIndexRouteImport.update({
+    id: '/orders/',
+    path: '/orders/',
+    getParentRoute: () => VendorVendorLayoutRoute,
+  } as any)
+const VendorVendorLayoutAccountIndexRoute =
+  VendorVendorLayoutAccountIndexRouteImport.update({
+    id: '/account/',
+    path: '/account/',
+    getParentRoute: () => VendorVendorLayoutRoute,
+  } as any)
+const AdminAdminLayoutAccountIndexRoute =
+  AdminAdminLayoutAccountIndexRouteImport.update({
+    id: '/account/',
+    path: '/account/',
+    getParentRoute: () => AdminAdminLayoutRoute,
+  } as any)
+const rootRootLayoutVendorsIndexRoute =
+  rootRootLayoutVendorsIndexRouteImport.update({
+    id: '/vendors/',
+    path: '/vendors/',
+    getParentRoute: () => rootRootLayoutRoute,
   } as any)
 const rootRootLayoutProductsIndexRoute =
   rootRootLayoutProductsIndexRouteImport.update({
@@ -148,11 +183,29 @@ const rootRootLayoutCartIndexRoute = rootRootLayoutCartIndexRouteImport.update({
   path: '/cart/',
   getParentRoute: () => rootRootLayoutRoute,
 } as any)
-const adminAdminAdminLayoutIndexRoute =
-  adminAdminAdminLayoutIndexRouteImport.update({
-    id: '/',
-    path: '/',
-    getParentRoute: () => adminAdminAdminLayoutRoute,
+const VendorVendorLayoutProductsNewRoute =
+  VendorVendorLayoutProductsNewRouteImport.update({
+    id: '/products/new',
+    path: '/products/new',
+    getParentRoute: () => VendorVendorLayoutRoute,
+  } as any)
+const VendorVendorLayoutProductsSlugRoute =
+  VendorVendorLayoutProductsSlugRouteImport.update({
+    id: '/products/$slug',
+    path: '/products/$slug',
+    getParentRoute: () => VendorVendorLayoutRoute,
+  } as any)
+const VendorVendorLayoutOrdersOrderIdRoute =
+  VendorVendorLayoutOrdersOrderIdRouteImport.update({
+    id: '/orders/$orderId',
+    path: '/orders/$orderId',
+    getParentRoute: () => VendorVendorLayoutRoute,
+  } as any)
+const rootRootLayoutVendorsSlugRoute =
+  rootRootLayoutVendorsSlugRouteImport.update({
+    id: '/vendors/$slug',
+    path: '/vendors/$slug',
+    getParentRoute: () => rootRootLayoutRoute,
   } as any)
 const rootRootLayoutProductsSlugRoute =
   rootRootLayoutProductsSlugRouteImport.update({
@@ -198,35 +251,27 @@ const authAuthAdminForgotPasswordRoute =
     path: '/admin/forgot-password',
     getParentRoute: () => authAuthRoute,
   } as any)
-const adminAdminAdminLayoutProductsRoute =
-  adminAdminAdminLayoutProductsRouteImport.update({
-    id: '/products',
-    path: '/products',
-    getParentRoute: () => adminAdminAdminLayoutRoute,
+const authAuthrootSignupRoute = authAuthrootSignupRouteImport.update({
+  id: '/(root)/signup',
+  path: '/signup',
+  getParentRoute: () => authAuthRoute,
+} as any)
+const authAuthrootResetPasswordRoute =
+  authAuthrootResetPasswordRouteImport.update({
+    id: '/(root)/reset-password',
+    path: '/reset-password',
+    getParentRoute: () => authAuthRoute,
   } as any)
-const vendorVendorVendorLayoutWalletIndexRoute =
-  vendorVendorVendorLayoutWalletIndexRouteImport.update({
-    id: '/wallet/',
-    path: '/wallet/',
-    getParentRoute: () => vendorVendorVendorLayoutRoute,
-  } as any)
-const vendorVendorVendorLayoutSettingsIndexRoute =
-  vendorVendorVendorLayoutSettingsIndexRouteImport.update({
-    id: '/settings/',
-    path: '/settings/',
-    getParentRoute: () => vendorVendorVendorLayoutRoute,
-  } as any)
-const vendorVendorVendorLayoutProductsIndexRoute =
-  vendorVendorVendorLayoutProductsIndexRouteImport.update({
-    id: '/products/',
-    path: '/products/',
-    getParentRoute: () => vendorVendorVendorLayoutRoute,
-  } as any)
-const vendorVendorVendorLayoutOrdersIndexRoute =
-  vendorVendorVendorLayoutOrdersIndexRouteImport.update({
-    id: '/orders/',
-    path: '/orders/',
-    getParentRoute: () => vendorVendorVendorLayoutRoute,
+const authAuthrootLoginRoute = authAuthrootLoginRouteImport.update({
+  id: '/(root)/login',
+  path: '/login',
+  getParentRoute: () => authAuthRoute,
+} as any)
+const authAuthrootForgotPasswordRoute =
+  authAuthrootForgotPasswordRouteImport.update({
+    id: '/(root)/forgot-password',
+    path: '/forgot-password',
+    getParentRoute: () => authAuthRoute,
   } as any)
 const rootRootLayoutAuthenticatedOrdersIndexRoute =
   rootRootLayoutAuthenticatedOrdersIndexRouteImport.update({
@@ -246,24 +291,6 @@ const rootRootLayoutAuthenticatedAccountIndexRoute =
     path: '/account/',
     getParentRoute: () => rootRootLayoutAuthenticatedRoute,
   } as any)
-const vendorVendorVendorLayoutProductsNewRoute =
-  vendorVendorVendorLayoutProductsNewRouteImport.update({
-    id: '/products/new',
-    path: '/products/new',
-    getParentRoute: () => vendorVendorVendorLayoutRoute,
-  } as any)
-const vendorVendorVendorLayoutProductsSlugRoute =
-  vendorVendorVendorLayoutProductsSlugRouteImport.update({
-    id: '/products/$slug',
-    path: '/products/$slug',
-    getParentRoute: () => vendorVendorVendorLayoutRoute,
-  } as any)
-const vendorVendorVendorLayoutOrdersOrderIdRoute =
-  vendorVendorVendorLayoutOrdersOrderIdRouteImport.update({
-    id: '/orders/$orderId',
-    path: '/orders/$orderId',
-    getParentRoute: () => vendorVendorVendorLayoutRoute,
-  } as any)
 const rootRootLayoutAuthenticatedOrdersOrderIdRoute =
   rootRootLayoutAuthenticatedOrdersOrderIdRouteImport.update({
     id: '/orders/$orderId',
@@ -278,19 +305,21 @@ const rootRootLayoutAuthenticatedCheckoutPaymentStatusRoute =
   } as any)
 
 export interface FileRoutesByFullPath {
-  '/admin': typeof adminAdminAdminLayoutRouteWithChildren
-  '/forgot-password': typeof authAuthForgotPasswordRoute
-  '/login': typeof authAuthLoginRoute
-  '/reset-password': typeof authAuthResetPasswordRoute
-  '/signup': typeof authAuthSignupRoute
+  '/admin': typeof AdminAdminLayoutRouteWithChildren
+  '/vendor': typeof VendorVendorLayoutRouteWithChildren
   '/contact': typeof rootRootLayoutContactRoute
   '/cookies': typeof rootRootLayoutCookiesRoute
   '/privacy': typeof rootRootLayoutPrivacyRoute
   '/search': typeof rootRootLayoutSearchRoute
   '/terms': typeof rootRootLayoutTermsRoute
-  '/vendor': typeof vendorVendorVendorLayoutRouteWithChildren
+  '/admin/products': typeof AdminAdminLayoutProductsRoute
   '/': typeof rootRootLayoutIndexRoute
-  '/admin/products': typeof adminAdminAdminLayoutProductsRoute
+  '/admin/': typeof AdminAdminLayoutIndexRoute
+  '/vendor/': typeof VendorVendorLayoutIndexRoute
+  '/forgot-password': typeof authAuthrootForgotPasswordRoute
+  '/login': typeof authAuthrootLoginRoute
+  '/reset-password': typeof authAuthrootResetPasswordRoute
+  '/signup': typeof authAuthrootSignupRoute
   '/admin/forgot-password': typeof authAuthAdminForgotPasswordRoute
   '/admin/login': typeof authAuthAdminLoginRoute
   '/admin/register': typeof authAuthAdminRegisterRoute
@@ -299,36 +328,40 @@ export interface FileRoutesByFullPath {
   '/vendor/register': typeof authAuthVendorRegisterRoute
   '/categories/$slug': typeof rootRootLayoutCategoriesSlugRoute
   '/products/$slug': typeof rootRootLayoutProductsSlugRoute
-  '/admin/': typeof adminAdminAdminLayoutIndexRoute
+  '/vendors/$slug': typeof rootRootLayoutVendorsSlugRoute
+  '/vendor/orders/$orderId': typeof VendorVendorLayoutOrdersOrderIdRoute
+  '/vendor/products/$slug': typeof VendorVendorLayoutProductsSlugRoute
+  '/vendor/products/new': typeof VendorVendorLayoutProductsNewRoute
   '/cart/': typeof rootRootLayoutCartIndexRoute
   '/categories/': typeof rootRootLayoutCategoriesIndexRoute
   '/products/': typeof rootRootLayoutProductsIndexRoute
-  '/vendor/': typeof vendorVendorVendorLayoutIndexRoute
+  '/vendors/': typeof rootRootLayoutVendorsIndexRoute
+  '/admin/account/': typeof AdminAdminLayoutAccountIndexRoute
+  '/vendor/account/': typeof VendorVendorLayoutAccountIndexRoute
+  '/vendor/orders/': typeof VendorVendorLayoutOrdersIndexRoute
+  '/vendor/products/': typeof VendorVendorLayoutProductsIndexRoute
+  '/vendor/settings/': typeof VendorVendorLayoutSettingsIndexRoute
+  '/vendor/wallet/': typeof VendorVendorLayoutWalletIndexRoute
   '/checkout/payment-status': typeof rootRootLayoutAuthenticatedCheckoutPaymentStatusRoute
   '/orders/$orderId': typeof rootRootLayoutAuthenticatedOrdersOrderIdRoute
-  '/vendor/orders/$orderId': typeof vendorVendorVendorLayoutOrdersOrderIdRoute
-  '/vendor/products/$slug': typeof vendorVendorVendorLayoutProductsSlugRoute
-  '/vendor/products/new': typeof vendorVendorVendorLayoutProductsNewRoute
   '/account/': typeof rootRootLayoutAuthenticatedAccountIndexRoute
   '/checkout/': typeof rootRootLayoutAuthenticatedCheckoutIndexRoute
   '/orders/': typeof rootRootLayoutAuthenticatedOrdersIndexRoute
-  '/vendor/orders/': typeof vendorVendorVendorLayoutOrdersIndexRoute
-  '/vendor/products/': typeof vendorVendorVendorLayoutProductsIndexRoute
-  '/vendor/settings/': typeof vendorVendorVendorLayoutSettingsIndexRoute
-  '/vendor/wallet/': typeof vendorVendorVendorLayoutWalletIndexRoute
 }
 export interface FileRoutesByTo {
-  '/forgot-password': typeof authAuthForgotPasswordRoute
-  '/login': typeof authAuthLoginRoute
-  '/reset-password': typeof authAuthResetPasswordRoute
-  '/signup': typeof authAuthSignupRoute
   '/contact': typeof rootRootLayoutContactRoute
   '/cookies': typeof rootRootLayoutCookiesRoute
   '/privacy': typeof rootRootLayoutPrivacyRoute
   '/search': typeof rootRootLayoutSearchRoute
   '/terms': typeof rootRootLayoutTermsRoute
+  '/admin/products': typeof AdminAdminLayoutProductsRoute
   '/': typeof rootRootLayoutIndexRoute
-  '/admin/products': typeof adminAdminAdminLayoutProductsRoute
+  '/admin': typeof AdminAdminLayoutIndexRoute
+  '/vendor': typeof VendorVendorLayoutIndexRoute
+  '/forgot-password': typeof authAuthrootForgotPasswordRoute
+  '/login': typeof authAuthrootLoginRoute
+  '/reset-password': typeof authAuthrootResetPasswordRoute
+  '/signup': typeof authAuthrootSignupRoute
   '/admin/forgot-password': typeof authAuthAdminForgotPasswordRoute
   '/admin/login': typeof authAuthAdminLoginRoute
   '/admin/register': typeof authAuthAdminRegisterRoute
@@ -337,42 +370,46 @@ export interface FileRoutesByTo {
   '/vendor/register': typeof authAuthVendorRegisterRoute
   '/categories/$slug': typeof rootRootLayoutCategoriesSlugRoute
   '/products/$slug': typeof rootRootLayoutProductsSlugRoute
-  '/admin': typeof adminAdminAdminLayoutIndexRoute
+  '/vendors/$slug': typeof rootRootLayoutVendorsSlugRoute
+  '/vendor/orders/$orderId': typeof VendorVendorLayoutOrdersOrderIdRoute
+  '/vendor/products/$slug': typeof VendorVendorLayoutProductsSlugRoute
+  '/vendor/products/new': typeof VendorVendorLayoutProductsNewRoute
   '/cart': typeof rootRootLayoutCartIndexRoute
   '/categories': typeof rootRootLayoutCategoriesIndexRoute
   '/products': typeof rootRootLayoutProductsIndexRoute
-  '/vendor': typeof vendorVendorVendorLayoutIndexRoute
+  '/vendors': typeof rootRootLayoutVendorsIndexRoute
+  '/admin/account': typeof AdminAdminLayoutAccountIndexRoute
+  '/vendor/account': typeof VendorVendorLayoutAccountIndexRoute
+  '/vendor/orders': typeof VendorVendorLayoutOrdersIndexRoute
+  '/vendor/products': typeof VendorVendorLayoutProductsIndexRoute
+  '/vendor/settings': typeof VendorVendorLayoutSettingsIndexRoute
+  '/vendor/wallet': typeof VendorVendorLayoutWalletIndexRoute
   '/checkout/payment-status': typeof rootRootLayoutAuthenticatedCheckoutPaymentStatusRoute
   '/orders/$orderId': typeof rootRootLayoutAuthenticatedOrdersOrderIdRoute
-  '/vendor/orders/$orderId': typeof vendorVendorVendorLayoutOrdersOrderIdRoute
-  '/vendor/products/$slug': typeof vendorVendorVendorLayoutProductsSlugRoute
-  '/vendor/products/new': typeof vendorVendorVendorLayoutProductsNewRoute
   '/account': typeof rootRootLayoutAuthenticatedAccountIndexRoute
   '/checkout': typeof rootRootLayoutAuthenticatedCheckoutIndexRoute
   '/orders': typeof rootRootLayoutAuthenticatedOrdersIndexRoute
-  '/vendor/orders': typeof vendorVendorVendorLayoutOrdersIndexRoute
-  '/vendor/products': typeof vendorVendorVendorLayoutProductsIndexRoute
-  '/vendor/settings': typeof vendorVendorVendorLayoutSettingsIndexRoute
-  '/vendor/wallet': typeof vendorVendorVendorLayoutWalletIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/(auth)/_auth': typeof authAuthRouteWithChildren
   '/(root)/_rootLayout': typeof rootRootLayoutRouteWithChildren
-  '/(admin)/admin/_adminLayout': typeof adminAdminAdminLayoutRouteWithChildren
-  '/(auth)/_auth/forgot-password': typeof authAuthForgotPasswordRoute
-  '/(auth)/_auth/login': typeof authAuthLoginRoute
-  '/(auth)/_auth/reset-password': typeof authAuthResetPasswordRoute
-  '/(auth)/_auth/signup': typeof authAuthSignupRoute
+  '/admin/_adminLayout': typeof AdminAdminLayoutRouteWithChildren
+  '/vendor/_vendorLayout': typeof VendorVendorLayoutRouteWithChildren
   '/(root)/_rootLayout/_authenticated': typeof rootRootLayoutAuthenticatedRouteWithChildren
   '/(root)/_rootLayout/contact': typeof rootRootLayoutContactRoute
   '/(root)/_rootLayout/cookies': typeof rootRootLayoutCookiesRoute
   '/(root)/_rootLayout/privacy': typeof rootRootLayoutPrivacyRoute
   '/(root)/_rootLayout/search': typeof rootRootLayoutSearchRoute
   '/(root)/_rootLayout/terms': typeof rootRootLayoutTermsRoute
-  '/(vendor)/vendor/_vendorLayout': typeof vendorVendorVendorLayoutRouteWithChildren
+  '/admin/_adminLayout/products': typeof AdminAdminLayoutProductsRoute
   '/(root)/_rootLayout/': typeof rootRootLayoutIndexRoute
-  '/(admin)/admin/_adminLayout/products': typeof adminAdminAdminLayoutProductsRoute
+  '/admin/_adminLayout/': typeof AdminAdminLayoutIndexRoute
+  '/vendor/_vendorLayout/': typeof VendorVendorLayoutIndexRoute
+  '/(auth)/_auth/(root)/forgot-password': typeof authAuthrootForgotPasswordRoute
+  '/(auth)/_auth/(root)/login': typeof authAuthrootLoginRoute
+  '/(auth)/_auth/(root)/reset-password': typeof authAuthrootResetPasswordRoute
+  '/(auth)/_auth/(root)/signup': typeof authAuthrootSignupRoute
   '/(auth)/_auth/admin/forgot-password': typeof authAuthAdminForgotPasswordRoute
   '/(auth)/_auth/admin/login': typeof authAuthAdminLoginRoute
   '/(auth)/_auth/admin/register': typeof authAuthAdminRegisterRoute
@@ -381,40 +418,44 @@ export interface FileRoutesById {
   '/(auth)/_auth/vendor/register': typeof authAuthVendorRegisterRoute
   '/(root)/_rootLayout/categories/$slug': typeof rootRootLayoutCategoriesSlugRoute
   '/(root)/_rootLayout/products/$slug': typeof rootRootLayoutProductsSlugRoute
-  '/(admin)/admin/_adminLayout/': typeof adminAdminAdminLayoutIndexRoute
+  '/(root)/_rootLayout/vendors/$slug': typeof rootRootLayoutVendorsSlugRoute
+  '/vendor/_vendorLayout/orders/$orderId': typeof VendorVendorLayoutOrdersOrderIdRoute
+  '/vendor/_vendorLayout/products/$slug': typeof VendorVendorLayoutProductsSlugRoute
+  '/vendor/_vendorLayout/products/new': typeof VendorVendorLayoutProductsNewRoute
   '/(root)/_rootLayout/cart/': typeof rootRootLayoutCartIndexRoute
   '/(root)/_rootLayout/categories/': typeof rootRootLayoutCategoriesIndexRoute
   '/(root)/_rootLayout/products/': typeof rootRootLayoutProductsIndexRoute
-  '/(vendor)/vendor/_vendorLayout/': typeof vendorVendorVendorLayoutIndexRoute
+  '/(root)/_rootLayout/vendors/': typeof rootRootLayoutVendorsIndexRoute
+  '/admin/_adminLayout/account/': typeof AdminAdminLayoutAccountIndexRoute
+  '/vendor/_vendorLayout/account/': typeof VendorVendorLayoutAccountIndexRoute
+  '/vendor/_vendorLayout/orders/': typeof VendorVendorLayoutOrdersIndexRoute
+  '/vendor/_vendorLayout/products/': typeof VendorVendorLayoutProductsIndexRoute
+  '/vendor/_vendorLayout/settings/': typeof VendorVendorLayoutSettingsIndexRoute
+  '/vendor/_vendorLayout/wallet/': typeof VendorVendorLayoutWalletIndexRoute
   '/(root)/_rootLayout/_authenticated/checkout/payment-status': typeof rootRootLayoutAuthenticatedCheckoutPaymentStatusRoute
   '/(root)/_rootLayout/_authenticated/orders/$orderId': typeof rootRootLayoutAuthenticatedOrdersOrderIdRoute
-  '/(vendor)/vendor/_vendorLayout/orders/$orderId': typeof vendorVendorVendorLayoutOrdersOrderIdRoute
-  '/(vendor)/vendor/_vendorLayout/products/$slug': typeof vendorVendorVendorLayoutProductsSlugRoute
-  '/(vendor)/vendor/_vendorLayout/products/new': typeof vendorVendorVendorLayoutProductsNewRoute
   '/(root)/_rootLayout/_authenticated/account/': typeof rootRootLayoutAuthenticatedAccountIndexRoute
   '/(root)/_rootLayout/_authenticated/checkout/': typeof rootRootLayoutAuthenticatedCheckoutIndexRoute
   '/(root)/_rootLayout/_authenticated/orders/': typeof rootRootLayoutAuthenticatedOrdersIndexRoute
-  '/(vendor)/vendor/_vendorLayout/orders/': typeof vendorVendorVendorLayoutOrdersIndexRoute
-  '/(vendor)/vendor/_vendorLayout/products/': typeof vendorVendorVendorLayoutProductsIndexRoute
-  '/(vendor)/vendor/_vendorLayout/settings/': typeof vendorVendorVendorLayoutSettingsIndexRoute
-  '/(vendor)/vendor/_vendorLayout/wallet/': typeof vendorVendorVendorLayoutWalletIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/admin'
-    | '/forgot-password'
-    | '/login'
-    | '/reset-password'
-    | '/signup'
+    | '/vendor'
     | '/contact'
     | '/cookies'
     | '/privacy'
     | '/search'
     | '/terms'
-    | '/vendor'
-    | '/'
     | '/admin/products'
+    | '/'
+    | '/admin/'
+    | '/vendor/'
+    | '/forgot-password'
+    | '/login'
+    | '/reset-password'
+    | '/signup'
     | '/admin/forgot-password'
     | '/admin/login'
     | '/admin/register'
@@ -423,36 +464,40 @@ export interface FileRouteTypes {
     | '/vendor/register'
     | '/categories/$slug'
     | '/products/$slug'
-    | '/admin/'
-    | '/cart/'
-    | '/categories/'
-    | '/products/'
-    | '/vendor/'
-    | '/checkout/payment-status'
-    | '/orders/$orderId'
+    | '/vendors/$slug'
     | '/vendor/orders/$orderId'
     | '/vendor/products/$slug'
     | '/vendor/products/new'
-    | '/account/'
-    | '/checkout/'
-    | '/orders/'
+    | '/cart/'
+    | '/categories/'
+    | '/products/'
+    | '/vendors/'
+    | '/admin/account/'
+    | '/vendor/account/'
     | '/vendor/orders/'
     | '/vendor/products/'
     | '/vendor/settings/'
     | '/vendor/wallet/'
+    | '/checkout/payment-status'
+    | '/orders/$orderId'
+    | '/account/'
+    | '/checkout/'
+    | '/orders/'
   fileRoutesByTo: FileRoutesByTo
   to:
-    | '/forgot-password'
-    | '/login'
-    | '/reset-password'
-    | '/signup'
     | '/contact'
     | '/cookies'
     | '/privacy'
     | '/search'
     | '/terms'
-    | '/'
     | '/admin/products'
+    | '/'
+    | '/admin'
+    | '/vendor'
+    | '/forgot-password'
+    | '/login'
+    | '/reset-password'
+    | '/signup'
     | '/admin/forgot-password'
     | '/admin/login'
     | '/admin/register'
@@ -461,41 +506,45 @@ export interface FileRouteTypes {
     | '/vendor/register'
     | '/categories/$slug'
     | '/products/$slug'
-    | '/admin'
-    | '/cart'
-    | '/categories'
-    | '/products'
-    | '/vendor'
-    | '/checkout/payment-status'
-    | '/orders/$orderId'
+    | '/vendors/$slug'
     | '/vendor/orders/$orderId'
     | '/vendor/products/$slug'
     | '/vendor/products/new'
-    | '/account'
-    | '/checkout'
-    | '/orders'
+    | '/cart'
+    | '/categories'
+    | '/products'
+    | '/vendors'
+    | '/admin/account'
+    | '/vendor/account'
     | '/vendor/orders'
     | '/vendor/products'
     | '/vendor/settings'
     | '/vendor/wallet'
+    | '/checkout/payment-status'
+    | '/orders/$orderId'
+    | '/account'
+    | '/checkout'
+    | '/orders'
   id:
     | '__root__'
     | '/(auth)/_auth'
     | '/(root)/_rootLayout'
-    | '/(admin)/admin/_adminLayout'
-    | '/(auth)/_auth/forgot-password'
-    | '/(auth)/_auth/login'
-    | '/(auth)/_auth/reset-password'
-    | '/(auth)/_auth/signup'
+    | '/admin/_adminLayout'
+    | '/vendor/_vendorLayout'
     | '/(root)/_rootLayout/_authenticated'
     | '/(root)/_rootLayout/contact'
     | '/(root)/_rootLayout/cookies'
     | '/(root)/_rootLayout/privacy'
     | '/(root)/_rootLayout/search'
     | '/(root)/_rootLayout/terms'
-    | '/(vendor)/vendor/_vendorLayout'
+    | '/admin/_adminLayout/products'
     | '/(root)/_rootLayout/'
-    | '/(admin)/admin/_adminLayout/products'
+    | '/admin/_adminLayout/'
+    | '/vendor/_vendorLayout/'
+    | '/(auth)/_auth/(root)/forgot-password'
+    | '/(auth)/_auth/(root)/login'
+    | '/(auth)/_auth/(root)/reset-password'
+    | '/(auth)/_auth/(root)/signup'
     | '/(auth)/_auth/admin/forgot-password'
     | '/(auth)/_auth/admin/login'
     | '/(auth)/_auth/admin/register'
@@ -504,34 +553,50 @@ export interface FileRouteTypes {
     | '/(auth)/_auth/vendor/register'
     | '/(root)/_rootLayout/categories/$slug'
     | '/(root)/_rootLayout/products/$slug'
-    | '/(admin)/admin/_adminLayout/'
+    | '/(root)/_rootLayout/vendors/$slug'
+    | '/vendor/_vendorLayout/orders/$orderId'
+    | '/vendor/_vendorLayout/products/$slug'
+    | '/vendor/_vendorLayout/products/new'
     | '/(root)/_rootLayout/cart/'
     | '/(root)/_rootLayout/categories/'
     | '/(root)/_rootLayout/products/'
-    | '/(vendor)/vendor/_vendorLayout/'
+    | '/(root)/_rootLayout/vendors/'
+    | '/admin/_adminLayout/account/'
+    | '/vendor/_vendorLayout/account/'
+    | '/vendor/_vendorLayout/orders/'
+    | '/vendor/_vendorLayout/products/'
+    | '/vendor/_vendorLayout/settings/'
+    | '/vendor/_vendorLayout/wallet/'
     | '/(root)/_rootLayout/_authenticated/checkout/payment-status'
     | '/(root)/_rootLayout/_authenticated/orders/$orderId'
-    | '/(vendor)/vendor/_vendorLayout/orders/$orderId'
-    | '/(vendor)/vendor/_vendorLayout/products/$slug'
-    | '/(vendor)/vendor/_vendorLayout/products/new'
     | '/(root)/_rootLayout/_authenticated/account/'
     | '/(root)/_rootLayout/_authenticated/checkout/'
     | '/(root)/_rootLayout/_authenticated/orders/'
-    | '/(vendor)/vendor/_vendorLayout/orders/'
-    | '/(vendor)/vendor/_vendorLayout/products/'
-    | '/(vendor)/vendor/_vendorLayout/settings/'
-    | '/(vendor)/vendor/_vendorLayout/wallet/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   authAuthRoute: typeof authAuthRouteWithChildren
   rootRootLayoutRoute: typeof rootRootLayoutRouteWithChildren
-  adminAdminAdminLayoutRoute: typeof adminAdminAdminLayoutRouteWithChildren
-  vendorVendorVendorLayoutRoute: typeof vendorVendorVendorLayoutRouteWithChildren
+  AdminAdminLayoutRoute: typeof AdminAdminLayoutRouteWithChildren
+  VendorVendorLayoutRoute: typeof VendorVendorLayoutRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/vendor/_vendorLayout': {
+      id: '/vendor/_vendorLayout'
+      path: '/vendor'
+      fullPath: '/vendor'
+      preLoaderRoute: typeof VendorVendorLayoutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/_adminLayout': {
+      id: '/admin/_adminLayout'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminAdminLayoutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/(root)/_rootLayout': {
       id: '/(root)/_rootLayout'
       path: ''
@@ -546,6 +611,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof authAuthRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/vendor/_vendorLayout/': {
+      id: '/vendor/_vendorLayout/'
+      path: '/'
+      fullPath: '/vendor/'
+      preLoaderRoute: typeof VendorVendorLayoutIndexRouteImport
+      parentRoute: typeof VendorVendorLayoutRoute
+    }
+    '/admin/_adminLayout/': {
+      id: '/admin/_adminLayout/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminAdminLayoutIndexRouteImport
+      parentRoute: typeof AdminAdminLayoutRoute
+    }
     '/(root)/_rootLayout/': {
       id: '/(root)/_rootLayout/'
       path: '/'
@@ -553,12 +632,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof rootRootLayoutIndexRouteImport
       parentRoute: typeof rootRootLayoutRoute
     }
-    '/(vendor)/vendor/_vendorLayout': {
-      id: '/(vendor)/vendor/_vendorLayout'
-      path: '/vendor'
-      fullPath: '/vendor'
-      preLoaderRoute: typeof vendorVendorVendorLayoutRouteImport
-      parentRoute: typeof rootRouteImport
+    '/admin/_adminLayout/products': {
+      id: '/admin/_adminLayout/products'
+      path: '/products'
+      fullPath: '/admin/products'
+      preLoaderRoute: typeof AdminAdminLayoutProductsRouteImport
+      parentRoute: typeof AdminAdminLayoutRoute
     }
     '/(root)/_rootLayout/terms': {
       id: '/(root)/_rootLayout/terms'
@@ -602,47 +681,54 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof rootRootLayoutAuthenticatedRouteImport
       parentRoute: typeof rootRootLayoutRoute
     }
-    '/(auth)/_auth/signup': {
-      id: '/(auth)/_auth/signup'
-      path: '/signup'
-      fullPath: '/signup'
-      preLoaderRoute: typeof authAuthSignupRouteImport
-      parentRoute: typeof authAuthRoute
+    '/vendor/_vendorLayout/wallet/': {
+      id: '/vendor/_vendorLayout/wallet/'
+      path: '/wallet'
+      fullPath: '/vendor/wallet/'
+      preLoaderRoute: typeof VendorVendorLayoutWalletIndexRouteImport
+      parentRoute: typeof VendorVendorLayoutRoute
     }
-    '/(auth)/_auth/reset-password': {
-      id: '/(auth)/_auth/reset-password'
-      path: '/reset-password'
-      fullPath: '/reset-password'
-      preLoaderRoute: typeof authAuthResetPasswordRouteImport
-      parentRoute: typeof authAuthRoute
+    '/vendor/_vendorLayout/settings/': {
+      id: '/vendor/_vendorLayout/settings/'
+      path: '/settings'
+      fullPath: '/vendor/settings/'
+      preLoaderRoute: typeof VendorVendorLayoutSettingsIndexRouteImport
+      parentRoute: typeof VendorVendorLayoutRoute
     }
-    '/(auth)/_auth/login': {
-      id: '/(auth)/_auth/login'
-      path: '/login'
-      fullPath: '/login'
-      preLoaderRoute: typeof authAuthLoginRouteImport
-      parentRoute: typeof authAuthRoute
+    '/vendor/_vendorLayout/products/': {
+      id: '/vendor/_vendorLayout/products/'
+      path: '/products'
+      fullPath: '/vendor/products/'
+      preLoaderRoute: typeof VendorVendorLayoutProductsIndexRouteImport
+      parentRoute: typeof VendorVendorLayoutRoute
     }
-    '/(auth)/_auth/forgot-password': {
-      id: '/(auth)/_auth/forgot-password'
-      path: '/forgot-password'
-      fullPath: '/forgot-password'
-      preLoaderRoute: typeof authAuthForgotPasswordRouteImport
-      parentRoute: typeof authAuthRoute
+    '/vendor/_vendorLayout/orders/': {
+      id: '/vendor/_vendorLayout/orders/'
+      path: '/orders'
+      fullPath: '/vendor/orders/'
+      preLoaderRoute: typeof VendorVendorLayoutOrdersIndexRouteImport
+      parentRoute: typeof VendorVendorLayoutRoute
     }
-    '/(admin)/admin/_adminLayout': {
-      id: '/(admin)/admin/_adminLayout'
-      path: '/admin'
-      fullPath: '/admin'
-      preLoaderRoute: typeof adminAdminAdminLayoutRouteImport
-      parentRoute: typeof rootRouteImport
+    '/vendor/_vendorLayout/account/': {
+      id: '/vendor/_vendorLayout/account/'
+      path: '/account'
+      fullPath: '/vendor/account/'
+      preLoaderRoute: typeof VendorVendorLayoutAccountIndexRouteImport
+      parentRoute: typeof VendorVendorLayoutRoute
     }
-    '/(vendor)/vendor/_vendorLayout/': {
-      id: '/(vendor)/vendor/_vendorLayout/'
-      path: '/'
-      fullPath: '/vendor/'
-      preLoaderRoute: typeof vendorVendorVendorLayoutIndexRouteImport
-      parentRoute: typeof vendorVendorVendorLayoutRoute
+    '/admin/_adminLayout/account/': {
+      id: '/admin/_adminLayout/account/'
+      path: '/account'
+      fullPath: '/admin/account/'
+      preLoaderRoute: typeof AdminAdminLayoutAccountIndexRouteImport
+      parentRoute: typeof AdminAdminLayoutRoute
+    }
+    '/(root)/_rootLayout/vendors/': {
+      id: '/(root)/_rootLayout/vendors/'
+      path: '/vendors'
+      fullPath: '/vendors/'
+      preLoaderRoute: typeof rootRootLayoutVendorsIndexRouteImport
+      parentRoute: typeof rootRootLayoutRoute
     }
     '/(root)/_rootLayout/products/': {
       id: '/(root)/_rootLayout/products/'
@@ -665,12 +751,33 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof rootRootLayoutCartIndexRouteImport
       parentRoute: typeof rootRootLayoutRoute
     }
-    '/(admin)/admin/_adminLayout/': {
-      id: '/(admin)/admin/_adminLayout/'
-      path: '/'
-      fullPath: '/admin/'
-      preLoaderRoute: typeof adminAdminAdminLayoutIndexRouteImport
-      parentRoute: typeof adminAdminAdminLayoutRoute
+    '/vendor/_vendorLayout/products/new': {
+      id: '/vendor/_vendorLayout/products/new'
+      path: '/products/new'
+      fullPath: '/vendor/products/new'
+      preLoaderRoute: typeof VendorVendorLayoutProductsNewRouteImport
+      parentRoute: typeof VendorVendorLayoutRoute
+    }
+    '/vendor/_vendorLayout/products/$slug': {
+      id: '/vendor/_vendorLayout/products/$slug'
+      path: '/products/$slug'
+      fullPath: '/vendor/products/$slug'
+      preLoaderRoute: typeof VendorVendorLayoutProductsSlugRouteImport
+      parentRoute: typeof VendorVendorLayoutRoute
+    }
+    '/vendor/_vendorLayout/orders/$orderId': {
+      id: '/vendor/_vendorLayout/orders/$orderId'
+      path: '/orders/$orderId'
+      fullPath: '/vendor/orders/$orderId'
+      preLoaderRoute: typeof VendorVendorLayoutOrdersOrderIdRouteImport
+      parentRoute: typeof VendorVendorLayoutRoute
+    }
+    '/(root)/_rootLayout/vendors/$slug': {
+      id: '/(root)/_rootLayout/vendors/$slug'
+      path: '/vendors/$slug'
+      fullPath: '/vendors/$slug'
+      preLoaderRoute: typeof rootRootLayoutVendorsSlugRouteImport
+      parentRoute: typeof rootRootLayoutRoute
     }
     '/(root)/_rootLayout/products/$slug': {
       id: '/(root)/_rootLayout/products/$slug'
@@ -728,40 +835,33 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof authAuthAdminForgotPasswordRouteImport
       parentRoute: typeof authAuthRoute
     }
-    '/(admin)/admin/_adminLayout/products': {
-      id: '/(admin)/admin/_adminLayout/products'
-      path: '/products'
-      fullPath: '/admin/products'
-      preLoaderRoute: typeof adminAdminAdminLayoutProductsRouteImport
-      parentRoute: typeof adminAdminAdminLayoutRoute
+    '/(auth)/_auth/(root)/signup': {
+      id: '/(auth)/_auth/(root)/signup'
+      path: '/signup'
+      fullPath: '/signup'
+      preLoaderRoute: typeof authAuthrootSignupRouteImport
+      parentRoute: typeof authAuthRoute
     }
-    '/(vendor)/vendor/_vendorLayout/wallet/': {
-      id: '/(vendor)/vendor/_vendorLayout/wallet/'
-      path: '/wallet'
-      fullPath: '/vendor/wallet/'
-      preLoaderRoute: typeof vendorVendorVendorLayoutWalletIndexRouteImport
-      parentRoute: typeof vendorVendorVendorLayoutRoute
+    '/(auth)/_auth/(root)/reset-password': {
+      id: '/(auth)/_auth/(root)/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof authAuthrootResetPasswordRouteImport
+      parentRoute: typeof authAuthRoute
     }
-    '/(vendor)/vendor/_vendorLayout/settings/': {
-      id: '/(vendor)/vendor/_vendorLayout/settings/'
-      path: '/settings'
-      fullPath: '/vendor/settings/'
-      preLoaderRoute: typeof vendorVendorVendorLayoutSettingsIndexRouteImport
-      parentRoute: typeof vendorVendorVendorLayoutRoute
+    '/(auth)/_auth/(root)/login': {
+      id: '/(auth)/_auth/(root)/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof authAuthrootLoginRouteImport
+      parentRoute: typeof authAuthRoute
     }
-    '/(vendor)/vendor/_vendorLayout/products/': {
-      id: '/(vendor)/vendor/_vendorLayout/products/'
-      path: '/products'
-      fullPath: '/vendor/products/'
-      preLoaderRoute: typeof vendorVendorVendorLayoutProductsIndexRouteImport
-      parentRoute: typeof vendorVendorVendorLayoutRoute
-    }
-    '/(vendor)/vendor/_vendorLayout/orders/': {
-      id: '/(vendor)/vendor/_vendorLayout/orders/'
-      path: '/orders'
-      fullPath: '/vendor/orders/'
-      preLoaderRoute: typeof vendorVendorVendorLayoutOrdersIndexRouteImport
-      parentRoute: typeof vendorVendorVendorLayoutRoute
+    '/(auth)/_auth/(root)/forgot-password': {
+      id: '/(auth)/_auth/(root)/forgot-password'
+      path: '/forgot-password'
+      fullPath: '/forgot-password'
+      preLoaderRoute: typeof authAuthrootForgotPasswordRouteImport
+      parentRoute: typeof authAuthRoute
     }
     '/(root)/_rootLayout/_authenticated/orders/': {
       id: '/(root)/_rootLayout/_authenticated/orders/'
@@ -784,27 +884,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof rootRootLayoutAuthenticatedAccountIndexRouteImport
       parentRoute: typeof rootRootLayoutAuthenticatedRoute
     }
-    '/(vendor)/vendor/_vendorLayout/products/new': {
-      id: '/(vendor)/vendor/_vendorLayout/products/new'
-      path: '/products/new'
-      fullPath: '/vendor/products/new'
-      preLoaderRoute: typeof vendorVendorVendorLayoutProductsNewRouteImport
-      parentRoute: typeof vendorVendorVendorLayoutRoute
-    }
-    '/(vendor)/vendor/_vendorLayout/products/$slug': {
-      id: '/(vendor)/vendor/_vendorLayout/products/$slug'
-      path: '/products/$slug'
-      fullPath: '/vendor/products/$slug'
-      preLoaderRoute: typeof vendorVendorVendorLayoutProductsSlugRouteImport
-      parentRoute: typeof vendorVendorVendorLayoutRoute
-    }
-    '/(vendor)/vendor/_vendorLayout/orders/$orderId': {
-      id: '/(vendor)/vendor/_vendorLayout/orders/$orderId'
-      path: '/orders/$orderId'
-      fullPath: '/vendor/orders/$orderId'
-      preLoaderRoute: typeof vendorVendorVendorLayoutOrdersOrderIdRouteImport
-      parentRoute: typeof vendorVendorVendorLayoutRoute
-    }
     '/(root)/_rootLayout/_authenticated/orders/$orderId': {
       id: '/(root)/_rootLayout/_authenticated/orders/$orderId'
       path: '/orders/$orderId'
@@ -823,10 +902,10 @@ declare module '@tanstack/react-router' {
 }
 
 interface authAuthRouteChildren {
-  authAuthForgotPasswordRoute: typeof authAuthForgotPasswordRoute
-  authAuthLoginRoute: typeof authAuthLoginRoute
-  authAuthResetPasswordRoute: typeof authAuthResetPasswordRoute
-  authAuthSignupRoute: typeof authAuthSignupRoute
+  authAuthrootForgotPasswordRoute: typeof authAuthrootForgotPasswordRoute
+  authAuthrootLoginRoute: typeof authAuthrootLoginRoute
+  authAuthrootResetPasswordRoute: typeof authAuthrootResetPasswordRoute
+  authAuthrootSignupRoute: typeof authAuthrootSignupRoute
   authAuthAdminForgotPasswordRoute: typeof authAuthAdminForgotPasswordRoute
   authAuthAdminLoginRoute: typeof authAuthAdminLoginRoute
   authAuthAdminRegisterRoute: typeof authAuthAdminRegisterRoute
@@ -836,10 +915,10 @@ interface authAuthRouteChildren {
 }
 
 const authAuthRouteChildren: authAuthRouteChildren = {
-  authAuthForgotPasswordRoute: authAuthForgotPasswordRoute,
-  authAuthLoginRoute: authAuthLoginRoute,
-  authAuthResetPasswordRoute: authAuthResetPasswordRoute,
-  authAuthSignupRoute: authAuthSignupRoute,
+  authAuthrootForgotPasswordRoute: authAuthrootForgotPasswordRoute,
+  authAuthrootLoginRoute: authAuthrootLoginRoute,
+  authAuthrootResetPasswordRoute: authAuthrootResetPasswordRoute,
+  authAuthrootSignupRoute: authAuthrootSignupRoute,
   authAuthAdminForgotPasswordRoute: authAuthAdminForgotPasswordRoute,
   authAuthAdminLoginRoute: authAuthAdminLoginRoute,
   authAuthAdminRegisterRoute: authAuthAdminRegisterRoute,
@@ -889,9 +968,11 @@ interface rootRootLayoutRouteChildren {
   rootRootLayoutIndexRoute: typeof rootRootLayoutIndexRoute
   rootRootLayoutCategoriesSlugRoute: typeof rootRootLayoutCategoriesSlugRoute
   rootRootLayoutProductsSlugRoute: typeof rootRootLayoutProductsSlugRoute
+  rootRootLayoutVendorsSlugRoute: typeof rootRootLayoutVendorsSlugRoute
   rootRootLayoutCartIndexRoute: typeof rootRootLayoutCartIndexRoute
   rootRootLayoutCategoriesIndexRoute: typeof rootRootLayoutCategoriesIndexRoute
   rootRootLayoutProductsIndexRoute: typeof rootRootLayoutProductsIndexRoute
+  rootRootLayoutVendorsIndexRoute: typeof rootRootLayoutVendorsIndexRoute
 }
 
 const rootRootLayoutRouteChildren: rootRootLayoutRouteChildren = {
@@ -905,70 +986,64 @@ const rootRootLayoutRouteChildren: rootRootLayoutRouteChildren = {
   rootRootLayoutIndexRoute: rootRootLayoutIndexRoute,
   rootRootLayoutCategoriesSlugRoute: rootRootLayoutCategoriesSlugRoute,
   rootRootLayoutProductsSlugRoute: rootRootLayoutProductsSlugRoute,
+  rootRootLayoutVendorsSlugRoute: rootRootLayoutVendorsSlugRoute,
   rootRootLayoutCartIndexRoute: rootRootLayoutCartIndexRoute,
   rootRootLayoutCategoriesIndexRoute: rootRootLayoutCategoriesIndexRoute,
   rootRootLayoutProductsIndexRoute: rootRootLayoutProductsIndexRoute,
+  rootRootLayoutVendorsIndexRoute: rootRootLayoutVendorsIndexRoute,
 }
 
 const rootRootLayoutRouteWithChildren = rootRootLayoutRoute._addFileChildren(
   rootRootLayoutRouteChildren,
 )
 
-interface adminAdminAdminLayoutRouteChildren {
-  adminAdminAdminLayoutProductsRoute: typeof adminAdminAdminLayoutProductsRoute
-  adminAdminAdminLayoutIndexRoute: typeof adminAdminAdminLayoutIndexRoute
+interface AdminAdminLayoutRouteChildren {
+  AdminAdminLayoutProductsRoute: typeof AdminAdminLayoutProductsRoute
+  AdminAdminLayoutIndexRoute: typeof AdminAdminLayoutIndexRoute
+  AdminAdminLayoutAccountIndexRoute: typeof AdminAdminLayoutAccountIndexRoute
 }
 
-const adminAdminAdminLayoutRouteChildren: adminAdminAdminLayoutRouteChildren = {
-  adminAdminAdminLayoutProductsRoute: adminAdminAdminLayoutProductsRoute,
-  adminAdminAdminLayoutIndexRoute: adminAdminAdminLayoutIndexRoute,
+const AdminAdminLayoutRouteChildren: AdminAdminLayoutRouteChildren = {
+  AdminAdminLayoutProductsRoute: AdminAdminLayoutProductsRoute,
+  AdminAdminLayoutIndexRoute: AdminAdminLayoutIndexRoute,
+  AdminAdminLayoutAccountIndexRoute: AdminAdminLayoutAccountIndexRoute,
 }
 
-const adminAdminAdminLayoutRouteWithChildren =
-  adminAdminAdminLayoutRoute._addFileChildren(
-    adminAdminAdminLayoutRouteChildren,
-  )
+const AdminAdminLayoutRouteWithChildren =
+  AdminAdminLayoutRoute._addFileChildren(AdminAdminLayoutRouteChildren)
 
-interface vendorVendorVendorLayoutRouteChildren {
-  vendorVendorVendorLayoutIndexRoute: typeof vendorVendorVendorLayoutIndexRoute
-  vendorVendorVendorLayoutOrdersOrderIdRoute: typeof vendorVendorVendorLayoutOrdersOrderIdRoute
-  vendorVendorVendorLayoutProductsSlugRoute: typeof vendorVendorVendorLayoutProductsSlugRoute
-  vendorVendorVendorLayoutProductsNewRoute: typeof vendorVendorVendorLayoutProductsNewRoute
-  vendorVendorVendorLayoutOrdersIndexRoute: typeof vendorVendorVendorLayoutOrdersIndexRoute
-  vendorVendorVendorLayoutProductsIndexRoute: typeof vendorVendorVendorLayoutProductsIndexRoute
-  vendorVendorVendorLayoutSettingsIndexRoute: typeof vendorVendorVendorLayoutSettingsIndexRoute
-  vendorVendorVendorLayoutWalletIndexRoute: typeof vendorVendorVendorLayoutWalletIndexRoute
+interface VendorVendorLayoutRouteChildren {
+  VendorVendorLayoutIndexRoute: typeof VendorVendorLayoutIndexRoute
+  VendorVendorLayoutOrdersOrderIdRoute: typeof VendorVendorLayoutOrdersOrderIdRoute
+  VendorVendorLayoutProductsSlugRoute: typeof VendorVendorLayoutProductsSlugRoute
+  VendorVendorLayoutProductsNewRoute: typeof VendorVendorLayoutProductsNewRoute
+  VendorVendorLayoutAccountIndexRoute: typeof VendorVendorLayoutAccountIndexRoute
+  VendorVendorLayoutOrdersIndexRoute: typeof VendorVendorLayoutOrdersIndexRoute
+  VendorVendorLayoutProductsIndexRoute: typeof VendorVendorLayoutProductsIndexRoute
+  VendorVendorLayoutSettingsIndexRoute: typeof VendorVendorLayoutSettingsIndexRoute
+  VendorVendorLayoutWalletIndexRoute: typeof VendorVendorLayoutWalletIndexRoute
 }
 
-const vendorVendorVendorLayoutRouteChildren: vendorVendorVendorLayoutRouteChildren =
-  {
-    vendorVendorVendorLayoutIndexRoute: vendorVendorVendorLayoutIndexRoute,
-    vendorVendorVendorLayoutOrdersOrderIdRoute:
-      vendorVendorVendorLayoutOrdersOrderIdRoute,
-    vendorVendorVendorLayoutProductsSlugRoute:
-      vendorVendorVendorLayoutProductsSlugRoute,
-    vendorVendorVendorLayoutProductsNewRoute:
-      vendorVendorVendorLayoutProductsNewRoute,
-    vendorVendorVendorLayoutOrdersIndexRoute:
-      vendorVendorVendorLayoutOrdersIndexRoute,
-    vendorVendorVendorLayoutProductsIndexRoute:
-      vendorVendorVendorLayoutProductsIndexRoute,
-    vendorVendorVendorLayoutSettingsIndexRoute:
-      vendorVendorVendorLayoutSettingsIndexRoute,
-    vendorVendorVendorLayoutWalletIndexRoute:
-      vendorVendorVendorLayoutWalletIndexRoute,
-  }
+const VendorVendorLayoutRouteChildren: VendorVendorLayoutRouteChildren = {
+  VendorVendorLayoutIndexRoute: VendorVendorLayoutIndexRoute,
+  VendorVendorLayoutOrdersOrderIdRoute: VendorVendorLayoutOrdersOrderIdRoute,
+  VendorVendorLayoutProductsSlugRoute: VendorVendorLayoutProductsSlugRoute,
+  VendorVendorLayoutProductsNewRoute: VendorVendorLayoutProductsNewRoute,
+  VendorVendorLayoutAccountIndexRoute: VendorVendorLayoutAccountIndexRoute,
+  VendorVendorLayoutOrdersIndexRoute: VendorVendorLayoutOrdersIndexRoute,
+  VendorVendorLayoutProductsIndexRoute: VendorVendorLayoutProductsIndexRoute,
+  VendorVendorLayoutSettingsIndexRoute: VendorVendorLayoutSettingsIndexRoute,
+  VendorVendorLayoutWalletIndexRoute: VendorVendorLayoutWalletIndexRoute,
+}
 
-const vendorVendorVendorLayoutRouteWithChildren =
-  vendorVendorVendorLayoutRoute._addFileChildren(
-    vendorVendorVendorLayoutRouteChildren,
-  )
+const VendorVendorLayoutRouteWithChildren =
+  VendorVendorLayoutRoute._addFileChildren(VendorVendorLayoutRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   authAuthRoute: authAuthRouteWithChildren,
   rootRootLayoutRoute: rootRootLayoutRouteWithChildren,
-  adminAdminAdminLayoutRoute: adminAdminAdminLayoutRouteWithChildren,
-  vendorVendorVendorLayoutRoute: vendorVendorVendorLayoutRouteWithChildren,
+  AdminAdminLayoutRoute: AdminAdminLayoutRouteWithChildren,
+  VendorVendorLayoutRoute: VendorVendorLayoutRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

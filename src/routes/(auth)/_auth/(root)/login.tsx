@@ -19,7 +19,7 @@ const loginSchema = z.object({
 
 type LoginFormData = z.infer<typeof loginSchema>
 
-export const Route = createFileRoute('/(auth)/_auth/login')({
+export const Route = createFileRoute('/(auth)/_auth/(root)/login')({
   component: LoginPage,
   validateSearch: z.object({
     redirect: z.string().optional(),

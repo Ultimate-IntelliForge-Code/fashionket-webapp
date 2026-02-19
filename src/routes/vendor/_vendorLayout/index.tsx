@@ -29,7 +29,7 @@ import { ErrorState } from '@/components/ui/error-state';
 import { StatsCard } from '@/components/ui/stats-card';
 import { OrdersTable } from '@/components/orders/order-table';
 
-export const Route = createFileRoute('/(vendor)/vendor/_vendorLayout/')({
+export const Route = createFileRoute('/vendor/_vendorLayout/')({
   loader: async ({ context }) => {
     const queryClient = context.queryClient;
     

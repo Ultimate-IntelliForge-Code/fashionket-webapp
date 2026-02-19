@@ -1,38 +1,41 @@
 import React from 'react';
-import { useTokenRefresh } from '@/hooks';
-import { useValidateToken } from '@/api/queries/auth.query';
-import { useAuthStore } from '@/store/auth.store';
-import { UserRole } from '@/types';
+import { useAuth } from '@/hooks';
 
-export const VendorAuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { clearAuth, setLoading, setAuthVendor } = useAuthStore();
-  const { data: validationData, isLoading: isValidating } = useValidateToken();
-  
-  useTokenRefresh();
+interface VendorAuthProviderProps {
+  children: React.ReactNode;
+  requireAuth?: boolean;
+}
 
-  React.useEffect(() => {
-     if (!isValidating && validationData) {
-       if (!validationData.valid) {
-         clearAuth()
-         setLoading(false)
-         return
-       }
- 
-       const user = validationData.user
- 
-       switch (user.role) {
+/**
+ * Vendor Auth Provider - Protects vendor-only routes
+ * Validates vendor is authenticated and has VENDOR role
+ * Used in /vendor/_vendorLayout routes
+ * 
+ * Loading happens in background - no loading state shown to user
+ */
+export const VendorAuthProvider: React.FC<VendorAuthProviderProps> = ({
+  children,
+  requireAuth = true,
+}) => {
+  const { isVendor, isAuthenticated } = useAuth();
 
-         case UserRole.VENDOR:
-           setAuthVendor(user) // ✅ IVendor
-           break
- 
-         default:
-           clearAuth()
-       }
- 
-       setLoading(false)
-     }
-   }, [validationData, isValidating, clearAuth, setLoading]);
+  // If auth is required but vendor is not authenticated or doesn't have VENDOR role
+  if (requireAuth && (!isAuthenticated || !isVendor)) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <p className="text-muted-foreground mb-4">
+            {!isAuthenticated
+              ? 'Please log in to access this page'
+              : 'You do not have permission to access this page. Vendor access required.'}
+          </p>
+          <a href="/vendor/login" className="text-primary hover:underline">
+            Go to vendor login
+          </a>
+        </div>
+      </div>
+    );
+  }
 
   return <>{children}</>;
 };

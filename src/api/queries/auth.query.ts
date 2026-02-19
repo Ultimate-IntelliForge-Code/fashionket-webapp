@@ -24,6 +24,42 @@ export const useValidateToken = () => {
   });
 };
 
+/**
+ * Get current user profile
+ */
+export const useUserProfile = (enabled = true) => {
+  return useQuery({
+    queryKey: queryKeys.auth.validate(),
+    queryFn: () => apiClient.getData<IUser>('/auth/profile/user'),
+    enabled,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
+};
+
+/**
+ * Get current vendor profile
+ */
+export const useVendorProfile = (enabled = true) => {
+  return useQuery({
+    queryKey: queryKeys.vendor.detail('profile'),
+    queryFn: () => apiClient.getData<IVendor>('/auth/profile/vendor'),
+    enabled,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
+};
+
+/**
+ * Get current admin profile
+ */
+export const useAdminProfile = (enabled = true) => {
+  return useQuery({
+    queryKey: queryKeys.admin.detail('profile'),
+    queryFn: () => apiClient.getData<IAdmin>('/auth/profile/admin'),
+    enabled,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
+};
+
 // Mutations
 // ========== USER ROUTES ==========
 export const useUserSignup = () => {

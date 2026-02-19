@@ -32,6 +32,7 @@ export const useAuth = () => {
 
       const user = validationData.user
 
+      console.log(user)
       switch (user.role) {
         case UserRole.USER:
           setAuth(user) // ✅ IUser

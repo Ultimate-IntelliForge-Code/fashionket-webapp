@@ -23,7 +23,7 @@ import { z } from 'zod';
 import { toast } from 'react-toastify';
 import { StatsCard } from '@/components/ui/stats-card';
 
-export const Route = createFileRoute('/(vendor)/vendor/_vendorLayout/wallet/')({
+export const Route = createFileRoute('/vendor/_vendorLayout/wallet/')({
   component: VendorWallet,
 });
 

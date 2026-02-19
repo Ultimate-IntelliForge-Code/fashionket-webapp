@@ -26,7 +26,7 @@ export const orderSearchSchema = z.object({
 
 export type IOrderQueryFilters = z.infer<typeof orderSearchSchema>
 
-export const Route = createFileRoute('/(vendor)/vendor/_vendorLayout/orders/')({
+export const Route = createFileRoute('/vendor/_vendorLayout/orders/')({
   validateSearch: (search) => {
     return orderSearchSchema.parse(search)
   },

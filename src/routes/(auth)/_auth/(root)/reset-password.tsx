@@ -28,7 +28,7 @@ const resetPasswordSchema = z.object({
 
 type ResetPasswordFormData = z.infer<typeof resetPasswordSchema>;
 
-export const Route = createFileRoute('/(auth)/_auth/reset-password')({
+export const Route = createFileRoute('/(auth)/_auth/(root)/reset-password')({
   component: ResetPasswordPage,
   validateSearch: z.object({
     token: z.string().optional().catch(''),

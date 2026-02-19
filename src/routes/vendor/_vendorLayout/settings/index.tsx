@@ -11,7 +11,7 @@ import { useAuth } from '@/hooks';
 import { toast } from 'react-toastify';
 import { Upload } from 'lucide-react';
 
-export const Route = createFileRoute('/(vendor)/vendor/_vendorLayout/settings/')({
+export const Route = createFileRoute('/vendor/_vendorLayout/settings/')({
   component: VendorSettings,
 });
 

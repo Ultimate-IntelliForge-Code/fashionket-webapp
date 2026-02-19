@@ -16,7 +16,7 @@ const forgotPasswordSchema = z.object({
 
 type ForgotPasswordFormData = z.infer<typeof forgotPasswordSchema>;
 
-export const Route = createFileRoute('/(auth)/_auth/forgot-password')({
+export const Route = createFileRoute('/(auth)/_auth/(root)/forgot-password')({
   component: ForgotPasswordPage,
 });
 

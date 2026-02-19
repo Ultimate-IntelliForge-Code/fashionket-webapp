@@ -11,7 +11,7 @@ import { LoadingState } from '@/components/ui/loading-state';
 import { ErrorState } from '@/components/ui/error-state';
 import { ProductForm } from '@/components/forms/product-form';
 
-export const Route = createFileRoute('/(vendor)/vendor/_vendorLayout/products/$slug')({
+export const Route = createFileRoute('/vendor/_vendorLayout/products/$slug')({
   loader: async ({ context, params }) => {
     const queryClient = context.queryClient;
     const [product, categories] = await Promise.all([

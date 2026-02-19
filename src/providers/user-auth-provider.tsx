@@ -1,37 +1,41 @@
 import React from 'react';
-import { useTokenRefresh } from '@/hooks';
-import { useValidateToken } from '@/api/queries/auth.query';
-import { useAuthStore } from '@/store/auth.store';
-import { UserRole } from '@/types';
+import { useAuth } from '@/hooks';
 
-export const UserAuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { setAuth, clearAuth, setLoading } = useAuthStore();
-  const { data: validationData, isLoading: isValidating } = useValidateToken();
-  
-  useTokenRefresh();
+interface UserAuthProviderProps {
+  children: React.ReactNode;
+  requireAuth?: boolean;
+}
 
-  React.useEffect(() => {
-     if (!isValidating && validationData) {
-       if (!validationData.valid) {
-         clearAuth()
-         setLoading(false)
-         return
-       }
- 
-       const user = validationData.user
- 
-       switch (user.role) {
-         case UserRole.USER:
-           setAuth(user) // ✅ IUser
-           break
- 
-         default:
-           clearAuth()
-       }
- 
-       setLoading(false)
-     }
-   }, [validationData, isValidating, setAuth, clearAuth, setLoading]);
+/**
+ * User Auth Provider - Protects user-only routes
+ * Validates user is authenticated and has USER role
+ * Used in (root)/_rootLayout routes
+ * 
+ * Loading happens in background - no loading state shown to user
+ */
+export const UserAuthProvider: React.FC<UserAuthProviderProps> = ({
+  children,
+  requireAuth = true,
+}) => {
+  const { isUser, isAuthenticated } = useAuth();
+
+  // If auth is required but user is not authenticated or doesn't have USER role
+  if (requireAuth && (!isAuthenticated || !isUser)) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <p className="text-muted-foreground mb-4">
+            {!isAuthenticated
+              ? 'Please log in to access this page'
+              : 'You do not have permission to access this page'}
+          </p>
+          <a href="/login" className="text-primary hover:underline">
+            Go to login
+          </a>
+        </div>
+      </div>
+    );
+  }
 
   return <>{children}</>;
 };

@@ -43,7 +43,7 @@ export const productSearchSchema = z.object({
 export type IProductQueryFilters = z.infer<typeof productSearchSchema>
 
 export const Route = createFileRoute(
-  '/(vendor)/vendor/_vendorLayout/products/',
+  '/vendor/_vendorLayout/products/',
 )({
   validateSearch: (search) => {
     return productSearchSchema.parse(search)

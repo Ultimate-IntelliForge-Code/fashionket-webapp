@@ -9,7 +9,7 @@ import { categoriesQuery } from '@/api/queries'
 import { useCreateProduct } from '@/api/mutations'
 
 export const Route = createFileRoute(
-  '/(vendor)/vendor/_vendorLayout/products/new',
+  '/vendor/_vendorLayout/products/new',
 )({
   component: NewProduct,
   pendingComponent: LoadingState,

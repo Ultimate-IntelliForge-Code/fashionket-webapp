@@ -21,7 +21,7 @@ import { LoadingState } from '@/components/ui/loading-state'
 import { ErrorState } from '@/components/ui/error-state'
 
 export const Route = createFileRoute(
-  '/(vendor)/vendor/_vendorLayout/orders/$orderId',
+  '/vendor/_vendorLayout/orders/$orderId',
 )({
   loader: async ({ context, params }) => {
     return await context.queryClient.ensureQueryData(orderQuery(params.orderId))
