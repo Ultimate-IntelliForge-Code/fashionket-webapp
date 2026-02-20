@@ -93,14 +93,14 @@ export default function HomeClient() {
   const scrollLeft = (categoryId: string) => {
     const scrollContainer = scrollRefs.current[categoryId]
     if (scrollContainer) {
-      scrollContainer.scrollBy({ left: -300, behavior: 'smooth' })
+      scrollContainer.scrollBy({ left: -200, behavior: 'smooth' }) // Reduced scroll amount for mobile
     }
   }
 
   const scrollRight = (categoryId: string) => {
     const scrollContainer = scrollRefs.current[categoryId]
     if (scrollContainer) {
-      scrollContainer.scrollBy({ left: 300, behavior: 'smooth' })
+      scrollContainer.scrollBy({ left: 200, behavior: 'smooth' }) // Reduced scroll amount for mobile
     }
   }
 
@@ -117,7 +117,7 @@ export default function HomeClient() {
   )
 
   return (
-    <div>
+    <div className="overflow-x-hidden"> {/* Prevent horizontal overflow */}
       {/* Hero Carousel */}
       <HeroCarousel heroSlides={heroSlides} />
 
@@ -125,34 +125,35 @@ export default function HomeClient() {
       <CategoriesCarousel categories={categories} />
 
       {/* Featured Products by Category */}
-      <section className="pb-16">
-        <div className="container mx-auto px-4">
+      <section className="md:pb-16">
+        <div className="container mx-auto px-3 sm:px-4">
           {categories.slice(0, 5).map((category) => (
-            <div key={category._id} className="mb-12 last:mb-0">
+            <div key={category._id} className="mb-8 md:mb-12">
               {/* Category Header */}
-              <div className="flex items-center justify-between mb-6">
-                <div>
-                  <div className="flex items-center gap-3 mb-2">
+              <div className="flex items-center justify-between mb-4 md:mb-6">
+                <div className="flex-1 min-w-0"> {/* Added min-w-0 to prevent overflow */}
+                  <div className="flex items-center gap-2 sm:gap-3">
                     {iconMap[category.icon] && (
-                      <div className="p-2 rounded-lg bg-gradient-to-r from-mmp-primary/10 to-mmp-accent/10">
+                      <div className="p-1.5 sm:p-2 rounded-lg bg-gradient-to-r from-mmp-primary/10 to-mmp-accent/10 flex-shrink-0">
                         {React.createElement(iconMap[category.icon], {
-                          className: 'h-5 w-5 text-mmp-accent',
+                          className: 'h-4 w-4 sm:h-5 sm:w-5 text-mmp-accent',
                         })}
                       </div>
                     )}
-                    <h3 className="text-2xl font-bold text-mmp-primary2">
+                    <h3 className="text-sm sm:text-base font-bold text-mmp-primary2 truncate">
                       {category.name}
                     </h3>
                   </div>
-                  <p className="text-mmp-accent">
+                  <p className="text-mmp-accent text-[10px] sm:text-xs mt-1 truncate">
                     Discover our latest {category.name.toLowerCase()} collection
                   </p>
                 </div>
 
+                {/* Desktop View All Link */}
                 <Link
                   to="/categories/$slug"
                   params={{ slug: category.slug }}
-                  className="hidden sm:flex items-center gap-2 text-mmp-accent hover:text-mmp-secondary font-medium group"
+                  className="hidden md:flex items-center gap-2 text-mmp-accent text-sm hover:text-mmp-secondary font-medium group flex-shrink-0 ml-4"
                 >
                   View All
                   <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
@@ -162,12 +163,12 @@ export default function HomeClient() {
               {/* Products Grid - Horizontal Scroll */}
               <div className="relative">
                 {/* Scroll Buttons for Desktop */}
-                {productsByCategory[category._id].length > 5 && (
+                {productsByCategory[category._id].length > 3 && (
                   <>
                     <Button
                       variant="outline"
                       size="icon"
-                      className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 z-10 bg-white shadow-lg hover:bg-mmp-neutral border-mmp-primary/20 hidden md:flex"
+                      className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 z-10 bg-white shadow-lg hover:bg-mmp-neutral border-mmp-primary/20 hidden lg:flex"
                       onClick={() => scrollLeft(category._id)}
                     >
                       <ChevronLeft className="h-4 w-4" />
@@ -176,7 +177,7 @@ export default function HomeClient() {
                     <Button
                       variant="outline"
                       size="icon"
-                      className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 z-10 bg-white shadow-lg hover:bg-mmp-neutral border-mmp-primary/20 hidden md:flex"
+                      className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 z-10 bg-white shadow-lg hover:bg-mmp-neutral border-mmp-primary/20 hidden lg:flex"
                       onClick={() => scrollRight(category._id)}
                     >
                       <ChevronRight className="h-4 w-4" />
@@ -188,134 +189,115 @@ export default function HomeClient() {
                 <ScrollArea className="w-full">
                   <div
                     // ref={(el) => (scrollRefs.current[category._id] = el)}
-                    className="flex justify-center gap-6 pb-4"
+                    className="flex gap-3 sm:gap-4 pb-4"
                     style={{ scrollBehavior: 'smooth' }}
                   >
-                    {/* First Row - Top 5 Products */}
-                    <div className="flex gap-6 min-w-full md:min-w-0">
-                      {productsByCategory[category._id]
-                        ?.slice(0, 5)
-                        .map((product) => (
-                          <div key={product._id} className="flex-none">
-                            <ProductCard product={product} />
-                          </div>
-                        ))}
-                    </div>
-
-                    {/* Second Row - Next 5 Products + View More */}
-                    <div className="flex gap-6 min-w-full md:min-w-0">
-                      {productsByCategory[category._id]
-                        ?.slice(5, 10)
-                        .map((product) => (
-                          <div key={product._id} className="flex-none">
-                            <ProductCard product={product} />
-                          </div>
-                        ))}
-
-                      {/* View More Card */}
-                      {productsByCategory[category._id].length > 0 && (
-                        <div className="flex-none max-w-[200px]">
-                          <Link
-                            to="/categories/$slug"
-                            params={{ slug: category.slug }}
-                          >
-                            <Card className="h-full border-mmp-primary/20 hover:border-mmp-secondary/50 transition-all duration-300 hover:shadow-lg group">
-                              <CardContent className="h-full p-8 flex flex-col items-center justify-center text-center">
-                                <div className="w-20 h-20 mb-6 rounded-full bg-gradient-to-br from-mmp-primary/10 to-mmp-accent/10 flex items-center justify-center group-hover:from-mmp-accent/20 group-hover:to-mmp-secondary/20 transition-all">
-                                  <ArrowRight className="h-8 w-8 text-mmp-accent group-hover:text-mmp-secondary transition-colors" />
-                                </div>
-                                <h3 className="text-xl font-bold text-mmp-primary2 mb-2">
-                                  View All {category.name}
-                                </h3>
-                                <p className="text-sm text-mmp-neutral/60 mb-4">
-                                  Explore our complete collection
-                                </p>
-                                <Badge className="bg-gradient-to-r from-mmp-accent/20 to-mmp-secondary/20 text-mmp-accent border-0">
-                                  {productsByCategory[category._id]?.length}+
-                                  items
-                                </Badge>
-                              </CardContent>
-                            </Card>
-                          </Link>
+                    {/* Products - First 5 */}
+                    {productsByCategory[category._id]
+                      ?.slice(0, 5)
+                      .map((product) => (
+                        <div key={product._id} className="flex-none w-[140px] sm:w-[180px] md:w-[200px]">
+                          <ProductCard product={product} />
                         </div>
-                      )}
+                      ))}
 
-                      {productsByCategory[category._id].length <= 0 && (
-                        <Card className="w-full h-full border-mmp-primary/20 hover:border-mmp-secondary/50 transition-all duration-300 hover:shadow-lg group">
-                          <CardContent className="h-full p-8 flex flex-col items-center justify-center text-center">
-                            <div className="w-20 h-20 mb-6 rounded-full bg-gradient-to-br from-mmp-primary/10 to-mmp-accent/10 flex items-center justify-center group-hover:from-mmp-accent/20 group-hover:to-mmp-secondary/20 transition-all">
-                              <Telescope className="h-8 w-8 text-mmp-accent group-hover:text-mmp-secondary transition-colors" />
+                    {/* Products - Next 5 (if available) */}
+                    {productsByCategory[category._id]?.length > 5 && (
+                      <>
+                        {productsByCategory[category._id]
+                          ?.slice(5, 10)
+                          .map((product) => (
+                            <div key={product._id} className="flex-none w-[140px] sm:w-[180px] md:w-[200px]">
+                              <ProductCard product={product} />
                             </div>
+                          ))}
+                      </>
+                    )}
 
-                            <h3 className="text-xl font-bold text-mmp-primary2 mb-2">
+                    {/* View More Card - Only show if there are products */}
+                    {productsByCategory[category._id].length > 0 && (
+                      <div className="flex-none w-[140px] sm:w-[180px] md:w-[200px]">
+                        <Link
+                          to="/categories/$slug"
+                          params={{ slug: category.slug }}
+                        >
+                          <Card className="h-full border-mmp-primary/20 hover:border-mmp-secondary/50 transition-all duration-300 hover:shadow-lg group">
+                            <CardContent className="p-3 sm:p-4 flex flex-col items-center justify-center text-center h-full">
+                              <div className="w-12 h-12 sm:w-16 sm:h-16 mb-2 sm:mb-3 rounded-full bg-gradient-to-br from-mmp-primary/10 to-mmp-accent/10 flex items-center justify-center group-hover:from-mmp-accent/20 group-hover:to-mmp-secondary/20 transition-all">
+                                <ArrowRight className="h-5 w-5 sm:h-6 sm:w-6 text-mmp-accent group-hover:text-mmp-secondary transition-colors" />
+                              </div>
+                              <h3 className="text-xs sm:text-sm font-bold text-mmp-primary2 line-clamp-2">
+                                View All {category.name}
+                              </h3>
+                              <p className="text-[10px] sm:text-xs text-mmp-neutral/60 mt-1 line-clamp-2">
+                                Explore collection
+                              </p>
+                              <Badge className="mt-2 bg-gradient-to-r from-mmp-accent/20 to-mmp-secondary/20 text-mmp-accent border-0 text-[8px] sm:text-xs">
+                                {productsByCategory[category._id]?.length}+ items
+                              </Badge>
+                            </CardContent>
+                          </Card>
+                        </Link>
+                      </div>
+                    )}
+
+                    {/* Empty State */}
+                    {productsByCategory[category._id].length <= 0 && (
+                      <div className="flex-none w-full">
+                        <Card className="border-mmp-primary/20">
+                          <CardContent className="p-6 sm:p-8 flex flex-col items-center justify-center text-center">
+                            <div className="w-16 h-16 sm:w-20 sm:h-20 mb-4 rounded-full bg-gradient-to-br from-mmp-primary/10 to-mmp-accent/10 flex items-center justify-center">
+                              <Telescope className="h-6 w-6 sm:h-8 sm:w-8 text-mmp-accent" />
+                            </div>
+                            <h3 className="text-sm sm:text-base font-bold text-mmp-primary2 mb-2">
                               Nothing here yet
                             </h3>
-
-                            <p className="text-sm text-mmp-accent mb-1">
-                              We’re adding new products behind the scenes.
+                            <p className="text-xs sm:text-sm text-mmp-accent mb-2">
+                              We're adding new products behind the scenes.
                             </p>
-
-                            <p className="text-xs text-mmp-primary/70">
-                              Check back soon — you won’t miss out 👀
+                            <p className="text-[10px] sm:text-xs text-mmp-primary/70">
+                              Check back soon — you won't miss out 👀
                             </p>
                           </CardContent>
                         </Card>
-                      )}
-                    </div>
+                      </div>
+                    )}
                   </div>
-                  <ScrollBar orientation="horizontal" className="md:hidden" />
+                  <ScrollBar orientation="horizontal" className="flex" />
                 </ScrollArea>
-
-                {/* Mobile View All Button */}
-                <div className="mt-6 sm:hidden">
-                  <Link
-                    to="/categories/$slug"
-                    params={{ slug: category.slug }}
-                    className="w-full"
-                  >
-                    <Button
-                      variant="outline"
-                      className="w-full border-mmp-primary/30 hover:border-mmp-secondary/50"
-                    >
-                      View All {category.name}
-                      <ArrowRight className="ml-2 h-4 w-4" />
-                    </Button>
-                  </Link>
-                </div>
               </div>
-
-              <Separator className="mt-12 bg-gradient-to-r from-transparent via-mmp-primary/20 to-transparent" />
+              <Separator className="mt-2bg-gradient-to-r from-transparent via-mmp-primary/20 to-transparent" />
             </div>
           ))}
         </div>
       </section>
 
       {/* CTA Section */}
-      <section className="py-16 bg-gradient-to-r from-mmp-primary/5 to-mmp-accent/5">
+      <section className="py-8 md:py-12 bg-gradient-to-r from-mmp-primary/5 to-mmp-accent/5">
         <div className="container mx-auto px-4 text-center">
           <div className="max-w-3xl mx-auto">
-            <Badge className="mb-4 bg-gradient-to-r from-mmp-accent to-mmp-secondary text-white border-0">
+            <Badge className="mb-3 md:mb-4 bg-gradient-to-r from-mmp-accent to-mmp-secondary text-white border-0 text-xs md:text-sm">
               <Crown className="h-3 w-3 mr-1" />
               Exclusive Membership
             </Badge>
-            <h2 className="text-3xl md:text-4xl font-bold text-mmp-primary2 mb-4">
+            <h2 className="text-xl sm:text-2xl md:text-4xl font-bold text-mmp-primary2 mb-3 md:mb-4">
               Join Our Fashion Community
             </h2>
-            <p className="text-lg text-mmp-neutral/60 mb-8">
+            <p className="text-sm sm:text-base md:text-lg text-mmp-neutral/60 mb-6 md:mb-8 px-4">
               Get early access to sales, personalized recommendations, and
               exclusive offers
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center px-4">
               <Button
-                size="lg"
-                className="bg-gradient-to-r from-mmp-accent to-mmp-secondary hover:opacity-90 text-white border-0 px-8"
+                size="default"
+                className="bg-gradient-to-r from-mmp-accent to-mmp-secondary hover:opacity-90 text-white border-0 px-6 py-2 text-sm sm:text-base w-full sm:w-auto"
               >
                 Sign Up Free
               </Button>
               <Button
-                size="lg"
+                size="default"
                 variant="outline"
-                className="border-2 border-mmp-primary/30 hover:border-mmp-secondary/50 px-8"
+                className="border-2 border-mmp-primary/30 hover:border-mmp-secondary/50 px-6 py-2 text-sm sm:text-base w-full sm:w-auto"
               >
                 Learn More
               </Button>

@@ -183,7 +183,7 @@ interface CompactPaginationProps {
   className?: string;
 }
 
-export const CompactPagination: React.FC<CompactPaginationProps> = ({
+export const  CompactPagination: React.FC<CompactPaginationProps> = ({
   meta,
   onPageChange,
   className,

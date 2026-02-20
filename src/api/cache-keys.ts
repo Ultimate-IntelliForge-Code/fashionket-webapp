@@ -37,6 +37,8 @@ export const queryKeys = {
   vendor: {
     all: (filters?: Record<string, any>) => ['vendors', 'list', filters] as const,
     detail: (id: string) => ['vendors', 'detail', id] as const,
+    bySlug: (slug: string) => ['vendors', 'slug', slug] as const,
+    products: (slug: string) => ['vendors', slug, 'products'] as const,
   },
 
   users: {

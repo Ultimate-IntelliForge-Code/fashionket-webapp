@@ -2,6 +2,7 @@ export * from './base.types';
 export * from './enums';
 export * from './admin.types';
 export * from './user.types';
+export * from './vendor.type';
 export * from './category.types';
 export * from './product.types';
 export * from './cart.types';

@@ -11,23 +11,35 @@ export interface ILocation {
   lng?: string;
 }
 
+export enum AccountStatus {
+  UNDER_REVIEW = 'UNDER_REVIEW',
+  ACTIVE = 'ACTIVE',
+  SUSPENDED = 'SUSPENDED',
+  REJECTED = 'REJECTED',
+}
+
 /**
- * Admin base interface (excluding sensitive fields)
+ * Vendor base interface (excluding sensitive fields)
  */
 export interface IVendor extends IBaseDocument, ITimestamps, IBaseUser {
   fullName: string;
   businessName: string;
+  slug: string;
   description?: string;
-  businessLogo?: string
+  logoUrl?: string;
   phone: string;
   role: UserRole.VENDOR;
   isActive: boolean;
+  verified: boolean;
+  accountStatus: AccountStatus;
+  location: ILocation;
+  ratingAverage: number;
+  ratingCount: number;
   googleId?: string | null;
-  location: ILocation
 }
 
 /**
- * Admin with password (for backend use only)
+ * Vendor with password (for backend use only)
  */
 export interface IVendorWithPassword extends IVendor {
   passwordHash: string;
@@ -35,7 +47,7 @@ export interface IVendorWithPassword extends IVendor {
 }
 
 /**
- * Admin creation payload
+ * Vendor creation payload
  */
 export interface ICreateVendorPayload {
   fullName: string;
@@ -55,17 +67,20 @@ export interface IVendorAddress {
 }
 
 /**
- * Admin update payload
+ * Vendor update payload
  */
 export interface IUpdateVendorPayload {
-
+  fullName?: string;
+  description?: string;
+  location?: IVendorAddress;
+  phone?: string;
 }
 
 /**
- * Admin login response
+ * Vendor login response
  */
 export interface IVendorAuthResponse {
   success: boolean;
   message: string;
-  data: IVendor
+  data: IVendor;
 }

@@ -42,7 +42,7 @@ export const productsQuery = (filters?: IProductQueryFilters) => ({
  */
 export const paginatedProductsQuery = (filters?: IProductQueryFilters) => ({
   queryKey: queryKeys.products.all(filters),
-  queryFn: async (): Promise<IPaginatedResponse<FrontendSafe<IProductListItem>>> => {
+  queryFn: async (): Promise<IPaginatedResponse<FrontendSafe<IProductListItem>[]>> => {
     const params = new URLSearchParams();
     if (filters) {
       Object.entries(filters).forEach(([key, value]) => {
@@ -52,7 +52,7 @@ export const paginatedProductsQuery = (filters?: IProductQueryFilters) => ({
       });
     }
 
-    const response = await apiClient.get<IPaginatedResponse<FrontendSafe<IProductListItem>>>(
+    const response = await apiClient.get<IPaginatedResponse<FrontendSafe<IProductListItem[]>>>(
       `/products?${params.toString()}`
     );
 

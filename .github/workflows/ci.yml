@@ -1,4 +1,4 @@
-name: Next.js CI
+name: Fashionket CI
 
 on:
   push:
@@ -14,13 +14,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # Install PNPM correctly
       - name: Setup PNPM
         uses: pnpm/action-setup@v4
         with:
-          version: 9 # or your project version
+          version: 9  # Matches your local environment
 
-      # Setup Node and enable PNPM cache
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -30,5 +28,20 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Build Vite.js app
+      # Optional: Add a Lint step if you use ESLint
+      # - name: Lint
+      #   run: pnpm run lint
+
+      - name: Build TanStack Start App
         run: pnpm run build
+        env:
+          # If your build requires environment variables (like API URLs), 
+          # add them here or via GitHub Secrets
+          NODE_ENV: production
+
+      - name: Upload Build Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: nitro-output
+          path: .output
+          retention-days: 7

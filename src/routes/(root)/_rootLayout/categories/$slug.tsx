@@ -1,19 +1,20 @@
-import React from 'react'
-import { createFileRoute, Link } from '@tanstack/react-router'
-import { z } from 'zod'
-import { ProductGrid } from '@/components/ui/product-card'
-import { Button } from '@/components/ui/button'
-import { formatCurrency } from '@/lib/utils'
-import { ArrowLeft, Grid3x3, List } from 'lucide-react'
-import { ProductFilters } from '@/components/ui/product-filters'
-import type { IProductQueryFilters } from '@/types'
+import React from "react";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { z } from "zod";
+import { ProductGrid, ProductListItem } from "@/components/ui/product-card";
+import { Button } from "@/components/ui/button";
+import { cn, formatCurrency } from "@/lib/utils";
+import { ArrowLeft, Grid3x3, List, Filter, X } from "lucide-react";
+import { ProductFilters } from "@/components/ui/product-filters";
+import type { IProductQueryFilters } from "@/types";
 import {
   categoriesQuery,
   categoryBySlugQuery,
   productsQuery,
-} from '@/api/queries'
-import { useProducts } from '@/api/hooks'
-import { Pagination } from '@/components/ui/pagination'
+} from "@/api/queries";
+import { useProducts } from "@/api/hooks";
+import { Pagination } from "@/components/ui/pagination";
+import { FilterBadge } from "@/components/ui/filter-badge";
 
 // Search params schema
 const productSearchSchema = z.object({
@@ -25,22 +26,22 @@ const productSearchSchema = z.object({
   maxPrice: z.number().optional(),
   tags: z.string().optional(),
   sortBy: z.string().optional(),
-  sortOrder: z.enum(['asc', 'desc']).optional(),
-})
+  sortOrder: z.enum(["asc", "desc"]).optional(),
+});
 
-export const Route = createFileRoute('/(root)/_rootLayout/categories/$slug')({
+export const Route = createFileRoute("/(root)/_rootLayout/categories/$slug")({
   component: CategoryProductsPage,
   validateSearch: productSearchSchema,
   loaderDeps: ({ search }) => ({ search }),
   loader: async ({ context, params, deps }) => {
     const categories =
-      await context.queryClient.ensureQueryData(categoriesQuery())
+      await context.queryClient.ensureQueryData(categoriesQuery());
     const category = await context.queryClient.ensureQueryData(
       categoryBySlugQuery(params.slug),
-    )
-    
+    );
+
     if (!category) {
-      throw new Error('Category not found')
+      throw new Error("Category not found");
     }
 
     // Build filters from search params
@@ -55,24 +56,24 @@ export const Route = createFileRoute('/(root)/_rootLayout/categories/$slug')({
       tags: deps.search.tags,
       sortBy: deps.search.sortBy,
       sortOrder: deps.search.sortOrder,
-    }
+    };
 
     // Fetch products with filters
     const productsData = await context.queryClient.ensureQueryData(
       productsQuery(filters),
-    )
+    );
 
     // Extract metadata from initial load (for filter options)
     const allProductsData = await context.queryClient.ensureQueryData(
       productsQuery({ categorySlug: params.slug, limit: 1000 }),
-    )
-    
-    const allProducts = allProductsData.data
+    );
+
+    const allProducts = allProductsData.data;
     const brands = Array.from(
       new Set(allProducts.map((p) => p.brand).filter(Boolean)),
-    ) as string[]
-    const tags = Array.from(new Set(allProducts.flatMap((p) => p.tags)))
-    const maxPrice = Math.max(...allProducts.map((p) => p.price), 0)
+    ) as string[];
+    const tags = Array.from(new Set(allProducts.flatMap((p) => p.tags)));
+    const maxPrice = Math.max(...allProducts.map((p) => p.price), 0);
 
     return {
       categories,
@@ -82,9 +83,9 @@ export const Route = createFileRoute('/(root)/_rootLayout/categories/$slug')({
       brands,
       tags,
       maxPrice,
-    }
+    };
   },
-})
+});
 
 function CategoryProductsPage() {
   const {
@@ -94,11 +95,14 @@ function CategoryProductsPage() {
     brands,
     tags,
     maxPrice,
-  } = Route.useLoaderData()
-  
-  const searchParams = Route.useSearch()
-  const { slug } = Route.useParams()
-  const navigate = Route.useNavigate()
+  } = Route.useLoaderData();
+
+  const searchParams = Route.useSearch();
+  const { slug } = Route.useParams();
+  const navigate = Route.useNavigate();
+
+  // Mobile filters state
+  const [isFilterOpen, setIsFilterOpen] = React.useState(false);
 
   // Initialize filters from URL search params
   const [filters, setFilters] = React.useState<IProductQueryFilters>({
@@ -112,20 +116,20 @@ function CategoryProductsPage() {
     tags: searchParams.tags,
     sortBy: searchParams.sortBy,
     sortOrder: searchParams.sortOrder,
-  })
+  });
 
-  const [viewMode, setViewMode] = React.useState<'grid' | 'list'>('grid')
+  const [viewMode, setViewMode] = React.useState<"grid" | "list">("grid");
 
   // Fetch products with current filters
   const {
     data: productsResponse,
     isLoading,
     isFetching,
-  } = useProducts(filters)
+  } = useProducts(filters);
 
   // Use fetched products or fallback to initial
-  const products = productsResponse?.data ?? initialProducts
-  const pagination = productsResponse?.pagination ?? initialPagination
+  const products = productsResponse?.data ?? initialProducts;
+  const pagination = productsResponse?.pagination ?? initialPagination;
 
   // Sync filters with URL search params
   React.useEffect(() => {
@@ -140,9 +144,9 @@ function CategoryProductsPage() {
       tags: searchParams.tags,
       sortBy: searchParams.sortBy,
       sortOrder: searchParams.sortOrder,
-    }
-    
-    setFilters(newFilters)
+    };
+
+    setFilters(newFilters);
   }, [
     slug,
     searchParams.page,
@@ -154,7 +158,7 @@ function CategoryProductsPage() {
     searchParams.tags,
     searchParams.sortBy,
     searchParams.sortOrder,
-  ])
+  ]);
 
   /**
    * Update filters and URL search params
@@ -165,21 +169,24 @@ function CategoryProductsPage() {
       ...searchParams,
       ...newFilters,
       page: 1, // Reset to first page when filters change
-    }
+    };
 
     // Remove undefined values
     Object.keys(updatedSearch).forEach((key) => {
-      if (updatedSearch[key] === undefined || updatedSearch[key] === '') {
-        delete updatedSearch[key]
+      if (updatedSearch[key] === undefined || updatedSearch[key] === "") {
+        delete updatedSearch[key];
       }
-    })
+    });
 
     // Update URL
     navigate({
       search: updatedSearch,
       replace: true,
-    })
-  }
+    });
+
+    // Close mobile filter drawer after applying
+    setIsFilterOpen(false);
+  };
 
   /**
    * Handle page change
@@ -188,130 +195,164 @@ function CategoryProductsPage() {
     navigate({
       search: (prev) => ({ ...prev, page }),
       replace: true,
-    })
-  }
+    });
+    // Scroll to top on page change
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
 
   /**
    * Handle sort change
    */
   const handleSortChange = (sortValue: string) => {
-    let sortBy: string
-    let sortOrder: 'asc' | 'desc' = 'asc'
+    let sortBy: string;
+    let sortOrder: "asc" | "desc" = "asc";
 
     switch (sortValue) {
-      case 'price':
-        sortBy = 'price'
-        sortOrder = 'asc'
-        break
-      case 'price_desc':
-        sortBy = 'price'
-        sortOrder = 'desc'
-        break
-      case 'popularity':
-        sortBy = 'soldCount'
-        sortOrder = 'desc'
-        break
-      case 'name':
-        sortBy = 'name'
-        sortOrder = 'asc'
-        break
-      case 'createdAt':
+      case "price":
+        sortBy = "price";
+        sortOrder = "asc";
+        break;
+      case "price_desc":
+        sortBy = "price";
+        sortOrder = "desc";
+        break;
+      case "popularity":
+        sortBy = "soldCount";
+        sortOrder = "desc";
+        break;
+      case "name":
+        sortBy = "name";
+        sortOrder = "asc";
+        break;
+      case "createdAt":
       default:
-        sortBy = 'createdAt'
-        sortOrder = 'desc'
-        break
+        sortBy = "createdAt";
+        sortOrder = "desc";
+        break;
     }
 
-    handleFilterChange({ sortBy, sortOrder })
-  }
+    handleFilterChange({ sortBy, sortOrder });
+  };
 
   /**
    * Get current sort value for select
    */
   const getCurrentSortValue = () => {
-    const { sortBy, sortOrder } = filters
-    
-    if (sortBy === 'price' && sortOrder === 'asc') return 'price'
-    if (sortBy === 'price' && sortOrder === 'desc') return 'price_desc'
-    if (sortBy === 'soldCount') return 'popularity'
-    if (sortBy === 'name') return 'name'
-    return 'createdAt'
-  }
+    const { sortBy, sortOrder } = filters;
 
-  const totalProducts = pagination?.total || 0
+    if (sortBy === "price" && sortOrder === "asc") return "price";
+    if (sortBy === "price" && sortOrder === "desc") return "price_desc";
+    if (sortBy === "soldCount") return "popularity";
+    if (sortBy === "name") return "name";
+    return "createdAt";
+  };
+
+  const totalProducts = pagination?.total || 0;
   const hasActiveFilters =
     filters.search ||
     filters.brand ||
     filters.minPrice !== undefined ||
     filters.maxPrice !== undefined ||
-    filters.tags
+    filters.tags;
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Category Header */}
+      {/* Category Header - Responsive */}
       <div className="bg-gradient-to-r from-mmp-primary to-mmp-primary2">
-        <div className="container mx-auto px-4 py-12">
-          <div className="flex items-center justify-between">
+        <div className="container mx-auto px-4 sm:px-6 py-6 sm:py-8 md:py-12">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div className="text-white">
               <Button
                 variant="ghost"
                 size="sm"
-                className="mb-4 text-white/90 hover:text-white hover:bg-white/20"
+                className="mb-3 sm:mb-4 text-white/90 hover:text-white hover:bg-white/20 -ml-2 sm:ml-0 h-8 sm:h-9 px-2 sm:px-3"
                 asChild
               >
                 <Link to="/">
-                  <ArrowLeft className="mr-2 h-4 w-4" />
-                  Back to Categories
+                  <ArrowLeft className="mr-1.5 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4" />
+                  <span className="text-xs sm:text-sm">Back to Categories</span>
                 </Link>
               </Button>
-              <h1 className="text-4xl font-bold mb-3">{category.name}</h1>
-              <p className="text-white/80 max-w-2xl">
+              <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-2 sm:mb-3">
+                {category.name}
+              </h1>
+              <p className="text-white/80 text-sm sm:text-base max-w-2xl leading-relaxed">
                 Explore our premium collection of {category.name.toLowerCase()}.
                 Find the perfect items that match your style and budget.
               </p>
-            </div>
-            <div className="hidden md:block">
-              <div className="rounded-full bg-white/20 p-6 backdrop-blur-sm">
-                <div className="text-center">
-                  <div className="text-3xl font-bold text-white">
-                    {totalProducts}
-                  </div>
-                  <div className="text-white/80 text-sm">
-                    Products Available
-                  </div>
-                </div>
-              </div>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="container mx-auto px-4 py-8">
-        <div className="flex flex-col lg:flex-row gap-8">
-          {/* Sidebar Filters */}
-          <div className="lg:w-64">
-            <ProductFilters
-              filters={filters}
-              onFilterChange={handleFilterChange}
-              brands={brands}
-              tags={tags}
-              maxPrice={maxPrice}
-            />
+      <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 md:py-8">
+        <div className="flex flex-col lg:flex-row gap-4 lg:gap-8">
+          {/* Sidebar Filters - Desktop */}
+          <div className="hidden lg:block lg:w-64 xl:w-72">
+            <div className="sticky top-4">
+              <ProductFilters
+                filters={filters}
+                onFilterChange={handleFilterChange}
+                brands={brands}
+                tags={tags}
+                maxPrice={maxPrice}
+              />
+            </div>
           </div>
 
+          {/* Mobile Filter Drawer */}
+          {isFilterOpen && (
+            <div className="fixed inset-0 z-50 lg:hidden">
+              {/* Backdrop */}
+              <div
+                className="absolute inset-0 bg-black/50 backdrop-blur-sm transition-opacity"
+                onClick={() => setIsFilterOpen(false)}
+              />
+
+              {/* Drawer - Slide from bottom on mobile */}
+              <div className="absolute bottom-0 left-0 right-0 max-h-[90vh] bg-white rounded-t-2xl shadow-xl overflow-y-auto animate-slide-up">
+                <div className="sticky top-0 bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between rounded-t-2xl">
+                  <h3 className="text-lg font-semibold text-gray-900">
+                    Filters
+                  </h3>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setIsFilterOpen(false)}
+                    className="h-8 w-8 p-0 rounded-full"
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+                <div className="p-4 pb-8">
+                  <ProductFilters
+                    filters={filters}
+                    onFilterChange={handleFilterChange}
+                    brands={brands}
+                    tags={tags}
+                    maxPrice={maxPrice}
+                    isMobile={true}
+                    onClose={() => setIsFilterOpen(false)}
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Main Content */}
-          <div className="flex-1">
-            {/* Results Header */}
-            <div className="mb-8">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex-1 min-w-0">
+            {/* Results Header - Mobile Optimized */}
+            <div className="mb-4 sm:mb-6 md:mb-8">
+              <div className="flex flex-col gap-3">
+                {/* Title and count */}
                 <div>
-                  <h2 className="text-2xl font-bold text-gray-900">
+                  <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900">
                     {category.name}
                   </h2>
-                  <p className="text-gray-600 mt-1">
+                  <p className="text-xs sm:text-sm text-gray-600 mt-1">
                     {isFetching ? (
                       <span className="inline-flex items-center gap-2">
-                        <span className="h-4 w-4 animate-spin rounded-full border-2 border-gray-300 border-t-mmp-primary" />
+                        <span className="h-3 w-3 animate-spin rounded-full border-2 border-gray-300 border-t-mmp-primary" />
                         Loading...
                       </span>
                     ) : (
@@ -322,34 +363,46 @@ function CategoryProductsPage() {
                   </p>
                 </div>
 
-                <div className="flex items-center gap-4">
-                  {/* View Mode Toggle */}
-                  <div className="hidden sm:flex items-center gap-2 rounded-lg border border-gray-300 p-1">
-                    <Button
-                      type="button"
-                      size="sm"
-                      variant={viewMode === 'grid' ? 'default' : 'ghost'}
-                      className={viewMode === 'grid' ? 'bg-mmp-primary' : ''}
-                      onClick={() => setViewMode('grid')}
-                    >
-                      <Grid3x3 className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      type="button"
-                      size="sm"
-                      variant={viewMode === 'list' ? 'default' : 'ghost'}
-                      className={viewMode === 'list' ? 'bg-mmp-primary' : ''}
-                      onClick={() => setViewMode('list')}
-                    >
-                      <List className="h-4 w-4" />
-                    </Button>
-                  </div>
+                {/* Mobile Controls Row */}
+                <div className="flex items-center gap-2">
+                  {/* Filter Button - Mobile Only */}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="lg:hidden flex-1 h-9 sm:h-10 text-xs sm:text-sm"
+                    onClick={() => setIsFilterOpen(true)}
+                  >
+                    <Filter className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
+                    Filters
+                    {hasActiveFilters && (
+                      <span className="ml-1.5 sm:ml-2 bg-mmp-primary text-white rounded-full min-w-[20px] h-5 px-1 text-xs flex items-center justify-center">
+                        {
+                          Object.keys(filters).filter(
+                            (k) =>
+                              filters[k as keyof IProductQueryFilters] &&
+                              ![
+                                "categorySlug",
+                                "page",
+                                "limit",
+                                "sortBy",
+                                "sortOrder",
+                              ].includes(k),
+                          ).length
+                        }
+                      </span>
+                    )}
+                  </Button>
 
-                  {/* Sort Options */}
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm text-gray-600">Sort by:</span>
+                  {/* Sort Dropdown - Responsive */}
+                  <div className="flex-1 lg:flex-none">
                     <select
-                      className="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:border-mmp-primary focus:outline-none focus:ring-1 focus:ring-mmp-primary"
+                      className="w-full rounded-lg border border-gray-300 bg-white px-2 sm:px-3 py-2 text-xs sm:text-sm focus:border-mmp-primary focus:outline-none focus:ring-1 focus:ring-mmp-primary appearance-none bg-no-repeat bg-right"
+                      style={{
+                        backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%236B7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3E%3C/svg%3E")`,
+                        backgroundPosition: "right 0.5rem center",
+                        backgroundSize: "1.5em 1.5em",
+                        paddingRight: "2.5rem",
+                      }}
                       value={getCurrentSortValue()}
                       onChange={(e) => handleSortChange(e.target.value)}
                       disabled={isFetching}
@@ -361,12 +414,44 @@ function CategoryProductsPage() {
                       <option value="name">Name: A to Z</option>
                     </select>
                   </div>
+
+                  {/* View Mode Toggle - Desktop Only */}
+                  <div className="hidden lg:flex items-center gap-1 rounded-lg border border-gray-300 p-1">
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant={viewMode === "grid" ? "default" : "ghost"}
+                      className={cn(
+                        "h-8 w-8 p-0",
+                        viewMode === "grid"
+                          ? "bg-mmp-primary text-white hover:bg-mmp-primary2"
+                          : "",
+                      )}
+                      onClick={() => setViewMode("grid")}
+                    >
+                      <Grid3x3 className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant={viewMode === "list" ? "default" : "ghost"}
+                      className={cn(
+                        "h-8 w-8 p-0",
+                        viewMode === "list"
+                          ? "bg-mmp-primary text-white hover:bg-mmp-primary2"
+                          : "",
+                      )}
+                      onClick={() => setViewMode("list")}
+                    >
+                      <List className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
               </div>
 
-              {/* Active Filters */}
+              {/* Active Filters - Responsive */}
               {hasActiveFilters && (
-                <div className="mt-4 flex flex-wrap gap-2">
+                <div className="mt-3 sm:mt-4 flex flex-wrap gap-1.5 sm:gap-2">
                   {filters.search && (
                     <FilterBadge
                       label="Search"
@@ -405,36 +490,54 @@ function CategoryProductsPage() {
                       color="amber"
                     />
                   )}
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      navigate({
+                        search: { page: 1, limit: 12 },
+                        replace: true,
+                      });
+                    }}
+                    className="text-xs text-gray-500 hover:text-gray-700 h-6 sm:h-7 px-2"
+                  >
+                    Clear all
+                  </Button>
                 </div>
               )}
             </div>
 
             {/* Loading State */}
             {isLoading && products.length === 0 && (
-              <div className="flex items-center justify-center py-20">
+              <div className="flex items-center justify-center py-12 sm:py-20">
                 <div className="text-center">
-                  <div className="h-12 w-12 animate-spin rounded-full border-4 border-gray-200 border-t-mmp-primary mx-auto mb-4" />
-                  <p className="text-gray-600">Loading products...</p>
+                  <div className="h-8 w-8 sm:h-12 sm:w-12 animate-spin rounded-full border-3 border-gray-200 border-t-mmp-primary mx-auto mb-3 sm:mb-4" />
+                  <p className="text-sm sm:text-base text-gray-600">
+                    Loading products...
+                  </p>
                 </div>
               </div>
             )}
 
             {/* No Results */}
             {!isLoading && products.length === 0 && (
-              <div className="flex flex-col items-center justify-center py-20 text-center">
-                <div className="mb-4 text-6xl">🔍</div>
-                <h3 className="text-2xl font-bold text-gray-900 mb-2">
+              <div className="flex flex-col items-center justify-center py-12 sm:py-20 text-center px-4">
+                <div className="mb-3 sm:mb-4 text-4xl sm:text-6xl">🔍</div>
+                <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 mb-2">
                   No products found
                 </h3>
-                <p className="text-gray-600 mb-6">
-                  Try adjusting your filters or search terms
+                <p className="text-sm sm:text-base text-gray-600 mb-4 sm:mb-6 max-w-md">
+                  Try adjusting your filters or search terms to find what you're
+                  looking for.
                 </p>
                 <Button
+                  size="sm"
+                  className="h-9 sm:h-10 px-4 sm:px-6"
                   onClick={() => {
                     navigate({
                       search: { page: 1, limit: 12 },
                       replace: true,
-                    })
+                    });
                   }}
                 >
                   Clear All Filters
@@ -445,10 +548,10 @@ function CategoryProductsPage() {
             {/* Products Grid/List */}
             {!isLoading && products.length > 0 && (
               <>
-                {viewMode === 'grid' ? (
+                {viewMode === "grid" ? (
                   <ProductGrid products={products} />
                 ) : (
-                  <div className="space-y-4">
+                  <div className="space-y-3 sm:space-y-4">
                     {products.map((product) => (
                       <ProductListItem key={product._id} product={product} />
                     ))}
@@ -457,7 +560,7 @@ function CategoryProductsPage() {
 
                 {/* Pagination */}
                 {pagination && pagination.totalPages > 1 && (
-                  <div className="mt-8">
+                  <div className="mt-6 sm:mt-8">
                     <Pagination
                       meta={pagination}
                       onPageChange={handlePageChange}
@@ -472,125 +575,5 @@ function CategoryProductsPage() {
         </div>
       </div>
     </div>
-  )
-}
-
-// Filter Badge Component
-const FilterBadge: React.FC<{
-  label: string
-  value: string
-  onRemove: () => void
-  color: 'blue' | 'green' | 'purple' | 'amber'
-}> = ({ label, value, onRemove, color }) => {
-  const colorClasses = {
-    blue: 'bg-blue-100 text-blue-800 hover:bg-blue-200',
-    green: 'bg-green-100 text-green-800 hover:bg-green-200',
-    purple: 'bg-purple-100 text-purple-800 hover:bg-purple-200',
-    amber: 'bg-amber-100 text-amber-800 hover:bg-amber-200',
-  }
-
-  return (
-    <div
-      className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-sm transition-colors ${colorClasses[color]}`}
-    >
-      <span className="font-medium">{label}:</span>
-      <span>{value}</span>
-      <button
-        type="button"
-        className="ml-1 hover:scale-110 transition-transform"
-        onClick={onRemove}
-      >
-        ×
-      </button>
-    </div>
-  )
-}
-
-// List View Item Component
-const ProductListItem: React.FC<{ product: any }> = ({ product }) => {
-  const discountedPrice = product.price * (1 - product.discount / 100)
-
-  return (
-    <div className="flex flex-col sm:flex-row gap-4 rounded-lg border border-gray-200 bg-white p-4 hover:shadow-md transition-shadow">
-      {/* Product Image */}
-      <Link
-        to="/products/$slug"
-        params={{ slug: product.slug }}
-        className="block shrink-0"
-      >
-        <div className="h-48 w-48 overflow-hidden rounded-lg bg-gray-100 sm:h-32 sm:w-32">
-          <img
-            src={product.images[0]}
-            alt={product.name}
-            className="h-full w-full object-cover"
-          />
-        </div>
-      </Link>
-
-      {/* Product Info */}
-      <div className="flex-1">
-        <div className="flex flex-col sm:flex-row sm:items-start justify-between">
-          <div>
-            <Link
-              to="/products/$slug"
-              params={{ slug: product.slug }}
-              className="block"
-            >
-              <h3 className="text-lg font-semibold text-gray-900 hover:text-mmp-primary">
-                {product.name}
-              </h3>
-            </Link>
-            <p className="mt-1 text-sm text-gray-600 line-clamp-2">
-              {product.description}
-            </p>
-            <div className="mt-2 flex items-center gap-2">
-              <span className="text-xs font-medium text-gray-500 uppercase">
-                {product.brand}
-              </span>
-              <span className="text-xs text-gray-400">•</span>
-              <span className="text-xs text-gray-500">
-                {product.soldCount} sold
-              </span>
-            </div>
-          </div>
-
-          <div className="mt-2 sm:mt-0 sm:text-right">
-            <div className="flex items-center gap-2">
-              <span className="text-xl font-bold text-gray-900">
-                {formatCurrency(discountedPrice)}
-              </span>
-              {product.discount > 0 && (
-                <span className="text-sm text-gray-500 line-through">
-                  {formatCurrency(product.price)}
-                </span>
-              )}
-            </div>
-            {product.discount > 0 && (
-              <span className="inline-block rounded-full bg-red-100 px-2 py-1 text-xs font-semibold text-red-800">
-                Save {product.discount}%
-              </span>
-            )}
-            <div className="mt-2 text-sm text-gray-600">
-              {product.stock > 0 ? (
-                <span className="text-green-600">{product.stock} in stock</span>
-              ) : (
-                <span className="text-red-600">Out of stock</span>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* Action Buttons */}
-        <div className="mt-4 flex items-center gap-3">
-          <Button className="bg-mmp-primary hover:bg-mmp-primary2">
-            Add to Cart
-          </Button>
-          <Button variant="outline">Quick View</Button>
-          <Button variant="ghost" size="sm">
-            Save for Later
-          </Button>
-        </div>
-      </div>
-    </div>
-  )
+  );
 }

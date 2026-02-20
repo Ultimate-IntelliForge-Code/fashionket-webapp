@@ -90,64 +90,60 @@ export default function Footer() {
 
   return (
     <footer className="bg-mmp-primary2 text-mmp-neutral">
-      {/* Main Footer */}
-      <div className="container mx-auto px-4 py-12">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
+      {/* Main Footer - Mobile Optimized */}
+      <div className="container mx-auto px-4 sm:px-6 py-8 sm:py-10 md:py-12">
+        <div className="flex flex-col lg:flex-row gap-8 lg:gap-12">
           {/* Brand Column */}
-          <div className="lg:col-span-4">
-            <Link to="/" className="inline-block mb-6">
+          <div className="lg:w-1/3">
+            <Link to="/" className="inline-block mb-4 sm:mb-6">
               <img
-                  src="/logo.png"
-                  alt="FashionKet Logo"
-                />
+                src="/logo.png"
+                alt="FashionKet Logo"
+                className="h-8 sm:h-10 w-auto"
+              />
             </Link>
 
-            <p className="text-mmp-neutral/70 mb-6 max-w-md">
+            <p className="text-mmp-neutral/70 text-sm sm:text-base mb-4 sm:mb-6 max-w-md">
               Discover premium fashion curated for the modern lifestyle.
-              Experience quality, style, and exclusive collections that elevate
-              your wardrobe.
+              Experience quality, style, and exclusive collections.
             </p>
 
-            {/* Newsletter Subscription */}
-            <div className="mb-8">
-              <h4 className="font-semibold mb-3 flex items-center gap-2">
-                <Mail className="h-4 w-4 text-mmp-secondary" />
-                Subscribe to our newsletter
+            {/* Newsletter - Simplified for mobile */}
+            <div className="mb-6 sm:mb-8">
+              <h4 className="font-semibold text-sm sm:text-base mb-2 flex items-center gap-2">
+                <Mail className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-mmp-secondary" />
+                Subscribe for updates
               </h4>
-              <div className="flex gap-2">
+              <div className="flex flex-col xs:flex-row gap-2">
                 <Input
                   type="email"
-                  placeholder="Enter your email"
-                  className="bg-mmp-primary/20 border-mmp-primary/30 focus:border-mmp-secondary text-mmp-neutral placeholder:text-mmp-neutral/50"
+                  placeholder="Your email"
+                  className="bg-mmp-primary/20 border-mmp-primary/30 focus:border-mmp-secondary text-mmp-neutral placeholder:text-mmp-neutral/50 h-9 sm:h-10 text-sm"
                 />
-                <Button className="bg-gradient-to-r from-mmp-accent to-mmp-secondary hover:opacity-90">
+                <Button className="bg-gradient-to-r from-mmp-accent to-mmp-secondary hover:opacity-90 h-9 sm:h-10 text-sm px-4 whitespace-nowrap">
                   Subscribe
                 </Button>
               </div>
-              <p className="text-xs text-mmp-neutral/50 mt-2">
-                Get exclusive offers, fashion tips, and early access to new
-                collections.
-              </p>
             </div>
           </div>
 
-          {/* Links Columns */}
-          <div className="lg:col-span-8">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+          {/* Links & Services */}
+          <div className="lg:w-2/3">
+            {/* Footer Links - Responsive Grid */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 sm:gap-8">
               {Object.entries(footerLinks).map(([category, links]) => (
-                <div key={category}>
-                  <h3 className="font-bold text-lg mb-4 capitalize text-mmp-secondary">
+                <div key={category} className="space-y-3">
+                  <h3 className="font-bold text-sm sm:text-base capitalize text-mmp-secondary">
                     {category}
                   </h3>
-                  <ul className="space-y-3">
+                  <ul className="space-y-2">
                     {links.map((link) => (
                       <li key={link.title}>
                         <Link
                           to={link.href}
-                          className="group flex items-center gap-2 text-mmp-neutral/70 hover:text-mmp-secondary transition-colors"
+                          className="text-xs sm:text-sm text-mmp-neutral/70 hover:text-mmp-secondary transition-colors inline-block"
                         >
-                          <ChevronRight className="h-3 w-3 opacity-0 group-hover:opacity-100 transition-opacity" />
-                          <span>{link.title}</span>
+                          {link.title}
                         </Link>
                       </li>
                     ))}
@@ -156,44 +152,53 @@ export default function Footer() {
               ))}
             </div>
 
-            {/* Store services */}
-            <div className="mt-12 pt-8 border-t border-mmp-primary/30">
-              {/* Contact Info */}
-              <div>
-                <h4 className="font-semibold mb-4 text-mmp-secondary">
-                  Store Services
-                </h4>
-              </div>
-              <div className="flex flex-row gap-2">
-                <Button
-                  variant="ghost"
-                  className="px-5 border-mmp-primary/30 hover:bg-mmp-primary/10"
-                  asChild
-                >
-                  <Link to="/vendor/login">Login</Link>
-                </Button>
-                <Button variant="ghost" className="px-5" asChild>
-                  <Link to="/vendor/register">Register</Link>
-                </Button>
+            {/* Store Registration Section - Simplified & Prominent */}
+            <div className="mt-8 sm:mt-10 pt-6 sm:pt-8 border-t border-mmp-primary/30">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div>
+                  <h4 className="font-semibold text-sm sm:text-base text-mmp-secondary mb-1">
+                    Sell on FashionKet
+                  </h4>
+                  <p className="text-xs sm:text-sm text-mmp-neutral/70">
+                    Join thousands of sellers and grow your business
+                  </p>
+                </div>
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="border-mmp-primary/30 hover:bg-mmp-primary/10 h-9 text-xs sm:text-sm px-3 sm:px-4"
+                    asChild
+                  >
+                    <Link to="/vendor/login">Login</Link>
+                  </Button>
+                  <Button
+                    size="sm"
+                    className="bg-gradient-to-r from-mmp-accent to-mmp-secondary hover:opacity-90 h-9 text-xs sm:text-sm px-3 sm:px-4"
+                    asChild
+                  >
+                    <Link to="/vendor/register">Register Store</Link>
+                  </Button>
+                </div>
               </div>
             </div>
 
-            {/* Contact & Social Row */}
-            <div className="mt-12 pt-8 border-t border-mmp-primary/30">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                {/* Contact Info */}
+            {/* Contact & Social - Compact Grid */}
+            <div className="mt-8 sm:mt-10 pt-6 sm:pt-8 border-t border-mmp-primary/30">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                {/* Contact Info - Simplified */}
                 <div>
-                  <h4 className="font-semibold mb-4 text-mmp-secondary">
-                    Contact Information
+                  <h4 className="font-semibold text-sm sm:text-base text-mmp-secondary mb-3">
+                    Contact
                   </h4>
-                  <div className="space-y-3">
-                    {contactInfo.map((info, index) => {
+                  <div className="space-y-2">
+                    {contactInfo.slice(0, 2).map((info, index) => {
                       const Icon = info.icon;
                       return (
                         <Link
                           key={index}
                           to={info.href}
-                          className="flex items-center gap-3 text-mmp-neutral/70 hover:text-mmp-secondary transition-colors group"
+                          className="flex items-center gap-2 text-mmp-neutral/70 hover:text-mmp-secondary transition-colors text-xs sm:text-sm"
                           target={
                             info.href.startsWith("http") ? "_blank" : undefined
                           }
@@ -203,62 +208,35 @@ export default function Footer() {
                               : undefined
                           }
                         >
-                          <div className="p-2 rounded bg-mmp-primary/20 group-hover:bg-mmp-accent/20 transition-colors">
-                            <Icon className="h-4 w-4" />
-                          </div>
-                          <span className="text-sm">{info.text}</span>
+                          <Icon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                          <span className="truncate">{info.text}</span>
                         </Link>
                       );
                     })}
                   </div>
                 </div>
 
-                {/* Social & App Links */}
+                {/* Social Media - Compact */}
                 <div>
-                  <h4 className="font-semibold mb-4 text-mmp-secondary">
-                    Follow & Download
+                  <h4 className="font-semibold text-sm sm:text-base text-mmp-secondary mb-3">
+                    Follow Us
                   </h4>
-                  <div className="space-y-6">
-                    {/* Social Media */}
-                    <div>
-                      <div className="flex gap-3 mb-4">
-                        {socialLinks.map((social) => {
-                          const Icon = social.icon;
-                          return (
-                            <Link
-                              key={social.label}
-                              to={social.href}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="p-2 rounded-lg bg-mmp-primary/20 hover:bg-gradient-to-r hover:from-mmp-accent hover:to-mmp-secondary transition-all group"
-                              aria-label={social.label}
-                            >
-                              <Icon className="h-5 w-5 text-mmp-neutral/70 group-hover:text-white transition-colors" />
-                            </Link>
-                          );
-                        })}
-                      </div>
-                    </div>
-
-                    {/* Mobile Apps */}
-                    {/* <div>
-                      <p className="text-sm text-mmp-neutral/70 mb-3">
-                        Get our mobile app
-                      </p>
-                      <div className="flex flex-wrap gap-3">
-                        {appLinks.map((app) => (
-                          <a
-                            key={app.platform}
-                            href={app.href}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all hover:scale-105 ${app.color}`}
-                          >
-                            {app.platform}
-                          </a>
-                        ))}
-                      </div>
-                    </div> */}
+                  <div className="flex flex-wrap gap-2">
+                    {socialLinks.slice(0, 4).map((social) => {
+                      const Icon = social.icon;
+                      return (
+                        <Link
+                          key={social.label}
+                          to={social.href}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="p-2 rounded-lg bg-mmp-primary/20 hover:bg-gradient-to-r hover:from-mmp-accent hover:to-mmp-secondary transition-all"
+                          aria-label={social.label}
+                        >
+                          <Icon className="h-4 w-4 sm:h-5 sm:w-5 text-mmp-neutral/70 hover:text-white transition-colors" />
+                        </Link>
+                      );
+                    })}
                   </div>
                 </div>
               </div>
@@ -267,103 +245,74 @@ export default function Footer() {
         </div>
       </div>
 
-      {/* Bottom Bar */}
+      {/* Bottom Bar - Streamlined */}
       <div className="bg-mmp-primary/20 border-t border-mmp-primary/30">
-        <div className="container mx-auto px-4 py-6">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-            <div className="flex items-center gap-6">
-              {/* Language Selector */}
-              <div className="flex items-center gap-2">
-                <Globe className="h-4 w-4 text-mmp-neutral/60" />
-                <select
-                  className="bg-transparent text-sm text-mmp-neutral/70 focus:outline-none focus:ring-0"
-                  aria-label="Select language"
-                >
-                  <option value="en">English (US)</option>
-                  <option value="es">Español</option>
-                  <option value="fr">Français</option>
-                  <option value="de">Deutsch</option>
-                </select>
-              </div>
-
-              {/* Live Chat */}
-              <Button
-                variant="ghost"
-                size="sm"
-                className="text-mmp-neutral/70 hover:text-mmp-secondary hover:bg-mmp-primary/20"
-              >
-                <MessageCircle className="h-4 w-4 mr-2" />
-                Live Chat
-              </Button>
-            </div>
-
-            <div className="flex items-center gap-6">
+        <div className="container mx-auto px-4 sm:px-6 py-4 sm:py-6">
+          {/* Legal & Security - Horizontal Scroll on Mobile */}
+          <div className="flex items-center justify-between gap-4 overflow-x-auto pb-2 scrollbar-hide">
+            <div className="flex items-center gap-3 sm:gap-4 min-w-max">
               <Link
                 to="/privacy"
-                className="text-sm text-mmp-neutral/70 hover:text-mmp-secondary transition-colors"
+                className="text-[10px] sm:text-xs text-mmp-neutral/70 hover:text-mmp-secondary whitespace-nowrap"
               >
-                Privacy Policy
+                Privacy
               </Link>
+              <span className="text-mmp-neutral/30">•</span>
               <Link
                 to="/terms"
-                className="text-sm text-mmp-neutral/70 hover:text-mmp-secondary transition-colors"
+                className="text-[10px] sm:text-xs text-mmp-neutral/70 hover:text-mmp-secondary whitespace-nowrap"
               >
-                Terms of Service
+                Terms
               </Link>
+              <span className="text-mmp-neutral/30">•</span>
               <Link
                 to="/cookies"
-                className="text-sm text-mmp-neutral/70 hover:text-mmp-secondary transition-colors"
+                className="text-[10px] sm:text-xs text-mmp-neutral/70 hover:text-mmp-secondary whitespace-nowrap"
               >
-                Cookie Policy
+                Cookies
               </Link>
-              <Badge className="bg-mmp-primary/30 text-mmp-neutral/60">
-                <Shield className="h-3 w-3 mr-1" />
-                SSL Secured
-              </Badge>
             </div>
+
+            <Badge className="bg-mmp-primary/30 text-mmp-neutral/60 text-[8px] sm:text-[10px] px-2 py-0.5 whitespace-nowrap">
+              <Shield className="h-2.5 w-2.5 sm:h-3 sm:w-3 mr-1" />
+              SSL Secured
+            </Badge>
           </div>
 
-          <Separator className="my-6 bg-mmp-primary/30" />
+          <Separator className="my-3 sm:my-4 bg-mmp-primary/30" />
 
-          {/* Copyright & Powered By */}
-          <div className="flex flex-col md:flex-row justify-between items-center gap-4 text-sm">
-            <div className="text-mmp-neutral/60">
+          {/* Copyright & Powered By - Stack on Mobile */}
+          <div className="flex flex-col sm:flex-row justify-between items-center gap-3 text-[10px] sm:text-xs">
+            <div className="text-mmp-neutral/60 text-center sm:text-left">
               © {currentYear} FashionKet. All rights reserved.
             </div>
 
-            <div className="flex items-center gap-4">
-              {/* Payment Methods */}
-              <div className="flex items-center gap-2">
-                <span className="text-mmp-neutral/60 pr-2">
-                  Payments Platform:{" "}
+            <div className="flex items-center gap-3">
+              {/* Payment - Simplified */}
+              <div className="flex items-center gap-1">
+                <span className="text-mmp-neutral/60 text-[8px] sm:text-[10px]">
+                  Payments:
                 </span>
-                <div className="w-8 h-5 bg-mmp-primary/20 rounded flex items-center justify-center">
-                  <span className="text-xs font-bold text-mmp-neutral/50">
-                    {" "}
-                    PayStack
-                  </span>
-                </div>
+                <span className="text-xs font-bold text-mmp-neutral/50 bg-mmp-primary/20 px-2 py-0.5 rounded">
+                  PayStack
+                </span>
               </div>
 
-              {/* Ultimate IntelliForge Badge */}
-              <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-mmp-primary/10 to-mmp-accent/10 border border-mmp-primary/30">
-                <Heart className="h-3 w-3 text-mmp-accent" />
-                <span className="text-xs text-mmp-neutral/70">
-                  Powered by
-                  <span className="font-semibold text-mmp-secondary ml-1">
-                    Ultimate IntelliForge
-                  </span>
+              {/* Powered By - Compact */}
+              <div className="flex items-center gap-1 px-2 py-1 rounded-full bg-gradient-to-r from-mmp-primary/10 to-mmp-accent/10 border border-mmp-primary/30">
+                <Heart className="h-2.5 w-2.5 text-mmp-accent" />
+                <span className="text-[8px] sm:text-[10px] text-mmp-neutral/70">
+                  Ultimate IntelliForge
                 </span>
               </div>
             </div>
           </div>
 
-          {/* Legal Disclaimer */}
-          <div className="mt-6 text-center">
-            <p className="text-xs text-mmp-neutral/50 max-w-3xl mx-auto">
-              FashionKet is a premium fashion retailer. All products are subject
-              to availability. Prices and offers are subject to change without
-              notice.
+          {/* Legal Disclaimer - Smaller on Mobile */}
+          <div className="mt-3 sm:mt-4 text-center">
+            <p className="text-[8px] sm:text-[10px] text-mmp-neutral/50 max-w-2xl mx-auto px-2">
+              FashionKet is a premium fashion retailer. Products subject to
+              availability. Prices and offers may change without notice.
             </p>
           </div>
         </div>
