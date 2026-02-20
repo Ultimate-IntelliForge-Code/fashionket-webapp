@@ -4,6 +4,8 @@ import type {
   IVendor,
   IPaginatedResponse,
   FrontendSafe,
+  IProductQueryFilters,
+  IProductListItem,
 } from '@/types';
 
 export interface IVendorQueryFilters {
@@ -72,15 +74,18 @@ export const vendorBySlugQuery = (slug: string) => ({
  */
 export const vendorProductsBySlugQuery = (
   slug: string,
-  page?: number,
-  limit?: number
+  filters?: IProductQueryFilters
 ) => ({
-  queryKey: queryKeys.vendor.detail(`${slug}-products-${page}-${limit}`),
-  queryFn: async (): Promise<any> => {
-    const params = new URLSearchParams();
-    if (page) params.append('page', String(page));
-    if (limit) params.append('limit', String(limit));
-
+  queryKey: queryKeys.vendor.all(filters),
+  queryFn: async ():Promise<IPaginatedResponse<FrontendSafe<IProductListItem[]>>> => {
+     const params = new URLSearchParams();
+    if (filters) {
+      Object.entries(filters).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          params.append(key, String(value));
+        }
+      });
+    }
     const response = await apiClient.get<any>(
       `/vendors/${slug}/products?${params.toString()}`
     );

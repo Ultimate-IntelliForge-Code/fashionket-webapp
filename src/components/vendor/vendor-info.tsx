@@ -1,7 +1,8 @@
 import React from "react";
-import { MapPin, Phone, Globe } from "lucide-react";
+import { MapPin, Phone, Info, Mail } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import type { IVendor } from "@/types";
+import { Badge } from "../ui/badge";
 
 interface VendorInfoProps {
   vendor: IVendor;
@@ -9,62 +10,84 @@ interface VendorInfoProps {
 
 export const VendorInfo: React.FC<VendorInfoProps> = ({ vendor }) => {
   return (
-    <Card>
-      <CardContent className="p-8">
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-          {/* Location */}
-          <div>
-            <div className="flex items-center gap-2 mb-3">
-              <MapPin className="w-5 h-5 text-primary" />
-              <h3 className="font-semibold">Location</h3>
-            </div>
-            <p className="text-sm text-muted-foreground">
-              {vendor.location.street}
-            </p>
-            <p className="text-sm text-muted-foreground">
-              {vendor.location.city}, {vendor.location.state} {vendor.location.country}
-            </p>
-          </div>
-
+    <Card className="border-gray-200">
+      <CardContent className="p-2 sm:p-3 md:p-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4 md:gap-6">
           {/* Contact */}
           {vendor.phone && (
-            <div>
-              <div className="flex items-center gap-2 mb-3">
-                <Phone className="w-5 h-5 text-primary" />
-                <h3 className="font-semibold">Phone</h3>
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <Phone className="w-4 h-4 sm:w-5 sm:h-5 text-primary flex-shrink-0" />
+                <h3 className="font-semibold text-xs lg:text-sm sm:text-base">Phone</h3>
               </div>
-              <p className="text-sm text-muted-foreground">
-                {vendor.phone}
-              </p>
+              <div className="pl-6 sm:pl-7">
+                <p className="text-[10px] sm:text-xs lg:text-sm text-muted-foreground break-all">
+                  {vendor.phone}
+                </p>
+              </div>
             </div>
           )}
 
           {/* Email */}
-          <div>
-            <div className="flex items-center gap-2 mb-3">
-              <Globe className="w-5 h-5 text-primary" />
-              <h3 className="font-semibold">Email</h3>
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <Mail className="w-4 h-4 sm:w-5 sm:h-5 text-primary flex-shrink-0" />
+              <h3 className="font-semibold text-xs lg:text-sm sm:text-base">Email</h3>
             </div>
-            <p className="text-sm text-muted-foreground break-all">
-              {vendor.email}
-            </p>
+            <div className="pl-6 sm:pl-7">
+              <p className="text-[10px] sm:text-xs lg:text-sm text-muted-foreground break-all">
+                {vendor.email}
+              </p>
+            </div>
           </div>
 
           {/* Status */}
-          <div>
-            <h3 className="font-semibold mb-3">Status</h3>
-            <div className="space-y-2">
-              <p className="text-sm">
-                <span className="text-muted-foreground">Active:</span>
-                <span className="ml-2 font-medium">
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <Info className="w-4 h-4 sm:w-5 sm:h-5 text-primary flex-shrink-0" />
+              <h3 className="font-semibold text-xs lg:text-sm sm:text-base">Status</h3>
+            </div>
+            <div className="pl-6 sm:pl-7 space-y-1">
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] sm:text-xs lg:text-sm text-muted-foreground">
+                  Active:
+                </span>
+                <Badge
+                  variant={vendor.isActive ? "default" : "secondary"}
+                  className="text-[10px] sm:text-[10px] px-2 py-0"
+                >
                   {vendor.isActive ? "Yes" : "No"}
+                </Badge>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] sm:text-xs lg:text-sm text-muted-foreground">
+                  Verified:
                 </span>
-              </p>
-              <p className="text-sm">
-                <span className="text-muted-foreground">Verified:</span>
-                <span className="ml-2 font-medium">
+                <Badge
+                  variant={vendor.verified ? "default" : "secondary"}
+                  className="text-[10px] sm:text-[10px] px-2 py-0"
+                >
                   {vendor.verified ? "Yes" : "No"}
-                </span>
+                </Badge>
+              </div>
+            </div>
+          </div>
+
+          {/* Location */}
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <MapPin className="w-4 h-4 sm:w-5 sm:h-5 text-primary flex-shrink-0" />
+              <h3 className="font-semibold text-xs lg:text-sm sm:text-base">Location</h3>
+            </div>
+            <div className="pl-6 sm:pl-7">
+              <p className="text-[10px] sm:text-xs lg:text-sm text-muted-foreground">
+                {vendor.location.street}
+              </p>
+              <p className="text-[10px] sm:text-xs lg:text-sm text-muted-foreground">
+                {vendor.location.city}, {vendor.location.state}
+              </p>
+              <p className="text-[10px] sm:text-xs lg:text-sm text-muted-foreground">
+                {vendor.location.country}
               </p>
             </div>
           </div>

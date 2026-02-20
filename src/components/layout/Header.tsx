@@ -17,6 +17,7 @@ import {
   Shield,
   Bell,
   TrendingUp,
+  Store,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -48,6 +49,7 @@ const navLinks = [
   { href: "/", title: "Home", icon: Home },
   { href: "/categories", title: "Categories", icon: Tag },
   { href: "/products", title: "Products", icon: Package },
+  { href: "/vendors", title: "Vendors", icon: Store },
   // { href: '/new-arrivals', title: 'New Arrivals', icon: Sparkles },
 ];
 
