@@ -15,12 +15,14 @@ import type {
 import type { IVendor, IVendorAuthResponse } from '@/types/vendor.type';
 
 // Queries
-export const useValidateToken = () => {
+export const useValidateToken = (enabled: boolean) => {
   return useQuery({
     queryKey: queryKeys.auth.validate(),
-    queryFn: () => apiClient.getData<ITokenValidationResponse>('/auth/validate'),
+    queryFn: () =>
+      apiClient.getData<ITokenValidationResponse>('/auth/validate'),
     retry: false,
-    staleTime: 2 * 60 * 1000, // 1 minutes
+    staleTime: 2 * 60 * 1000,
+    enabled, // 👈 CRITICAL
   });
 };
 

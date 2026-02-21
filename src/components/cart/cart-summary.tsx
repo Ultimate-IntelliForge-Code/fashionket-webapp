@@ -4,7 +4,8 @@ import { Separator } from '@/components/ui/separator';
 import { ShoppingBag, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useCart } from '@/hooks';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from '@tanstack/react-router';
+;
 
 interface CartSummaryProps {
   showCheckoutButton?: boolean;

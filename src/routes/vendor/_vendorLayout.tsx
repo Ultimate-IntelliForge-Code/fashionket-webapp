@@ -3,7 +3,7 @@ import { useAuth } from "@/hooks";
 import { VendorSideBar } from "@/components/vendor/vendor-sidebar";
 import { VendorHeader } from "@/components/vendor/vendor-header";
 import React from "react";
-import { VendorAuthProvider } from "@/providers/vendor-auth-provider";
+import { VendorAuthProvider } from "@/providers/auth-provider";
 
 export const Route = createFileRoute("/vendor/_vendorLayout")({
   component: VendorLayout,
