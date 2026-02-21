@@ -7,13 +7,23 @@ interface AuthInitializerProps {
 
 /**
  * Auth Initializer - Initializes authentication state at app root
- * This component validates tokens and syncs auth state globally
- * All auth context flows from this single source of truth
  * 
- * Loading happens in background without blocking user view
+ * Key improvements:
+ * 1. Validates token ONLY ONCE on app mount
+ * 2. Uses isInitialized flag to prevent re-validation
+ * 3. All auth context flows from this single source of truth
+ * 4. No loading state shown - happens in background
+ * 
+ * This component should wrap your entire app in main.tsx:
+ * <AuthInitializer>
+ *   <RouterProvider router={router} />
+ * </AuthInitializer>
  */
-export const AuthInitializer: React.FC<AuthInitializerProps> = ({ children }) => {
-  // Auth loading happens in background via useAuth hook
+export const AuthInitializer: React.FC<AuthInitializerProps> = ({
+  children,
+}) => {
+  // Auth validation happens automatically in useAuth
+  // Only runs once on mount due to isInitialized flag
   // No loading state shown to user - maintains smooth UX
   useAuth();
 

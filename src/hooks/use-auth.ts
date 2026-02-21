@@ -1,12 +1,42 @@
-import React, { useCallback } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useAuthStore } from '@/store';
 import { useValidateToken, useLogout } from '@/api/queries';
 import { useQueryClient } from '@tanstack/react-query';
 import { UserRole } from '@/types';
 
+/**
+ * useAuth Hook - Centralized authentication logic
+ * 
+ * Key improvements:
+ * 1. Validates token only once on mount (not on every navigation)
+ * 2. Uses isInitialized flag to prevent re-validation loops
+ * 3. Role comes from backend cookie validation, not localStorage
+ * 4. Clears stale data when validation fails
+ */
 export const useAuth = () => {
-  const { user, vendor, admin, isAuthenticated, isLoading, role, setAuth, setAuthAdmin, setAuthVendor, clearAuth, setLoading } = useAuthStore();
-  const { data: validationData, isLoading: isValidating } = useValidateToken();
+  const {
+    user,
+    vendor,
+    admin,
+    isAuthenticated,
+    isLoading,
+    isInitialized,
+    role,
+    setAuth,
+    setAuthAdmin,
+    setAuthVendor,
+    clearAuth,
+    setLoading,
+    setInitialized,
+  } = useAuthStore();
+
+  // Only validate if not already initialized
+  // This prevents infinite validation loops on navigation
+  const shouldValidate = !isInitialized;
+
+  const { data: validationData, isLoading: isValidating } =
+    useValidateToken(shouldValidate);
+
   const { mutateAsync: logoutMutate } = useLogout();
   const queryClient = useQueryClient();
 
@@ -21,42 +51,62 @@ export const useAuth = () => {
     }
   }, [logoutMutate, clearAuth, queryClient]);
 
-  // Sync auth state with token validation
-  React.useEffect(() => {
-    if (!isValidating && validationData) {
-      if (!validationData.valid) {
-        clearAuth()
-        setLoading(false)
-        return
-      }
-
-      const user = validationData.user
-
-      console.log(user)
-      switch (user.role) {
-        case UserRole.USER:
-          setAuth(user) // ✅ IUser
-          break
-
-        case UserRole.VENDOR:
-          setAuthVendor(user) // ✅ IVendor
-          break
-
-        case UserRole.ADMIN:
-        case UserRole.SUPER_ADMIN:
-          setAuthAdmin(user) // ✅ IAdmin
-          break
-
-        default:
-          clearAuth()
-      }
-
-      setLoading(false)
+  // Sync auth state with token validation (only runs once on mount)
+  useEffect(() => {
+    // Skip if already initialized or still validating
+    if (isInitialized || isValidating) {
+      return;
     }
-  }, [validationData, isValidating])
 
+    // Validation failed or no data
+    if (!validationData?.valid) {
+      clearAuth();
+      setLoading(false);
+      setInitialized(true);
+      return;
+    }
+
+    const user = validationData.user;
+
+    console.log('Auth initialized:', { user, role: user.role });
+
+    // Set auth based on role from backend validation
+    switch (user.role) {
+      case UserRole.USER:
+        setAuth(user); // Sets user, role, isAuthenticated, isInitialized
+        break;
+
+      case UserRole.VENDOR:
+        setAuthVendor(user); // Sets vendor, role, isAuthenticated, isInitialized
+        break;
+
+      case UserRole.ADMIN:
+      case UserRole.SUPER_ADMIN:
+        setAuthAdmin(user); // Sets admin, role, isAuthenticated, isInitialized
+        break;
+
+      default:
+        console.warn('Unknown role:', (user as any).role);
+        clearAuth();
+    }
+
+    setLoading(false);
+    setInitialized(true);
+  }, [
+    validationData,
+    isValidating,
+    isInitialized,
+    setAuth,
+    setAuthAdmin,
+    setAuthVendor,
+    clearAuth,
+    setLoading,
+    setInitialized,
+  ]);
+
+  // Computed role checks
   const isAdmin = role === UserRole.ADMIN || role === UserRole.SUPER_ADMIN;
-  const isVendor = role === UserRole.VENDOR
+  const isVendor = role === UserRole.VENDOR;
   const isUser = role === UserRole.USER;
   const isSuperAdmin = role === UserRole.SUPER_ADMIN;
 
@@ -66,6 +116,7 @@ export const useAuth = () => {
     admin,
     isAuthenticated,
     isLoading: isLoading || isValidating,
+    isInitialized,
     role,
     isAdmin,
     isVendor,
