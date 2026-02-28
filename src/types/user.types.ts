@@ -2,11 +2,12 @@ import type { IBaseDocument, IBaseUser, ITimestamps } from "./base.types";
 import type { UserRole } from "./enums";
 
 export interface IUser extends IBaseDocument, ITimestamps, IBaseUser {
-  fullName: string;
+  fullName?: string;
   phone?: string;
   role: UserRole.USER;
   isActive: boolean;
   googleId?: string | null;
+  addressId?: string[];
 }
 
 /**
@@ -33,6 +34,7 @@ export interface ICreateUserPayload {
 export interface IUpdateUserPayload {
   fullName?: string;
   phone?: string;
+  email?: string;
 }
 
 /**
@@ -41,5 +43,13 @@ export interface IUpdateUserPayload {
 export interface IUserAuthResponse {
   success: boolean;
   message: string;
-  data: IUser
+  data: IUser;
+}
+
+/**
+ * User profile response
+ */
+export interface IUserProfileResponse {
+  success: boolean;
+  data: IUser;
 }

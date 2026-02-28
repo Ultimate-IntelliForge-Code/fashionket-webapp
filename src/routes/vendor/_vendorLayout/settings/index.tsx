@@ -10,25 +10,12 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuth } from '@/hooks';
 import { toast } from 'react-toastify';
 import { Upload } from 'lucide-react';
+import { SettingsFormData, settingsSchema } from '@/lib';
 
 export const Route = createFileRoute('/vendor/_vendorLayout/settings/')({
   component: VendorSettings,
 });
 
-const settingsSchema = z.object({
-  businessName: z.string().min(3, 'Business name must be at least 3 characters'),
-  email: z.string().email('Invalid email address'),
-  phone: z.string().min(10, 'Phone number must be at least 10 characters'),
-  description: z.string().optional(),
-  location: z.object({
-    street: z.string().min(1, 'Street address is required'),
-    city: z.string().min(1, 'City is required'),
-    state: z.string().min(1, 'State is required'),
-    country: z.string().min(1, 'Country is required'),
-  }),
-});
-
-type SettingsFormData = z.infer<typeof settingsSchema>;
 
 function VendorSettings() {
   const { vendor } = useAuth();
@@ -38,7 +25,7 @@ function VendorSettings() {
     handleSubmit,
     formState: { errors, isDirty },
   } = useForm<SettingsFormData>({
-    resolver: zodResolver(settingsSchema),
+    resolver: zodResolver(settingsSchema as any),
     defaultValues: {
       businessName: vendor?.businessName || '',
       email: vendor?.email || '',

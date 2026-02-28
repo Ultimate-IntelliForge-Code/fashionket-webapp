@@ -10,9 +10,9 @@ import type {
   IPasswordResetPayload,
   ICreateAdminPayload,
   IUser,
-  IAdmin,
+  IAdmin, IVendorAuthResponse,
+  IVendor,
 } from '@/types';
-import type { IVendor, IVendorAuthResponse } from '@/types/vendor.type';
 
 // Queries
 export const useValidateToken = (enabled: boolean) => {
@@ -23,42 +23,6 @@ export const useValidateToken = (enabled: boolean) => {
     retry: false,
     staleTime: 2 * 60 * 1000,
     enabled, // 👈 CRITICAL
-  });
-};
-
-/**
- * Get current user profile
- */
-export const useUserProfile = (enabled = true) => {
-  return useQuery({
-    queryKey: queryKeys.auth.validate(),
-    queryFn: () => apiClient.getData<IUser>('/auth/profile/user'),
-    enabled,
-    staleTime: 5 * 60 * 1000, // 5 minutes
-  });
-};
-
-/**
- * Get current vendor profile
- */
-export const useVendorProfile = (enabled = true) => {
-  return useQuery({
-    queryKey: queryKeys.vendor.detail('profile'),
-    queryFn: () => apiClient.getData<IVendor>('/auth/profile/vendor'),
-    enabled,
-    staleTime: 5 * 60 * 1000, // 5 minutes
-  });
-};
-
-/**
- * Get current admin profile
- */
-export const useAdminProfile = (enabled = true) => {
-  return useQuery({
-    queryKey: queryKeys.admin.detail('profile'),
-    queryFn: () => apiClient.getData<IAdmin>('/auth/profile/admin'),
-    enabled,
-    staleTime: 5 * 60 * 1000, // 5 minutes
   });
 };
 
@@ -173,7 +137,7 @@ export const useLogout = () => {
   });
 };
 
-export const useRequestPasswordReset = (type: 'user' | 'admin') => {
+export const useRequestPasswordReset = (type: 'user' | 'admin' | 'vendor') => {
   return useMutation({
     mutationFn: (data: IPasswordResetRequest) =>
       apiClient.postData<{ message: string }>(`/auth/${type}/request-reset`, data),

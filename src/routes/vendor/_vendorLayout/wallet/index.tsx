@@ -19,9 +19,9 @@ import { format } from 'date-fns';
 import { Pagination } from '@/components/ui/pagination';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
 import { toast } from 'react-toastify';
 import { StatsCard } from '@/components/ui/stats-card';
+import { WithdrawalFormData, withdrawalSchema } from '@/lib';
 
 export const Route = createFileRoute('/vendor/_vendorLayout/wallet/')({
   component: VendorWallet,
@@ -34,15 +34,6 @@ const mockWithdrawals = [
   { id: '3', amount: 180000, status: 'completed', date: new Date('2024-01-10'), method: 'Bank Transfer' },
 ];
 
-const withdrawalSchema = z.object({
-  accountHolderName: z.string().min(3, 'Account holder name is required'),
-  bankName: z.string().min(3, 'Bank name is required'),
-  accountNumber: z.string().min(10, 'Account number must be at least 10 digits'),
-  amount: z.number().min(1000, 'Minimum withdrawal is ₦1,000'),
-});
-
-type WithdrawalFormData = z.infer<typeof withdrawalSchema>;
-
 function VendorWallet() {
   const [open, setOpen] = useState(false);
   const [page, setPage] = useState(1);
@@ -54,7 +45,7 @@ function VendorWallet() {
     formState: { errors },
     reset,
   } = useForm<WithdrawalFormData>({
-    resolver: zodResolver(withdrawalSchema),
+    resolver: zodResolver(withdrawalSchema as any),
     defaultValues: {
       accountHolderName: '',
       bankName: '',

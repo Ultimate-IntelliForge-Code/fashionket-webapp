@@ -1,6 +1,6 @@
 import { useCallback, useEffect } from 'react';
 import { useAuthStore } from '@/store';
-import { useValidateToken, useLogout } from '@/api/queries';
+import { useValidateToken, useLogout } from '@/api/mutations';
 import { useQueryClient } from '@tanstack/react-query';
 import { UserRole } from '@/types';
 

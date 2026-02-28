@@ -2,44 +2,17 @@ import React from 'react';
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Textarea } from '@/components/ui/textarea';
-import { useAdminSignup } from '@/api/queries/auth.query';
+import { useAdminSignup } from '@/api/mutations';
 import { useAuth } from '@/hooks';
 import { AuthFormWrapper, GoogleAuthButton } from '@/components/auth';
 import { Eye, EyeOff, Shield } from 'lucide-react';
 import { toast } from 'react-toastify';
-import { validatePassword } from '@/lib/utils/validation.utils';
-
-const adminSignupSchema = z.object({
-  fullName: z.string().min(2, 'Full name must be at least 2 characters'),
-  email: z.string().email('Invalid email address'),
-  phone: z.string().min(10, 'Valid phone number is required'),
-  password: z.string().min(8, 'Password must be at least 8 characters'),
-  confirmPassword: z.string(),
-  storeName: z.string().min(2, 'Store name is required'),
-  businessType: z.enum(['boutique', 'brand', 'retailer', 'other']),
-  businessDescription: z.string().optional(),
-  acceptTerms: z.boolean().refine(val => val === true, {
-    message: 'You must accept the terms and conditions',
-  }),
-  requestPermissions: z.boolean().default(false),
-}).refine((data) => data.password === data.confirmPassword, {
-  message: "Passwords don't match",
-  path: ["confirmPassword"],
-}).refine((data) => {
-  const validation = validatePassword(data.password);
-  return validation.valid;
-}, {
-  message: "Password must contain uppercase, lowercase, number, and special character",
-  path: ["password"],
-});
-
-type AdminSignupFormData = z.infer<typeof adminSignupSchema>;
+import { AdminSignupFormData, adminSignupSchema } from '@/lib';
 
 export const Route = createFileRoute('/(auth)/_auth/admin/register')({
   component: AdminSignupPage,

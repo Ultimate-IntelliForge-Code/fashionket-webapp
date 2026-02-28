@@ -12,7 +12,6 @@ import {
   CheckCircle2,
 } from "lucide-react";
 import { OrderStatus } from "@/types";
-import { z } from "zod";
 import { ordersQuery, orderStatsQuery } from "@/api/queries/order.query";
 import { LoadingState } from "@/components/ui/loading-state";
 import { useOrdersQuery, useOrderStatsQuery } from "@/api/hooks";
@@ -22,19 +21,14 @@ import { OrdersStats } from "@/components/orders/order-stats";
 import { OrdersList } from "@/components/orders/order-list";
 import { OrdersSidebar } from "@/components/orders/order-sidebar";
 import { cn } from "@/lib/utils";
+import { IOrderQueryFilters, orderSearchSchema } from "@/lib";
 
-// Search validation schema
-const ordersSearchSchema = z.object({
-  page: z.number().optional().default(1),
-  limit: z.number().optional().default(20),
-  status: z.nativeEnum(OrderStatus).optional(),
-});
 
 export const Route = createFileRoute(
   "/(root)/_rootLayout/_authenticated/orders/",
 )({
   component: OrdersPage,
-  validateSearch: ordersSearchSchema,
+  validateSearch: orderSearchSchema,
   loaderDeps: ({ search }) => ({
     page: search.page,
     limit: search.limit,
@@ -101,7 +95,7 @@ function OrdersPage() {
 
   // Handle search param updates
   const updateSearchParams = React.useCallback(
-    (updates: Partial<z.infer<typeof ordersSearchSchema>>) => {
+    (updates: Partial<IOrderQueryFilters>) => {
       navigate({
         search: (prev) => ({
           ...prev,

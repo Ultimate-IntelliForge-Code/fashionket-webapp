@@ -14,17 +14,8 @@ import { LoadingState } from '@/components/ui/loading-state'
 import { ErrorState } from '@/components/ui/error-state'
 import { StatsCard } from '@/components/ui/stats-card'
 import { OrdersTable } from '@/components/orders/order-table'
-import { z } from 'zod'
+import { orderSearchSchema } from '@/lib'
 
-export const orderSearchSchema = z.object({
-  page: z.coerce.number().int().min(1).default(1).optional(),
-  limit: z.coerce.number().int().min(1).max(100).default(20).optional(),
-  status: z.nativeEnum(OrderStatus).optional(),
-  sortBy: z.string().default('createdAt').optional(),
-  sortOrder: z.enum(['asc', 'desc']).default('desc').optional(),
-})
-
-export type IOrderQueryFilters = z.infer<typeof orderSearchSchema>
 
 export const Route = createFileRoute('/vendor/_vendorLayout/orders/')({
   validateSearch: (search) => {

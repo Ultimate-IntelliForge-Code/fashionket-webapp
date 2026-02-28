@@ -12,13 +12,13 @@ import { toast } from 'react-toastify'
 import { ForgotPasswordFormData, forgotPasswordSchema } from '@/lib'
 
 
-export const Route = createFileRoute('/(auth)/_auth/admin/forgot-password')({
-  component: AdminForgotPasswordPage,
+export const Route = createFileRoute('/(auth)/_auth/vendor/forgot-password')({
+  component: VendorForgotPasswordPage,
 })
 
-function AdminForgotPasswordPage() {
+function VendorForgotPasswordPage() {
   const [isSubmitted, setIsSubmitted] = React.useState(false)
-  const { mutate: requestReset, isPending } = useRequestPasswordReset('admin')
+  const { mutate: requestReset, isPending } = useRequestPasswordReset('vendor')
 
   const {
     register,

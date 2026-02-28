@@ -2,7 +2,6 @@ import React from 'react';
 import { createFileRoute, Link } from '@tanstack/react-router';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -11,16 +10,17 @@ import { AuthFormWrapper } from '@/components/auth';
 import { Eye, EyeOff, CheckCircle, Shield } from 'lucide-react';
 import { toast } from 'react-toastify';
 import { ResetPasswordFormData, resetPasswordSchema } from '@/lib';
+import z from 'zod';
 
 
-export const Route = createFileRoute('/(auth)/_auth/admin/reset-password')({
-  component: AdminResetPasswordPage,
+export const Route = createFileRoute('/(auth)/_auth/vendor/reset-password')({
+  component: VendorResetPasswordPage,
   validateSearch: z.object({
     token: z.string().optional().catch(''),
   }),
 });
 
-function AdminResetPasswordPage() {
+function VendorResetPasswordPage() {
   const search = Route.useSearch()
   const [showNewPassword, setShowNewPassword] = React.useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = React.useState(false);

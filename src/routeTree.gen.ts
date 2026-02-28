@@ -39,8 +39,10 @@ import { Route as VendorVendorLayoutOrdersOrderIdRouteImport } from './routes/ve
 import { Route as rootRootLayoutVendorsSlugRouteImport } from './routes/(root)/_rootLayout/vendors/$slug'
 import { Route as rootRootLayoutProductsSlugRouteImport } from './routes/(root)/_rootLayout/products/$slug'
 import { Route as rootRootLayoutCategoriesSlugRouteImport } from './routes/(root)/_rootLayout/categories/$slug'
+import { Route as authAuthVendorResetPasswordRouteImport } from './routes/(auth)/_auth/vendor/reset-password'
 import { Route as authAuthVendorRegisterRouteImport } from './routes/(auth)/_auth/vendor/register'
 import { Route as authAuthVendorLoginRouteImport } from './routes/(auth)/_auth/vendor/login'
+import { Route as authAuthVendorForgotPasswordRouteImport } from './routes/(auth)/_auth/vendor/forgot-password'
 import { Route as authAuthAdminResetPasswordRouteImport } from './routes/(auth)/_auth/admin/reset-password'
 import { Route as authAuthAdminRegisterRouteImport } from './routes/(auth)/_auth/admin/register'
 import { Route as authAuthAdminLoginRouteImport } from './routes/(auth)/_auth/admin/login'
@@ -219,6 +221,12 @@ const rootRootLayoutCategoriesSlugRoute =
     path: '/categories/$slug',
     getParentRoute: () => rootRootLayoutRoute,
   } as any)
+const authAuthVendorResetPasswordRoute =
+  authAuthVendorResetPasswordRouteImport.update({
+    id: '/vendor/reset-password',
+    path: '/vendor/reset-password',
+    getParentRoute: () => authAuthRoute,
+  } as any)
 const authAuthVendorRegisterRoute = authAuthVendorRegisterRouteImport.update({
   id: '/vendor/register',
   path: '/vendor/register',
@@ -229,6 +237,12 @@ const authAuthVendorLoginRoute = authAuthVendorLoginRouteImport.update({
   path: '/vendor/login',
   getParentRoute: () => authAuthRoute,
 } as any)
+const authAuthVendorForgotPasswordRoute =
+  authAuthVendorForgotPasswordRouteImport.update({
+    id: '/vendor/forgot-password',
+    path: '/vendor/forgot-password',
+    getParentRoute: () => authAuthRoute,
+  } as any)
 const authAuthAdminResetPasswordRoute =
   authAuthAdminResetPasswordRouteImport.update({
     id: '/admin/reset-password',
@@ -324,8 +338,10 @@ export interface FileRoutesByFullPath {
   '/admin/login': typeof authAuthAdminLoginRoute
   '/admin/register': typeof authAuthAdminRegisterRoute
   '/admin/reset-password': typeof authAuthAdminResetPasswordRoute
+  '/vendor/forgot-password': typeof authAuthVendorForgotPasswordRoute
   '/vendor/login': typeof authAuthVendorLoginRoute
   '/vendor/register': typeof authAuthVendorRegisterRoute
+  '/vendor/reset-password': typeof authAuthVendorResetPasswordRoute
   '/categories/$slug': typeof rootRootLayoutCategoriesSlugRoute
   '/products/$slug': typeof rootRootLayoutProductsSlugRoute
   '/vendors/$slug': typeof rootRootLayoutVendorsSlugRoute
@@ -366,8 +382,10 @@ export interface FileRoutesByTo {
   '/admin/login': typeof authAuthAdminLoginRoute
   '/admin/register': typeof authAuthAdminRegisterRoute
   '/admin/reset-password': typeof authAuthAdminResetPasswordRoute
+  '/vendor/forgot-password': typeof authAuthVendorForgotPasswordRoute
   '/vendor/login': typeof authAuthVendorLoginRoute
   '/vendor/register': typeof authAuthVendorRegisterRoute
+  '/vendor/reset-password': typeof authAuthVendorResetPasswordRoute
   '/categories/$slug': typeof rootRootLayoutCategoriesSlugRoute
   '/products/$slug': typeof rootRootLayoutProductsSlugRoute
   '/vendors/$slug': typeof rootRootLayoutVendorsSlugRoute
@@ -414,8 +432,10 @@ export interface FileRoutesById {
   '/(auth)/_auth/admin/login': typeof authAuthAdminLoginRoute
   '/(auth)/_auth/admin/register': typeof authAuthAdminRegisterRoute
   '/(auth)/_auth/admin/reset-password': typeof authAuthAdminResetPasswordRoute
+  '/(auth)/_auth/vendor/forgot-password': typeof authAuthVendorForgotPasswordRoute
   '/(auth)/_auth/vendor/login': typeof authAuthVendorLoginRoute
   '/(auth)/_auth/vendor/register': typeof authAuthVendorRegisterRoute
+  '/(auth)/_auth/vendor/reset-password': typeof authAuthVendorResetPasswordRoute
   '/(root)/_rootLayout/categories/$slug': typeof rootRootLayoutCategoriesSlugRoute
   '/(root)/_rootLayout/products/$slug': typeof rootRootLayoutProductsSlugRoute
   '/(root)/_rootLayout/vendors/$slug': typeof rootRootLayoutVendorsSlugRoute
@@ -460,8 +480,10 @@ export interface FileRouteTypes {
     | '/admin/login'
     | '/admin/register'
     | '/admin/reset-password'
+    | '/vendor/forgot-password'
     | '/vendor/login'
     | '/vendor/register'
+    | '/vendor/reset-password'
     | '/categories/$slug'
     | '/products/$slug'
     | '/vendors/$slug'
@@ -502,8 +524,10 @@ export interface FileRouteTypes {
     | '/admin/login'
     | '/admin/register'
     | '/admin/reset-password'
+    | '/vendor/forgot-password'
     | '/vendor/login'
     | '/vendor/register'
+    | '/vendor/reset-password'
     | '/categories/$slug'
     | '/products/$slug'
     | '/vendors/$slug'
@@ -549,8 +573,10 @@ export interface FileRouteTypes {
     | '/(auth)/_auth/admin/login'
     | '/(auth)/_auth/admin/register'
     | '/(auth)/_auth/admin/reset-password'
+    | '/(auth)/_auth/vendor/forgot-password'
     | '/(auth)/_auth/vendor/login'
     | '/(auth)/_auth/vendor/register'
+    | '/(auth)/_auth/vendor/reset-password'
     | '/(root)/_rootLayout/categories/$slug'
     | '/(root)/_rootLayout/products/$slug'
     | '/(root)/_rootLayout/vendors/$slug'
@@ -793,6 +819,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof rootRootLayoutCategoriesSlugRouteImport
       parentRoute: typeof rootRootLayoutRoute
     }
+    '/(auth)/_auth/vendor/reset-password': {
+      id: '/(auth)/_auth/vendor/reset-password'
+      path: '/vendor/reset-password'
+      fullPath: '/vendor/reset-password'
+      preLoaderRoute: typeof authAuthVendorResetPasswordRouteImport
+      parentRoute: typeof authAuthRoute
+    }
     '/(auth)/_auth/vendor/register': {
       id: '/(auth)/_auth/vendor/register'
       path: '/vendor/register'
@@ -805,6 +838,13 @@ declare module '@tanstack/react-router' {
       path: '/vendor/login'
       fullPath: '/vendor/login'
       preLoaderRoute: typeof authAuthVendorLoginRouteImport
+      parentRoute: typeof authAuthRoute
+    }
+    '/(auth)/_auth/vendor/forgot-password': {
+      id: '/(auth)/_auth/vendor/forgot-password'
+      path: '/vendor/forgot-password'
+      fullPath: '/vendor/forgot-password'
+      preLoaderRoute: typeof authAuthVendorForgotPasswordRouteImport
       parentRoute: typeof authAuthRoute
     }
     '/(auth)/_auth/admin/reset-password': {
@@ -910,8 +950,10 @@ interface authAuthRouteChildren {
   authAuthAdminLoginRoute: typeof authAuthAdminLoginRoute
   authAuthAdminRegisterRoute: typeof authAuthAdminRegisterRoute
   authAuthAdminResetPasswordRoute: typeof authAuthAdminResetPasswordRoute
+  authAuthVendorForgotPasswordRoute: typeof authAuthVendorForgotPasswordRoute
   authAuthVendorLoginRoute: typeof authAuthVendorLoginRoute
   authAuthVendorRegisterRoute: typeof authAuthVendorRegisterRoute
+  authAuthVendorResetPasswordRoute: typeof authAuthVendorResetPasswordRoute
 }
 
 const authAuthRouteChildren: authAuthRouteChildren = {
@@ -923,8 +965,10 @@ const authAuthRouteChildren: authAuthRouteChildren = {
   authAuthAdminLoginRoute: authAuthAdminLoginRoute,
   authAuthAdminRegisterRoute: authAuthAdminRegisterRoute,
   authAuthAdminResetPasswordRoute: authAuthAdminResetPasswordRoute,
+  authAuthVendorForgotPasswordRoute: authAuthVendorForgotPasswordRoute,
   authAuthVendorLoginRoute: authAuthVendorLoginRoute,
   authAuthVendorRegisterRoute: authAuthVendorRegisterRoute,
+  authAuthVendorResetPasswordRoute: authAuthVendorResetPasswordRoute,
 }
 
 const authAuthRouteWithChildren = authAuthRoute._addFileChildren(

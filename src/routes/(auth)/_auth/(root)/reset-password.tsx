@@ -6,10 +6,10 @@ import { z } from 'zod';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useResetPassword } from '@/api/queries/auth.query';
+import { useResetPassword } from '@/api/mutations';
 import { AuthFormWrapper } from '@/components/auth';
 import { Eye, EyeOff, CheckCircle } from 'lucide-react';
-import { validatePassword } from '@/lib/utils/validation.utils';
+import { validatePassword } from '@/lib/validation.utils';
 
 const resetPasswordSchema = z.object({
   token: z.string().min(1, 'Token is required'),
@@ -50,7 +50,7 @@ function ResetPasswordPage() {
     setError,
     watch,
   } = useForm<ResetPasswordFormData>({
-    resolver: zodResolver(resetPasswordSchema),
+    resolver: zodResolver(resetPasswordSchema as any),
     defaultValues: {
       token: search.token || '',
     },

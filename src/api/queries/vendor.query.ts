@@ -65,6 +65,8 @@ export const vendorBySlugQuery = (slug: string) => ({
       throw new Error(response.error.message);
     }
 
+    console.log(response)
+
     return response.data;
   },
 });
@@ -76,9 +78,9 @@ export const vendorProductsBySlugQuery = (
   slug: string,
   filters?: IProductQueryFilters
 ) => ({
-  queryKey: queryKeys.vendor.all(filters),
-  queryFn: async ():Promise<IPaginatedResponse<FrontendSafe<IProductListItem[]>>> => {
-     const params = new URLSearchParams();
+  queryKey: queryKeys.vendor.all(filters, slug),
+  queryFn: async (): Promise<IPaginatedResponse<FrontendSafe<IProductListItem[]>>> => {
+    const params = new URLSearchParams();
     if (filters) {
       Object.entries(filters).forEach(([key, value]) => {
         if (value !== undefined && value !== null) {
@@ -87,9 +89,9 @@ export const vendorProductsBySlugQuery = (
       });
     }
     const response = await apiClient.get<any>(
-      `/vendors/${slug}/products?${params.toString()}`
+      `/products/vendor/${slug}/products?${params.toString()}`
     );
-
+    console.log('Error', response)
     if (!response.success) {
       throw new Error(response.error.message);
     }

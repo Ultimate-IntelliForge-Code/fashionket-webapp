@@ -2,34 +2,15 @@ import React from 'react';
 import { createFileRoute, Link } from '@tanstack/react-router';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useUserSignup } from '@/api/queries/auth.query';
+import { useUserSignup } from '@/api/mutations';
 import { useAuth } from '@/hooks';
 import { AuthFormWrapper, GoogleAuthButton } from '@/components/auth';
 import { Eye, EyeOff } from 'lucide-react';
-import { validatePassword } from '@/lib/utils/index';
+import { SignupFormData, signupSchema } from '@/lib';
 
-const signupSchema = z.object({
-  fullName: z.string().min(2, 'Full name must be at least 2 characters'),
-  email: z.string().email('Invalid email address'),
-  password: z.string().min(8, 'Password must be at least 8 characters'),
-  confirmPassword: z.string(),
-  phone: z.string().optional(),
-}).refine((data) => data.password === data.confirmPassword, {
-  message: "Passwords don't match",
-  path: ["confirmPassword"],
-}).refine((data) => {
-  const validation = validatePassword(data.password);
-  return validation.valid;
-}, {
-  message: "Password must contain uppercase, lowercase, number, and special character",
-  path: ["password"],
-});
-
-type SignupFormData = z.infer<typeof signupSchema>;
 
 export const Route = createFileRoute('/(auth)/_auth/(root)/signup')({
   component: SignupPage,
