@@ -84,7 +84,7 @@ function CheckoutPage() {
 
   const {
     data: shippingFeeData,
-    // isLoading: isLoadingShipping,
+    // isLoading: isLoadingShippking,
     isError: isShippingError,
   } = useShippingFeeQuery(selectedAddressId);
 
@@ -222,7 +222,7 @@ function CheckoutPage() {
       // Step 2: Initialize payment
       const paymentData = await initPayment({
         orderId: createdOrder._id,
-        callbackUrl: `${window.location.origin}/cart/payment-status`,
+        callbackUrl: `${window.location.origin}/checkout/payment-status`,
       });
 
       console.log("💰 Payment initialized:", paymentData);
@@ -591,67 +591,61 @@ function CheckoutPage() {
                         />
                         <Label
                           htmlFor={`address-${address._id}`}
-                          className="flex flex-col p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-mmp-primary peer-data-[state=checked]:border-mmp-primary peer-data-[state=checked]:bg-mmp-primary/5 transition-colors"
+                          className="flex items-start justify-between p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-mmp-primary peer-data-[state=checked]:border-mmp-primary peer-data-[state=checked]:bg-mmp-primary/5 transition-colors"
                         >
-                          <div className="flex items-start justify-between">
-                            <div className="flex items-start gap-3">
-                              <div className="p-2 rounded-lg bg-gray-100">
-                                <FcAddressBook className="h-5 w-5" />
+                          <div className="flex items-start gap-3">
+                            <div className="p-2 rounded-lg bg-gray-100">
+                              <FcAddressBook className="h-5 w-5" />
+                            </div>
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2 mb-2">
+                                <span className="font-semibold text-gray-900">
+                                  {address.fullName}
+                                </span>
+                                {address.isDefault && (
+                                  <Badge variant="outline" className="text-xs">
+                                    Default
+                                  </Badge>
+                                )}
                               </div>
-                              <div className="flex-1">
-                                <div className="flex items-center gap-2 mb-2">
-                                  <span className="font-semibold text-gray-900">
-                                    {address.fullName}
-                                  </span>
-                                  {address.isDefault && (
-                                    <Badge
-                                      variant="outline"
-                                      className="text-xs"
-                                    >
-                                      Default
-                                    </Badge>
-                                  )}
-                                </div>
-                                <div className="space-y-1 text-sm text-gray-600">
-                                  <p>{address.addressLine1}</p>
-                                  {address.addressLine2 && (
-                                    <p>{address.addressLine2}</p>
-                                  )}
-                                  <p>
-                                    {address.city}, {address.state}{" "}
-                                    {address.postalCode}
-                                  </p>
-                                  <p>{address.country}</p>
-                                  <p className="mt-2">📞 {address.phone}</p>
-                                </div>
+                              <div className="space-y-1 text-sm text-gray-600">
+                                <p>{address.addressLine1}</p>
+                                {address.addressLine2 && (
+                                  <p>{address.addressLine2}</p>
+                                )}
+                                <p>
+                                  {address.city}, {address.state}{" "}
+                                  {address.postalCode}
+                                </p>
+                                <p>{address.country}</p>
+                                <p className="mt-2">📞 {address.phone}</p>
                               </div>
                             </div>
-                            <div className="flex items-center gap-2">
+                          </div>
+
+                          <div className="flex items-end gap-2">
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8"
+                              asChild
+                            >
+                              <Link to={`/account`}>
+                                <Edit className="h-4 w-4" />
+                              </Link>
+                            </Button>
+                            {!address.isDefault && (
                               <Button
                                 type="button"
                                 variant="ghost"
                                 size="icon"
-                                className="h-8 w-8"
-                                asChild
+                                className="h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50"
+                                onClick={() => handleDeleteAddress(address._id)}
                               >
-                                <Link to={`/account`}>
-                                  <Edit className="h-4 w-4" />
-                                </Link>
+                                <Trash2 className="h-4 w-4" />
                               </Button>
-                              {!address.isDefault && (
-                                <Button
-                                  type="button"
-                                  variant="ghost"
-                                  size="icon"
-                                  className="h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50"
-                                  onClick={() =>
-                                    handleDeleteAddress(address._id)
-                                  }
-                                >
-                                  <Trash2 className="h-4 w-4" />
-                                </Button>
-                              )}
-                            </div>
+                            )}
                           </div>
                         </Label>
                       </div>
