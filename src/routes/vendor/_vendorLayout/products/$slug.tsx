@@ -70,13 +70,11 @@ function VendorProductDetail() {
             variant="ghost"
             size="icon"
             onClick={() => navigate({ to: '/vendor/products' })}
+            className='w-full'
           >
             <ArrowLeft className="h-5 w-5" />
+            View all products
           </Button>
-          <div>
-            <h1 className="text-3xl font-bold text-mmp-primary2">Edit Product</h1>
-            <p className="text-gray-600 mt-1">Update product details and settings</p>
-          </div>
         </div>
         <div className="flex items-center gap-3">
           <Badge variant={product.isActive ? 'default' : 'secondary'} className="text-sm">

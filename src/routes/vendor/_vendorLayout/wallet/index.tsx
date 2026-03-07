@@ -78,11 +78,7 @@ function VendorWallet() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-mmp-primary2">Wallet</h1>
-          <p className="text-gray-600 mt-1">Manage your earnings and withdrawals</p>
-        </div>
+      <div className="flex items-center justify-end">
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
             <Button className="bg-mmp-primary hover:bg-mmp-primary2">

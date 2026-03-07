@@ -33,7 +33,7 @@ export const useVendorProducts = (
   enabled = true
 ) => {
   return useQuery({
-    ...vendorProductsBySlugQuery(slug, page, limit),
+    ...vendorProductsBySlugQuery(slug, { page, limit }),
     enabled: !!slug && enabled,
   });
 };

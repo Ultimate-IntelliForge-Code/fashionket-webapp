@@ -1,8 +1,9 @@
 import { useCallback, useEffect } from 'react';
 import { useAuthStore } from '@/store';
-import { useValidateToken, useLogout } from '@/api/mutations';
+import { useLogout } from '@/api/mutations';
 import { useQueryClient } from '@tanstack/react-query';
 import { UserRole } from '@/types';
+import { useValidateToken } from '@/api/queries';
 
 /**
  * useAuth Hook - Centralized authentication logic
@@ -34,7 +35,7 @@ export const useAuth = () => {
   // This prevents infinite validation loops on navigation
   const shouldValidate = !isInitialized;
 
-  const { data: validationData, isLoading: isValidating } =
+  const validation =
     useValidateToken(shouldValidate);
 
   const { mutateAsync: logoutMutate } = useLogout();
@@ -54,21 +55,21 @@ export const useAuth = () => {
   // Sync auth state with token validation (only runs once on mount)
   useEffect(() => {
     // Skip if already initialized or still validating
-    if (isInitialized || isValidating) {
+    if (isInitialized || validation.isPending) {
       return;
     }
 
     // Validation failed or no data
-    if (!validationData?.valid) {
+    if (!validation.data?.valid) {
       clearAuth();
       setLoading(false);
       setInitialized(true);
       return;
     }
 
-    const user = validationData.user;
+    const user = validation.data.user;
 
-    console.log('Auth initialized:', { user, role: user.role });
+    console.log('Auth initialized:');
 
     // Set auth based on role from backend validation
     switch (user.role) {
@@ -93,8 +94,8 @@ export const useAuth = () => {
     setLoading(false);
     setInitialized(true);
   }, [
-    validationData,
-    isValidating,
+    validation,
+    validation.isPending,
     isInitialized,
     setAuth,
     setAuthAdmin,
@@ -115,7 +116,7 @@ export const useAuth = () => {
     vendor,
     admin,
     isAuthenticated,
-    isLoading: isLoading || isValidating,
+    isLoading: isLoading || validation.isPending,
     isInitialized,
     role,
     isAdmin,

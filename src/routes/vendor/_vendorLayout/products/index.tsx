@@ -112,11 +112,7 @@ function VendorProducts() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-mmp-primary2">Products</h1>
-          <p className="text-gray-600 mt-1">Manage your product inventory</p>
-        </div>
+      <div className="flex items-center justify-end">
         <Button
           onClick={() => navigate({ to: '/vendor/products/new' })}
           className="bg-mmp-primary hover:bg-mmp-primary2"
@@ -153,7 +149,7 @@ function VendorProducts() {
 
       {/* Filters and Products */}
       <div className="flex flex-col lg:flex-row gap-6">
-        <div className="lg:w-64 flex-shrink-0">
+        {/* <div className="lg:w-64 flex-shrink-0">
           <ProductFilters
             filters={search}
             onFilterChange={handleFilterChange}
@@ -161,7 +157,7 @@ function VendorProducts() {
             tags={tags}
             maxPrice={maxPrice}
           />
-        </div>
+        </div> */}
 
         <div className="flex-1 space-y-6">
           {products.length === 0 ? (

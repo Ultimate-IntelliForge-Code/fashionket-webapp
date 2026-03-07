@@ -12,6 +12,7 @@ import { queryClient } from "@/lib/queryClient";
 import { ToastContainer } from "react-toastify";
 import { QueryClient } from "@tanstack/react-query";
 import { AuthInitializer } from "@/providers/auth-initializer";
+import { useTokenRefresh } from "@/hooks";
 
 // Define the type for your router context
 interface MyRouterContext {
@@ -39,6 +40,8 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
 });
 
 function RootDocument({ children }: { children: React.ReactNode }) {
+  useTokenRefresh()
+  
   return (
     <html lang="en">
       <head>

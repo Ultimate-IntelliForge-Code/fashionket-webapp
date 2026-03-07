@@ -115,21 +115,6 @@ function VendorAccountPage() {
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-7xl">
-      {/* Header */}
-      <div className="mb-8">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight">Vendor Dashboard</h1>
-            <p className="text-muted-foreground mt-2">
-              Manage your business profile and settings
-            </p>
-          </div>
-          <Badge variant={getStatusVariant(vendor.accountStatus)} className="h-fit">
-            {vendor.accountStatus.replace('_', ' ')}
-          </Badge>
-        </div>
-      </div>
-
       {/* Account Status Alert */}
       {vendor.accountStatus === AccountStatus.UNDER_REVIEW && (
         <Alert className="mb-6">

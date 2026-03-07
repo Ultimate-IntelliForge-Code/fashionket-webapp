@@ -58,13 +58,6 @@ const userLinks = [
   { href: "/settings", title: "Settings", icon: Settings },
 ];
 
-const adminLinks = [
-  { href: "/admin", title: "Dashboard", icon: TrendingUp },
-  { href: "/admin/products", title: "Products", icon: Package },
-  { href: "/admin/orders", title: "Orders", icon: ShoppingBag },
-  { href: "/admin/analytics", title: "Analytics", icon: CreditCard },
-];
-
 export default function Header() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -200,137 +193,11 @@ export default function Header() {
                   </SheetHeader>
 
                   <div className="overflow-y-auto h-[calc(100vh-70px)] p-4 sm:p-5">
-                    {/* User Info Section - Moved to top for better UX */}
-                    {isAuthenticated ? (
-                      <div className="flex gap-2 items-center mb-6">
-                        <Link
-                          to="/account"
-                          onClick={() => setIsSidebarOpen(false)}
-                          className="flex items-center gap-3 p-3 bg-mmp-primary/20 rounded-xl flex-1"
-                        >
-                          <Avatar className="h-10 w-10 sm:h-12 sm:w-12 ring-2 ring-white/20">
-                            <AvatarImage src="" />
-                            <AvatarFallback className="bg-gradient-to-br from-mmp-accent to-mmp-secondary text-white text-sm">
-                              {getUserInitials()}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div className="flex-1 min-w-0">
-                            <p className="font-semibold text-white text-sm truncate">
-                              {getUserDisplayName()}
-                            </p>
-                            <p className="text-xs text-white/70 truncate">
-                              {user?.email}
-                            </p>
-                          </div>
-                        </Link>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={handleLogout}
-                          disabled={isLoggingOut}
-                          className="bg-red-600/20 hover:bg-red-600/30 h-9 w-9"
-                        >
-                          <LogOut className="h-4 w-4 text-red-400" />
-                        </Button>
-                      </div>
-                    ) : (
-                      <div className="grid grid-cols-2 gap-3 mb-6">
-                        <Button
-                          variant="ghost"
-                          className="border-mmp-accent text-white hover:bg-white/10 h-11 text-sm"
-                          asChild
-                          onClick={() => setIsSidebarOpen(false)}
-                        >
-                          <Link to="/login">Login</Link>
-                        </Button>
-                        <Button
-                          className="bg-gradient-to-r from-mmp-accent to-mmp-secondary text-white hover:opacity-90 h-11 text-sm"
-                          asChild
-                          onClick={() => setIsSidebarOpen(false)}
-                        >
-                          <Link to="/signup">Register</Link>
-                        </Button>
-                      </div>
-                    )}
-
-                    {/* Vendor Section */}
-                    {isVendor && (
-                      <>
-                        <div className="mb-4">
-                          <h3 className="text-xs font-semibold text-mmp-secondary uppercase tracking-wider mb-2 px-2">
-                            Vendor Panel
-                          </h3>
-                          <nav className="space-y-1">
-                            {adminLinks.map((link) => {
-                              const Icon = link.icon;
-                              return (
-                                <Link
-                                  key={link.href}
-                                  to={link.href}
-                                  onClick={() => setIsSidebarOpen(false)}
-                                  className="flex items-center gap-3 p-3 rounded-lg hover:bg-white/10 transition-colors"
-                                >
-                                  <Icon className="h-5 w-5 text-mmp-secondary" />
-                                  <span className="text-white text-sm">
-                                    {link.title}
-                                  </span>
-                                </Link>
-                              );
-                            })}
-                          </nav>
-                        </div>
-                        <Separator className="my-4 bg-white/20" />
-                      </>
-                    )}
-
-                    {/* Navigation Links */}
-                    <nav className="space-y-2">
-                      {navLinks.map((link) => {
-                        const Icon = link.icon;
-                        const active = isActive(link.href);
-                        return (
-                          <Link
-                            key={link.href}
-                            to={link.href}
-                            onClick={() => setIsSidebarOpen(false)}
-                            className={`flex items-center justify-between px-3 py-1 rounded-lg transition-all group ${
-                              active
-                                ? "bg-mmp-accent rounded-l-none border-l-4 border-mmp-neutral"
-                                : "hover:bg-white/10"
-                            }`}
-                          >
-                            <div className="flex items-center gap-3">
-                              <div
-                                className={`p-2 rounded-lg  text-white ${
-                                  active ?? "bg-white/10 text-white"
-                                }`}
-                              >
-                                <Icon className="h-5 w-5" />
-                              </div>
-                              <span
-                                className={`font-medium text-sm ${
-                                  active ? "text-white" : "text-white/80"
-                                }`}
-                              >
-                                {link.title}
-                              </span>
-                            </div>
-                            <ChevronRight
-                              className={`h-4 w-4 transition-transform group-hover:translate-x-1 ${
-                                active ? "text-white" : "text-white/60"
-                              }`}
-                            />
-                          </Link>
-                        );
-                      })}
-                    </nav>
-
-                    {/* User Links */}
-                    {isAuthenticated && (
-                      <>
-                        <Separator className="my-6 bg-white/20" />
-                        <nav className="space-y-1">
-                          {userLinks.map((link) => {
+                    <div className="flex flex-col justify-between h-full">
+                      <div className="flex flex-col">
+                        {/* Navigation Links */}
+                        <nav className="space-y-2">
+                          {navLinks.map((link) => {
                             const Icon = link.icon;
                             const active = isActive(link.href);
                             return (
@@ -338,20 +205,122 @@ export default function Header() {
                                 key={link.href}
                                 to={link.href}
                                 onClick={() => setIsSidebarOpen(false)}
-                                className={`flex items-center gap-3 p-3 rounded-lg transition-colors ${
+                                className={`flex items-center justify-between px-3 py-1 rounded-lg transition-all group ${
                                   active
-                                    ? "bg-white/20 text-white"
-                                    : "hover:bg-white/10 text-white/80"
+                                    ? "bg-mmp-accent rounded-l-none border-l-4 border-mmp-neutral"
+                                    : "hover:bg-white/10"
                                 }`}
                               >
-                                <Icon className="h-5 w-5" />
-                                <span className="text-sm">{link.title}</span>
+                                <div className="flex items-center gap-3">
+                                  <div
+                                    className={`p-2 rounded-lg  text-white ${
+                                      active ?? "bg-white/10 text-white"
+                                    }`}
+                                  >
+                                    <Icon className="h-5 w-5" />
+                                  </div>
+                                  <span
+                                    className={`font-medium text-sm ${
+                                      active ? "text-white" : "text-white/80"
+                                    }`}
+                                  >
+                                    {link.title}
+                                  </span>
+                                </div>
+                                <ChevronRight
+                                  className={`h-4 w-4 transition-transform group-hover:translate-x-1 ${
+                                    active ? "text-white" : "text-white/60"
+                                  }`}
+                                />
                               </Link>
                             );
                           })}
                         </nav>
-                      </>
-                    )}
+
+                        {/* User Links */}
+                        {isAuthenticated && (
+                          <>
+                            <Separator className="my-6 bg-white/20" />
+                            <nav className="space-y-1">
+                              {userLinks.map((link) => {
+                                const Icon = link.icon;
+                                const active = isActive(link.href);
+                                return (
+                                  <Link
+                                    key={link.href}
+                                    to={link.href}
+                                    onClick={() => setIsSidebarOpen(false)}
+                                    className={`flex items-center gap-3 p-3 rounded-lg transition-colors ${
+                                      active
+                                        ? "bg-white/20 text-white"
+                                        : "hover:bg-white/10 text-white/80"
+                                    }`}
+                                  >
+                                    <Icon className="h-5 w-5" />
+                                    <span className="text-sm">
+                                      {link.title}
+                                    </span>
+                                  </Link>
+                                );
+                              })}
+                            </nav>
+                          </>
+                        )}
+                      </div>
+
+                      {/* User Info Section - Moved to top for better UX */}
+                      {isAuthenticated ? (
+                        <div className="flex gap-2 items-center mb-6">
+                          <Link
+                            to="/account"
+                            onClick={() => setIsSidebarOpen(false)}
+                            className="flex items-center gap-3 p-3 bg-mmp-primary/20 rounded-lg flex-1"
+                          >
+                            <Avatar className="h-10 w-10 sm:h-12 sm:w-12 ring-2 ring-white/20">
+                              <AvatarImage src="" />
+                              <AvatarFallback className="bg-gradient-to-br from-mmp-accent to-mmp-secondary text-white text-sm">
+                                {getUserInitials()}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div className="flex-1 min-w-0">
+                              <p className="font-semibold text-white text-sm truncate">
+                                {getUserDisplayName()}
+                              </p>
+                              <p className="text-xs text-white/70 truncate">
+                                {user?.email}
+                              </p>
+                            </div>
+                          </Link>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={handleLogout}
+                            disabled={isLoggingOut}
+                            className="bg-red-600/20 hover:bg-red-600/30 py-8 w-9 rounded-lg"
+                          >
+                            <LogOut className="h-4 w-4 text-red-400" />
+                          </Button>
+                        </div>
+                      ) : (
+                        <div className="grid grid-cols-2 gap-3 mb-6">
+                          <Button
+                            variant="ghost"
+                            className="border-mmp-accent text-white hover:bg-white/10 h-11 text-sm"
+                            asChild
+                            onClick={() => setIsSidebarOpen(false)}
+                          >
+                            <Link to="/login">Login</Link>
+                          </Button>
+                          <Button
+                            className="bg-gradient-to-r from-mmp-accent to-mmp-secondary text-white hover:opacity-90 h-11 text-sm"
+                            asChild
+                            onClick={() => setIsSidebarOpen(false)}
+                          >
+                            <Link to="/signup">Register</Link>
+                          </Button>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </SheetContent>
               </Sheet>

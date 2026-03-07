@@ -1,69 +1,71 @@
-import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { orderQuery } from '@/api/queries'
-import { useUpdateOrderStatus } from '@/api/mutations'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { ArrowLeft, Package, MapPin, CreditCard } from 'lucide-react'
-import { formatCurrency } from '@/lib/utils'
-import { format } from 'date-fns'
-import type { OrderStatus } from '@/types'
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { orderQuery } from "@/api/queries";
+import { useUpdateOrderStatus } from "@/api/mutations";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ArrowLeft, Package, MapPin, CreditCard } from "lucide-react";
+import { formatCurrency } from "@/lib/utils";
+import { format } from "date-fns";
+import type { OrderStatus } from "@/types";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
-import { Label } from '@/components/ui/label'
-import { toast } from 'react-toastify'
-import { LoadingState } from '@/components/ui/loading-state'
-import { ErrorState } from '@/components/ui/error-state'
+} from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
+import { toast } from "react-toastify";
+import { LoadingState } from "@/components/ui/loading-state";
+import { ErrorState } from "@/components/ui/error-state";
 
-export const Route = createFileRoute(
-  '/vendor/_vendorLayout/orders/$orderId',
-)({
+export const Route = createFileRoute("/vendor/_vendorLayout/orders/$orderId")({
   loader: async ({ context, params }) => {
-    return await context.queryClient.ensureQueryData(orderQuery(params.orderId))
+    return await context.queryClient.ensureQueryData(
+      orderQuery(params.orderId),
+    );
   },
   component: VendorOrderDetail,
   pendingComponent: LoadingState,
   errorComponent: ErrorState,
-})
+});
 
 const getStatusColor = (status: OrderStatus): string => {
   const colors: Record<OrderStatus, string> = {
-    PENDING: 'bg-yellow-100 text-yellow-800',
-    PENDING_PAYMENT: 'bg-blue-100 text-blue-800',
-    PROCESSING: 'bg-purple-100 text-purple-800',
-    PAID: 'bg-green-100 text-green-800',
-    SHIPPED: 'bg-indigo-100 text-indigo-800',
-    DELIVERED: 'bg-green-100 text-green-800',
-    CANCELLED: 'bg-red-100 text-red-800',
-    REFUNDED: 'bg-gray-100 text-gray-800',
-  }
-  return colors[status]
-}
+    PENDING: "bg-yellow-100 text-yellow-800",
+    PENDING_PAYMENT: "bg-blue-100 text-blue-800",
+    PROCESSING: "bg-purple-100 text-purple-800",
+    PAID: "bg-green-100 text-green-800",
+    SHIPPED: "bg-indigo-100 text-indigo-800",
+    DELIVERED: "bg-green-100 text-green-800",
+    CANCELLED: "bg-red-100 text-red-800",
+    REFUNDED: "bg-gray-100 text-gray-800",
+  };
+  return colors[status];
+};
 
 function VendorOrderDetail() {
-  const { orderId } = Route.useParams()
-  const navigate = useNavigate()
-  const order = Route.useLoaderData()
-  const { mutateAsync: updateStatus, isPending } = useUpdateOrderStatus()
+  const { orderId } = Route.useParams();
+  const navigate = useNavigate();
+  const order = Route.useLoaderData();
+  const { mutateAsync: updateStatus, isPending } = useUpdateOrderStatus();
 
-  if (!order) return null
+  if (!order) return null;
 
   const handleStatusUpdate = async (newStatus: OrderStatus) => {
     try {
       await updateStatus({
         id: orderId,
         data: { status: newStatus },
-      })
-      toast.success('Order status updated successfully')
+      });
+      toast.success("Order status updated successfully");
     } catch (error: any) {
-      toast.error(error.message || 'Failed to update order status')
+      toast.error(error.message || "Failed to update order status");
     }
-  }
+  };
+
+  console.log(order)
 
   return (
     <div className="space-y-6">
@@ -73,7 +75,7 @@ function VendorOrderDetail() {
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => navigate({ to: '/vendor/orders' })}
+            onClick={() => navigate({ to: "/vendor/orders" })}
           >
             <ArrowLeft className="h-5 w-5" />
           </Button>
@@ -82,7 +84,7 @@ function VendorOrderDetail() {
               Order #{order.orderNumber}
             </h1>
             <p className="text-gray-600 mt-1">
-              Placed on {format(new Date(order.createdAt!), 'PPP')}
+              Placed on {format(new Date(order.createdAt!), "PPP")}
             </p>
           </div>
         </div>
@@ -105,7 +107,7 @@ function VendorOrderDetail() {
                   className="flex items-center gap-4 pb-4 border-b last:border-0"
                 >
                   <div className="h-16 w-16 rounded bg-gray-100 flex items-center justify-center">
-                    <Package className="h-8 w-8 text-gray-400" />
+                    <img src={item.productId?.images ? item.productId.images[0] : '/logo.png'} className="h-8 w-8 text-gray-400" />
                   </div>
                   <div className="flex-1">
                     <h4 className="font-medium">{item.nameSnapshot}</h4>
@@ -189,26 +191,28 @@ function VendorOrderDetail() {
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <MapPin className="h-5 w-5" />
-                Shipping Address
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <address className="not-italic text-sm text-gray-600 space-y-1">
-                <p>{order.shippingAddress.addressLine1}</p>
-                <p>
-                  {order.shippingAddress.city}, {order.shippingAddress.state}
-                </p>
-                <p>{order.shippingAddress.country}</p>
-                <p className="pt-2">{order.shippingAddress.phone}</p>
-              </address>
-            </CardContent>
-          </Card>
+          {order.shippingAddress && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <MapPin className="h-5 w-5" />
+                  Shipping Address
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <address className="not-italic text-sm text-gray-600 space-y-1">
+                  <p>{order.shippingAddress?.addressLine1}</p>
+                  <p>
+                    {order.shippingAddress.city}, {order.shippingAddress.state}
+                  </p>
+                  <p>{order.shippingAddress.country}</p>
+                  <p className="pt-2">{order.shippingAddress.phone}</p>
+                </address>
+              </CardContent>
+            </Card>
+          )}
         </div>
       </div>
     </div>
-  )
+  );
 }

@@ -1,88 +1,51 @@
-import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { Button } from '@/components/ui/button'
-import { ArrowLeft, CheckCircle, Package } from 'lucide-react'
-import { toast } from 'react-toastify'
-import { LoadingState } from '@/components/ui/loading-state'
-import { ErrorState } from '@/components/ui/error-state'
-import { ProductForm } from '@/components/forms/product-form'
-import { categoriesQuery } from '@/api/queries'
-import { useCreateProduct } from '@/api/mutations'
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { Button } from "@/components/ui/button";
+import { ArrowLeft, CheckCircle, Package } from "lucide-react";
+import { toast } from "react-toastify";
+import { LoadingState } from "@/components/ui/loading-state";
+import { ErrorState } from "@/components/ui/error-state";
+import { ProductForm } from "@/components/forms/product-form";
+import { categoriesQuery } from "@/api/queries";
+import { useCreateProduct } from "@/api/mutations";
 
-export const Route = createFileRoute(
-  '/vendor/_vendorLayout/products/new',
-)({
+export const Route = createFileRoute("/vendor/_vendorLayout/products/new")({
   component: NewProduct,
   pendingComponent: LoadingState,
   errorComponent: ErrorState,
   loader: async ({ context }) => {
-    return await context.queryClient.ensureQueryData(categoriesQuery())
+    return await context.queryClient.ensureQueryData(categoriesQuery());
   },
-})
+});
 
 function NewProduct() {
-  const navigate = useNavigate()
-  const categories = Route.useLoaderData()
-  const { mutateAsync: createProduct, isPending } = useCreateProduct()
+  const navigate = useNavigate();
+  const categories = Route.useLoaderData();
+  const { mutateAsync: createProduct, isPending } = useCreateProduct();
 
   // Handle form submission
   const handleSubmit = async (data: FormData) => {
     try {
-      await createProduct(data)
-      navigate({ to: '/vendor/products' })
+      await createProduct(data);
+      navigate({ to: "/vendor/products" });
     } catch (error: any) {
-      toast.error(error.message)
+      toast.error(error.message);
     }
-  }
+  };
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-6xl">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-8">
-        <div className="flex items-center gap-4">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => navigate({ to: '/vendor/products' })}
-            className="hover:bg-gray-100"
-          >
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
-          <div>
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-gradient-to-r from-mmp-primary/10 to-mmp-primary2/10">
-                <Package className="h-6 w-6 text-mmp-primary" />
-              </div>
-              <h1 className="text-3xl font-bold text-mmp-primary2">
-                Add New Product
-              </h1>
-            </div>
-            <p className="text-gray-600 mt-1">
-              Create a new product for your FashionKet store
-            </p>
-          </div>
-        </div>
-
-        <Button
-          variant="outline"
-          onClick={() => navigate({ to: '/vendor/products' })}
-          className="hidden sm:flex"
-        >
-          View All Products
-        </Button>
-      </div>
-
+    <div className="container mx-auto px-4max-w-6xl">
       {/* Breadcrumb */}
       <div className="mb-6 flex items-center text-sm text-gray-600">
         <span
           className="cursor-pointer hover:text-mmp-primary"
-          onClick={() => navigate({ to: '/vendor' })}
+          onClick={() => navigate({ to: "/vendor" })}
         >
           Dashboard
         </span>
         <span className="mx-2">/</span>
         <span
           className="cursor-pointer hover:text-mmp-primary"
-          onClick={() => navigate({ to: '/vendor/products' })}
+          onClick={() => navigate({ to: "/vendor/products" })}
         >
           Products
         </span>
@@ -160,5 +123,5 @@ function NewProduct() {
         </ul>
       </div>
     </div>
-  )
+  );
 }

@@ -123,7 +123,7 @@ export const relatedProductsQuery = (slug: string, limit?: number) => ({
   queryFn: async (): Promise<FrontendSafe<IProductListItem>[]> => {
     const params = limit ? `?limit=${limit}` : '';
     const response = await apiClient.get<FrontendSafe<IProductListItem>[]>(
-      `/products/${slug}/related${params}`
+      `/products/slug/${slug}/related${params}`
     );
 
     if (!response.success) {
@@ -157,6 +157,7 @@ export const vendorProductsQuery = (filters?: IProductQueryFilters) => ({
       `/products/vendor?${params.toString()}`
     );
 
+    console.log(response)
     if (!response.success) {
       throw new Error(response.error.message);
     }

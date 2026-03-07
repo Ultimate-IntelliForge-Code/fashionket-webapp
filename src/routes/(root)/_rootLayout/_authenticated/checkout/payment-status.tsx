@@ -1,7 +1,7 @@
-import React from 'react'
-import { createFileRoute, useNavigate, Link } from '@tanstack/react-router'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
+import React from "react";
+import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import {
   Loader2,
   CheckCircle2,
@@ -16,16 +16,16 @@ import {
   Clock,
   Wallet,
   RefreshCw,
-} from 'lucide-react'
-import { PaymentStatus } from '@/types'
-import { toast } from 'react-toastify'
-import { z } from 'zod'
-import { formatCurrency } from '@/lib/utils'
-import { useOrderQuery } from '@/api/hooks'
-import { apiClient } from '@/api/client'
+} from "lucide-react";
+import { PaymentStatus } from "@/types";
+import { toast } from "react-toastify";
+import { z } from "zod";
+import { formatCurrency } from "@/lib/utils";
+import { useOrderQuery } from "@/api/hooks";
+import { apiClient } from "@/api/client";
 
 export const Route = createFileRoute(
-  '/(root)/_rootLayout/_authenticated/checkout/payment-status',
+  "/(root)/_rootLayout/_authenticated/checkout/payment-status",
 )({
   component: PaymentStatusPage,
   validateSearch: z.object({
@@ -33,273 +33,314 @@ export const Route = createFileRoute(
     trxref: z.string().optional(),
     orderId: z.string().optional(),
   }),
-})
+});
 
 // Types
 interface PaymentVerificationResult {
-  status: PaymentStatus
-  message?: string
-  order?: any
-  reference?: string
+  status: PaymentStatus;
+  message?: string;
+  order?: any;
+  reference?: string;
 }
 
 // Constants
-const VERIFICATION_TIMEOUT = 5 * 60 * 1000 // 5 minutes in milliseconds
-const POLL_INTERVAL = 3000 // 3 seconds
-const MAX_POLL_ATTEMPTS = Math.ceil(VERIFICATION_TIMEOUT / POLL_INTERVAL) // ~100 attempts
+const VERIFICATION_TIMEOUT = 5 * 60 * 1000; // 5 minutes in milliseconds
+const POLL_INTERVAL = 3000; // 3 seconds
+const MAX_POLL_ATTEMPTS = Math.ceil(VERIFICATION_TIMEOUT / POLL_INTERVAL); // ~100 attempts
 
 function PaymentStatusPage() {
-  const { reference: urlReference, trxref, orderId: urlOrderId } = Route.useSearch()
-  const navigate = useNavigate()
-  
+  const {
+    reference: urlReference,
+    trxref,
+    orderId: urlOrderId,
+  } = Route.useSearch();
+  const navigate = useNavigate();
+
   // State
-  const [paymentStatus, setPaymentStatus] = React.useState<PaymentStatus>(PaymentStatus.PENDING)
-  const [verificationError, setVerificationError] = React.useState<string>('')
-  const [isPolling, setIsPolling] = React.useState(false)
-  const [pollAttempt, setPollAttempt] = React.useState(0)
-  const [verificationStartTime, setVerificationStartTime] = React.useState<number | null>(null)
-  const [showManualVerification, setShowManualVerification] = React.useState(false)
-  const [manualVerificationLoading, setManualVerificationLoading] = React.useState(false)
-  
+  const [paymentStatus, setPaymentStatus] = React.useState<PaymentStatus>(
+    PaymentStatus.PENDING,
+  );
+  const [verificationError, setVerificationError] = React.useState<string>("");
+  const [isPolling, setIsPolling] = React.useState(false);
+  const [pollAttempt, setPollAttempt] = React.useState(0);
+  const [verificationStartTime, setVerificationStartTime] = React.useState<
+    number | null
+  >(null);
+  const [showManualVerification, setShowManualVerification] =
+    React.useState(false);
+  const [manualVerificationLoading, setManualVerificationLoading] =
+    React.useState(false);
+  const [remaining, setRemaining] = React.useState(5);
+
   // Refs
-  const pollingIntervalRef = React.useRef<NodeJS.Timeout | null>(null)
-  const verificationTimeoutRef = React.useRef<NodeJS.Timeout | null>(null)
-  
+  const pollingIntervalRef = React.useRef<NodeJS.Timeout | null>(null);
+  const verificationTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
+
   // Derived state
-  const reference = urlReference || trxref
-  const orderId = urlOrderId || localStorage.getItem('last_order_id')
-  
+  const reference = urlReference || trxref;
+  const orderId = urlOrderId || localStorage.getItem("last_order_id");
+
   // Fetch order details if we have orderId
-  const { data: orderData, isLoading: orderLoading } = useOrderQuery(orderId || '')
-  
+  const { data: orderData, isLoading: orderLoading } = useOrderQuery(
+    orderId || "",
+  );
+
   // Utility function to clear all timeouts/intervals
   const clearAllTimers = () => {
     if (pollingIntervalRef.current) {
-      clearInterval(pollingIntervalRef.current)
-      pollingIntervalRef.current = null
+      clearInterval(pollingIntervalRef.current);
+      pollingIntervalRef.current = null;
     }
     if (verificationTimeoutRef.current) {
-      clearTimeout(verificationTimeoutRef.current)
-      verificationTimeoutRef.current = null
+      clearTimeout(verificationTimeoutRef.current);
+      verificationTimeoutRef.current = null;
     }
-  }
-  
+  };
+
   // Clean up on unmount
   React.useEffect(() => {
     return () => {
-      clearAllTimers()
-    }
-  }, [])
-  
+      clearAllTimers();
+    };
+  }, []);
+
   // Payment verification function
-  const verifyPayment = async (paymentRef: string): Promise<PaymentVerificationResult> => {
+  const verifyPayment = async (
+    paymentRef: string,
+  ): Promise<PaymentVerificationResult> => {
     try {
-      const response = await apiClient.get<PaymentVerificationResult>(`/payments/verify/${paymentRef}`)
-      
+      const response = await apiClient.get<PaymentVerificationResult>(
+        `/payments/verify/${paymentRef}`,
+      );
+
       if (!response.success) {
-        throw new Error(response.error?.message || 'Failed to verify payment')
+        throw new Error(response.error?.message || "Failed to verify payment");
       }
-      
-      return response.data
+
+      return response.data;
     } catch (error: any) {
-      console.error('Payment verification error:', error)
-      throw new Error(error.message || 'Network error while verifying payment')
+      console.error("Payment verification error:", error);
+      throw new Error(error.message || "Network error while verifying payment");
     }
-  }
-  
+  };
+
   // Start automatic verification on component mount
   React.useEffect(() => {
     if (!reference) {
-      const storedReference = localStorage.getItem('last_payment_reference')
+      const storedReference = localStorage.getItem("last_payment_reference");
       if (storedReference) {
-        startPaymentVerification(storedReference)
+        startPaymentVerification(storedReference);
       } else {
-        toast.error('No payment reference found')
-        navigate({ to: '/checkout' })
+        toast.error("No payment reference found");
+        navigate({ to: "/checkout" });
       }
     } else {
-      startPaymentVerification(reference)
+      startPaymentVerification(reference);
     }
-  }, [reference])
-  
+  }, [reference]);
+
   // Check if verification has timed out
   React.useEffect(() => {
     if (verificationStartTime && isPolling) {
-      const elapsedTime = Date.now() - verificationStartTime
-      const timeRemaining = VERIFICATION_TIMEOUT - elapsedTime
-      
+      const elapsedTime = Date.now() - verificationStartTime;
+      const timeRemaining = VERIFICATION_TIMEOUT - elapsedTime;
+
       if (timeRemaining <= 0) {
-        handleVerificationTimeout()
+        handleVerificationTimeout();
       }
     }
-  }, [pollAttempt, verificationStartTime, isPolling])
-  
+  }, [pollAttempt, verificationStartTime, isPolling]);
+
   const startPaymentVerification = async (paymentRef: string) => {
     if (!paymentRef) {
-      setVerificationError('Payment reference is required')
-      setPaymentStatus(PaymentStatus.FAILED)
-      return
+      setVerificationError("Payment reference is required");
+      setPaymentStatus(PaymentStatus.FAILED);
+      return;
     }
-    
-    clearAllTimers()
-    
-    setVerificationStartTime(Date.now())
-    setPaymentStatus(PaymentStatus.PENDING)
-    setVerificationError('')
-    setIsPolling(true)
-    setPollAttempt(0)
-    setShowManualVerification(false)
-    
+
+    clearAllTimers();
+
+    setVerificationStartTime(Date.now());
+    setPaymentStatus(PaymentStatus.PENDING);
+    setVerificationError("");
+    setIsPolling(true);
+    setPollAttempt(0);
+    setShowManualVerification(false);
+
     // Set verification timeout (5 minutes)
     verificationTimeoutRef.current = setTimeout(() => {
-      handleVerificationTimeout()
-    }, VERIFICATION_TIMEOUT)
-    
+      handleVerificationTimeout();
+    }, VERIFICATION_TIMEOUT);
+
     // Start polling
-    let attempts = 0
+    let attempts = 0;
     pollingIntervalRef.current = setInterval(async () => {
-      attempts++
-      setPollAttempt(attempts)
-      
-      console.log(`🔍 Payment verification attempt ${attempts}/${MAX_POLL_ATTEMPTS}`)
-      
+      attempts++;
+      setPollAttempt(attempts);
+
+      console.log(
+        `🔍 Payment verification attempt ${attempts}/${MAX_POLL_ATTEMPTS}`,
+      );
+
       try {
-        const result = await verifyPayment(paymentRef)
-        
+        const result = await verifyPayment(paymentRef);
+
         if (result.status === PaymentStatus.SUCCESS) {
-          handleVerificationSuccess(result)
-          return
+          handleVerificationSuccess(result);
+          return;
         } else if (result.status === PaymentStatus.FAILED) {
-          handleVerificationFailure(result.message || 'Payment failed')
-          return
+          handleVerificationFailure(result.message || "Payment failed");
+          return;
         }
-        
+
         // Still pending, continue polling
         if (attempts >= MAX_POLL_ATTEMPTS) {
-          handleVerificationTimeout()
+          handleVerificationTimeout();
         }
       } catch (error: any) {
-        console.error('Polling error:', error)
-        
+        console.error("Polling error:", error);
+
         if (attempts >= MAX_POLL_ATTEMPTS) {
-          handleVerificationFailure(error.message || 'Verification failed after multiple attempts')
+          handleVerificationFailure(
+            error.message || "Verification failed after multiple attempts",
+          );
         }
       }
-    }, POLL_INTERVAL)
-    
+    }, POLL_INTERVAL);
+
     // Immediately make first verification attempt
     try {
-      const result = await verifyPayment(paymentRef)
-      
+      const result = await verifyPayment(paymentRef);
+
       if (result.status === PaymentStatus.SUCCESS) {
-        handleVerificationSuccess(result)
-        return
+        handleVerificationSuccess(result);
+        return;
       } else if (result.status === PaymentStatus.FAILED) {
-        handleVerificationFailure(result.message || 'Payment failed')
-        return
+        handleVerificationFailure(result.message || "Payment failed");
+        return;
       }
     } catch (error: any) {
-      console.error('Initial verification error:', error)
+      console.error("Initial verification error:", error);
       // Continue with polling
     }
-  }
-  
+  };
+
   const handleVerificationSuccess = (result: PaymentVerificationResult) => {
-    clearAllTimers()
-    
-    setPaymentStatus(PaymentStatus.SUCCESS)
-    setIsPolling(false)
-    
+    clearAllTimers();
+
+    setPaymentStatus(PaymentStatus.SUCCESS);
+    setIsPolling(false);
+
     // Clear localStorage
-    localStorage.removeItem('last_payment_reference')
-    localStorage.removeItem('last_order_id')
-    
-    toast.success(result.message || 'Payment verified successfully!')
-    
+    localStorage.removeItem("last_payment_reference");
+    localStorage.removeItem("last_order_id");
+
+    toast.success(result.message || "Payment verified successfully!");
+
     // Auto-redirect after 5 seconds
     setTimeout(() => {
-      navigate({ to: '/orders' })
-    }, 5000)
-  }
-  
+      navigate({ to: "/orders" });
+    }, 5000);
+  };
+
   const handleVerificationFailure = (errorMessage: string) => {
-    clearAllTimers()
-    
-    setPaymentStatus(PaymentStatus.FAILED)
-    setVerificationError(errorMessage)
-    setIsPolling(false)
-    setShowManualVerification(true)
-    
-    toast.error(errorMessage)
-  }
-  
+    clearAllTimers();
+
+    setPaymentStatus(PaymentStatus.FAILED);
+    setVerificationError(errorMessage);
+    setIsPolling(false);
+    setShowManualVerification(true);
+
+    toast.error(errorMessage);
+  };
+
   const handleVerificationTimeout = () => {
-    clearAllTimers()
-    
-    setPaymentStatus(PaymentStatus.FAILED)
-    setVerificationError('Payment verification timeout. Please verify your payment manually.')
-    setIsPolling(false)
-    setShowManualVerification(true)
-    
-    toast.error('Verification timeout after 5 minutes')
-  }
-  
+    clearAllTimers();
+
+    setPaymentStatus(PaymentStatus.FAILED);
+    setVerificationError(
+      "Payment verification timeout. Please verify your payment manually.",
+    );
+    setIsPolling(false);
+    setShowManualVerification(true);
+
+    toast.error("Verification timeout after 5 minutes");
+  };
+
   const handleManualVerification = async () => {
-    if (!reference) return
-    
-    setManualVerificationLoading(true)
-    
+    if (!reference) return;
+
+    setManualVerificationLoading(true);
+
     try {
-      const result = await verifyPayment(reference)
-      
+      const result = await verifyPayment(reference);
+
       if (result.status === PaymentStatus.SUCCESS) {
-        handleVerificationSuccess(result)
+        handleVerificationSuccess(result);
       } else {
-        setVerificationError(result.message || 'Payment verification failed')
-        toast.error('Payment verification failed. Please check your payment status.')
+        setVerificationError(result.message || "Payment verification failed");
+        toast.error(
+          "Payment verification failed. Please check your payment status.",
+        );
       }
     } catch (error: any) {
-      setVerificationError(error.message || 'Manual verification failed')
-      toast.error('Failed to verify payment. Please try again later.')
+      setVerificationError(error.message || "Manual verification failed");
+      toast.error("Failed to verify payment. Please try again later.");
     } finally {
-      setManualVerificationLoading(false)
+      setManualVerificationLoading(false);
     }
-  }
-  
+  };
+
   const handleRetryCheckout = () => {
     // Navigate back to checkout
-    navigate({ to: '/checkout' })
-  }
-  
+    navigate({ to: "/checkout" });
+  };
+
   const handleViewOrder = () => {
     if (orderId) {
       navigate({
-        to: '/orders/$orderId',
+        to: "/orders/$orderId",
         params: { orderId: orderId },
-      })
+      });
     } else {
-      navigate({ to: '/orders' })
+      navigate({ to: "/orders" });
     }
-  }
-  
+  };
+
   const handleContinueShopping = () => {
-    navigate({ to: '/products' })
-  }
-  
+    navigate({ to: "/products" });
+  };
+
   // Calculate remaining time for verification
   const getRemainingTime = () => {
-    if (!verificationStartTime) return VERIFICATION_TIMEOUT
-    
-    const elapsed = Date.now() - verificationStartTime
-    const remaining = VERIFICATION_TIMEOUT - elapsed
-    
-    return Math.max(0, Math.floor(remaining / 1000)) // Return in seconds
-  }
-  
-  const remainingSeconds = getRemainingTime()
-  const minutes = Math.floor(remainingSeconds / 60)
-  const seconds = remainingSeconds % 60
-  
+    if (!verificationStartTime) return VERIFICATION_TIMEOUT;
+
+    const elapsed = Date.now() - verificationStartTime;
+    const remaining = VERIFICATION_TIMEOUT - elapsed;
+
+    return Math.max(0, Math.floor(remaining / 1000)); // Return in seconds
+  };
+
+  const remainingSeconds = getRemainingTime();
+  const minutes = Math.floor(remainingSeconds / 60);
+  const seconds = remainingSeconds % 60;
+
+  React.useEffect(() => {
+    const timer = setInterval(() => {
+      setRemaining((prev) => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          // redirect
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, []);
+
+
   const renderContent = () => {
     switch (paymentStatus) {
       case PaymentStatus.SUCCESS:
@@ -313,7 +354,7 @@ function PaymentStatusPage() {
                   <CheckCircle2 className="h-12 w-12 text-green-600 animate-in zoom-in duration-500" />
                 </div>
               </div>
-              
+
               <h1 className="text-3xl font-bold text-gray-900 mb-3">
                 Payment Successful!
               </h1>
@@ -321,13 +362,14 @@ function PaymentStatusPage() {
                 Thank you for your order!
               </p>
               <p className="text-gray-500 mb-6">
-                We've sent a confirmation email to your registered email address.
+                We've sent a confirmation email to your registered email
+                address.
               </p>
-              
+
               <div className="flex items-center justify-center gap-2 text-green-600 animate-pulse">
                 <Loader2 className="h-4 w-4 animate-spin" />
                 <span className="text-sm">
-                  Redirecting to orders page in 5 seconds...
+                  `Redirecting to orders page in {remaining} seconds...`
                 </span>
               </div>
             </div>
@@ -335,12 +377,14 @@ function PaymentStatusPage() {
             {/* Order Details */}
             {orderData && !orderLoading && (
               <div className="bg-gray-50 rounded-xl p-6 mb-6">
-                <h3 className="font-semibold text-gray-900 mb-4">Order Details</h3>
+                <h3 className="font-semibold text-gray-900 mb-4">
+                  Order Details
+                </h3>
                 <div className="space-y-3">
                   <div className="flex justify-between">
                     <span className="text-gray-600">Order Number:</span>
                     <span className="font-medium">
-                      {orderData.orderNumber || 'N/A'}
+                      {orderData.orderNumber || "N/A"}
                     </span>
                   </div>
                   <div className="flex justify-between">
@@ -386,7 +430,7 @@ function PaymentStatusPage() {
               </Button>
             </div>
           </>
-        )
+        );
 
       case PaymentStatus.FAILED:
         return (
@@ -396,14 +440,14 @@ function PaymentStatusPage() {
               <div className="inline-flex items-center justify-center w-24 h-24 rounded-full bg-red-100 mb-6">
                 <XCircle className="h-12 w-12 text-red-600" />
               </div>
-              
+
               <h1 className="text-3xl font-bold text-gray-900 mb-3">
                 Payment Verification Failed
               </h1>
               <p className="text-lg text-gray-600 mb-4">
                 {verificationError || "We couldn't verify your payment."}
               </p>
-              
+
               {/* Show manual verification option */}
               {showManualVerification && (
                 <div className="mt-6">
@@ -415,9 +459,11 @@ function PaymentStatusPage() {
                           Verify Payment Manually
                         </h4>
                         <p className="text-sm text-yellow-800 mb-4">
-                          If you've already sent money but verification failed, click the button below to check your payment status manually.
+                          If you've already sent money but verification failed,
+                          click the button below to check your payment status
+                          manually.
                         </p>
-                        
+
                         <Button
                           onClick={handleManualVerification}
                           disabled={manualVerificationLoading}
@@ -480,15 +526,8 @@ function PaymentStatusPage() {
                 <ArrowLeft className="mr-2 h-5 w-5" />
                 Try Payment Again
               </Button>
-              <Button
-                variant="outline"
-                className="w-full"
-                size="lg"
-                asChild
-              >
-                <Link to="/contact">
-                  Contact Support
-                </Link>
+              <Button variant="outline" className="w-full" size="lg" asChild>
+                <Link to="/contact">Contact Support</Link>
               </Button>
               <Button
                 variant="ghost"
@@ -501,7 +540,7 @@ function PaymentStatusPage() {
               </Button>
             </div>
           </>
-        )
+        );
 
       default: // PENDING
         return (
@@ -514,16 +553,14 @@ function PaymentStatusPage() {
                   <Loader2 className="h-12 w-12 text-blue-600 animate-spin" />
                 </div>
               </div>
-              
+
               <h1 className="text-3xl font-bold text-gray-900 mb-3">
                 Verifying Your Payment
               </h1>
               <p className="text-lg text-gray-600 mb-2">
                 Please wait while we confirm your payment...
               </p>
-              <p className="text-gray-500">
-                This usually takes 10-30 seconds.
-              </p>
+              <p className="text-gray-500">This usually takes 10-30 seconds.</p>
             </div>
 
             {/* Progress Indicator */}
@@ -536,35 +573,39 @@ function PaymentStatusPage() {
                       Verification in progress
                     </span>
                   </div>
-                  <Badge variant="outline" className="bg-blue-100 text-blue-800">
+                  <Badge
+                    variant="outline"
+                    className="bg-blue-100 text-blue-800"
+                  >
                     Live
                   </Badge>
                 </div>
-                
+
                 {/* Time Remaining */}
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-blue-700">Time remaining:</span>
                   <span className="font-semibold text-blue-900">
-                    {minutes.toString().padStart(2, '0')}:{seconds.toString().padStart(2, '0')}
+                    {minutes.toString().padStart(2, "0")}:
+                    {seconds.toString().padStart(2, "0")}
                   </span>
                 </div>
-                
+
                 {/* Progress Bar */}
                 <div className="w-full bg-blue-200 rounded-full h-2">
                   <div
                     className="bg-blue-600 h-2 rounded-full transition-all duration-300"
                     style={{
-                      width: `${((VERIFICATION_TIMEOUT - (remainingSeconds * 1000)) / VERIFICATION_TIMEOUT) * 100}%`
+                      width: `${((VERIFICATION_TIMEOUT - remainingSeconds * 1000) / VERIFICATION_TIMEOUT) * 100}%`,
                     }}
                   />
                 </div>
-                
+
                 {/* Polling Info */}
                 <div className="flex items-center justify-between text-xs text-blue-600">
                   <span>Polling attempt: {pollAttempt}</span>
                   <span>Interval: {POLL_INTERVAL / 1000}s</span>
                 </div>
-                
+
                 <p className="text-xs text-blue-600 text-center">
                   Don't close or refresh this page
                 </p>
@@ -596,9 +637,10 @@ function PaymentStatusPage() {
                     Taking too long?
                   </h4>
                   <p className="text-sm text-yellow-800 mb-4">
-                    Verification will timeout after 5 minutes. If you've already sent money and want to check status immediately:
+                    Verification will timeout after 5 minutes. If you've already
+                    sent money and want to check status immediately:
                   </p>
-                  
+
                   <Button
                     onClick={handleManualVerification}
                     disabled={manualVerificationLoading}
@@ -656,9 +698,9 @@ function PaymentStatusPage() {
               </div>
             </div>
           </>
-        )
+        );
     }
-  }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
@@ -677,13 +719,15 @@ function PaymentStatusPage() {
           {/* Main Card */}
           <div className="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-200">
             {/* Status Banner */}
-            <div className={`px-6 py-4 ${
-              paymentStatus === PaymentStatus.SUCCESS
-                ? 'bg-green-50 border-b border-green-200'
-                : paymentStatus === PaymentStatus.FAILED
-                ? 'bg-red-50 border-b border-red-200'
-                : 'bg-blue-50 border-b border-blue-200'
-            }`}>
+            <div
+              className={`px-6 py-4 ${
+                paymentStatus === PaymentStatus.SUCCESS
+                  ? "bg-green-50 border-b border-green-200"
+                  : paymentStatus === PaymentStatus.FAILED
+                    ? "bg-red-50 border-b border-red-200"
+                    : "bg-blue-50 border-b border-blue-200"
+              }`}
+            >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   {paymentStatus === PaymentStatus.SUCCESS ? (
@@ -695,31 +739,34 @@ function PaymentStatusPage() {
                   )}
                   <span className="font-semibold">
                     {paymentStatus === PaymentStatus.SUCCESS
-                      ? 'Payment Verified'
+                      ? "Payment Verified"
                       : paymentStatus === PaymentStatus.FAILED
-                      ? 'Payment Failed'
-                      : 'Verifying Payment'}
+                        ? "Payment Failed"
+                        : "Verifying Payment"}
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Badge
                     variant={
                       paymentStatus === PaymentStatus.SUCCESS
-                        ? 'default'
+                        ? "default"
                         : paymentStatus === PaymentStatus.FAILED
-                        ? 'destructive'
-                        : 'outline'
+                          ? "destructive"
+                          : "outline"
                     }
                     className={
                       paymentStatus === PaymentStatus.SUCCESS
-                        ? 'bg-green-100 text-green-800 hover:bg-green-100'
-                        : ''
+                        ? "bg-green-100 text-green-800 hover:bg-green-100"
+                        : ""
                     }
                   >
                     {paymentStatus}
                   </Badge>
                   {isPolling && (
-                    <Badge variant="outline" className="bg-blue-100 text-blue-800">
+                    <Badge
+                      variant="outline"
+                      className="bg-blue-100 text-blue-800"
+                    >
                       Polling...
                     </Badge>
                   )}
@@ -728,9 +775,7 @@ function PaymentStatusPage() {
             </div>
 
             {/* Content */}
-            <div className="p-6 md:p-8">
-              {renderContent()}
-            </div>
+            <div className="p-6 md:p-8">{renderContent()}</div>
 
             {/* Footer */}
             <div className="px-6 py-4 bg-gray-50 border-t border-gray-200">
@@ -774,5 +819,5 @@ function PaymentStatusPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }
