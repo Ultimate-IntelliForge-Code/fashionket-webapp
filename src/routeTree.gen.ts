@@ -37,6 +37,7 @@ import { Route as VendorVendorLayoutProductsNewRouteImport } from './routes/vend
 import { Route as VendorVendorLayoutProductsSlugRouteImport } from './routes/vendor/_vendorLayout/products/$slug'
 import { Route as VendorVendorLayoutOrdersOrderIdRouteImport } from './routes/vendor/_vendorLayout/orders/$orderId'
 import { Route as rootRootLayoutVendorsSlugRouteImport } from './routes/(root)/_rootLayout/vendors/$slug'
+import { Route as rootRootLayoutShopSlugRouteImport } from './routes/(root)/_rootLayout/shop/slug'
 import { Route as rootRootLayoutProductsSlugRouteImport } from './routes/(root)/_rootLayout/products/$slug'
 import { Route as rootRootLayoutCategoriesSlugRouteImport } from './routes/(root)/_rootLayout/categories/$slug'
 import { Route as authAuthVendorResetPasswordRouteImport } from './routes/(auth)/_auth/vendor/reset-password'
@@ -209,6 +210,11 @@ const rootRootLayoutVendorsSlugRoute =
     path: '/vendors/$slug',
     getParentRoute: () => rootRootLayoutRoute,
   } as any)
+const rootRootLayoutShopSlugRoute = rootRootLayoutShopSlugRouteImport.update({
+  id: '/shop/slug',
+  path: '/shop/slug',
+  getParentRoute: () => rootRootLayoutRoute,
+} as any)
 const rootRootLayoutProductsSlugRoute =
   rootRootLayoutProductsSlugRouteImport.update({
     id: '/products/$slug',
@@ -344,6 +350,7 @@ export interface FileRoutesByFullPath {
   '/vendor/reset-password': typeof authAuthVendorResetPasswordRoute
   '/categories/$slug': typeof rootRootLayoutCategoriesSlugRoute
   '/products/$slug': typeof rootRootLayoutProductsSlugRoute
+  '/shop/slug': typeof rootRootLayoutShopSlugRoute
   '/vendors/$slug': typeof rootRootLayoutVendorsSlugRoute
   '/vendor/orders/$orderId': typeof VendorVendorLayoutOrdersOrderIdRoute
   '/vendor/products/$slug': typeof VendorVendorLayoutProductsSlugRoute
@@ -388,6 +395,7 @@ export interface FileRoutesByTo {
   '/vendor/reset-password': typeof authAuthVendorResetPasswordRoute
   '/categories/$slug': typeof rootRootLayoutCategoriesSlugRoute
   '/products/$slug': typeof rootRootLayoutProductsSlugRoute
+  '/shop/slug': typeof rootRootLayoutShopSlugRoute
   '/vendors/$slug': typeof rootRootLayoutVendorsSlugRoute
   '/vendor/orders/$orderId': typeof VendorVendorLayoutOrdersOrderIdRoute
   '/vendor/products/$slug': typeof VendorVendorLayoutProductsSlugRoute
@@ -438,6 +446,7 @@ export interface FileRoutesById {
   '/(auth)/_auth/vendor/reset-password': typeof authAuthVendorResetPasswordRoute
   '/(root)/_rootLayout/categories/$slug': typeof rootRootLayoutCategoriesSlugRoute
   '/(root)/_rootLayout/products/$slug': typeof rootRootLayoutProductsSlugRoute
+  '/(root)/_rootLayout/shop/slug': typeof rootRootLayoutShopSlugRoute
   '/(root)/_rootLayout/vendors/$slug': typeof rootRootLayoutVendorsSlugRoute
   '/vendor/_vendorLayout/orders/$orderId': typeof VendorVendorLayoutOrdersOrderIdRoute
   '/vendor/_vendorLayout/products/$slug': typeof VendorVendorLayoutProductsSlugRoute
@@ -486,6 +495,7 @@ export interface FileRouteTypes {
     | '/vendor/reset-password'
     | '/categories/$slug'
     | '/products/$slug'
+    | '/shop/slug'
     | '/vendors/$slug'
     | '/vendor/orders/$orderId'
     | '/vendor/products/$slug'
@@ -530,6 +540,7 @@ export interface FileRouteTypes {
     | '/vendor/reset-password'
     | '/categories/$slug'
     | '/products/$slug'
+    | '/shop/slug'
     | '/vendors/$slug'
     | '/vendor/orders/$orderId'
     | '/vendor/products/$slug'
@@ -579,6 +590,7 @@ export interface FileRouteTypes {
     | '/(auth)/_auth/vendor/reset-password'
     | '/(root)/_rootLayout/categories/$slug'
     | '/(root)/_rootLayout/products/$slug'
+    | '/(root)/_rootLayout/shop/slug'
     | '/(root)/_rootLayout/vendors/$slug'
     | '/vendor/_vendorLayout/orders/$orderId'
     | '/vendor/_vendorLayout/products/$slug'
@@ -805,6 +817,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof rootRootLayoutVendorsSlugRouteImport
       parentRoute: typeof rootRootLayoutRoute
     }
+    '/(root)/_rootLayout/shop/slug': {
+      id: '/(root)/_rootLayout/shop/slug'
+      path: '/shop/slug'
+      fullPath: '/shop/slug'
+      preLoaderRoute: typeof rootRootLayoutShopSlugRouteImport
+      parentRoute: typeof rootRootLayoutRoute
+    }
     '/(root)/_rootLayout/products/$slug': {
       id: '/(root)/_rootLayout/products/$slug'
       path: '/products/$slug'
@@ -1012,6 +1031,7 @@ interface rootRootLayoutRouteChildren {
   rootRootLayoutIndexRoute: typeof rootRootLayoutIndexRoute
   rootRootLayoutCategoriesSlugRoute: typeof rootRootLayoutCategoriesSlugRoute
   rootRootLayoutProductsSlugRoute: typeof rootRootLayoutProductsSlugRoute
+  rootRootLayoutShopSlugRoute: typeof rootRootLayoutShopSlugRoute
   rootRootLayoutVendorsSlugRoute: typeof rootRootLayoutVendorsSlugRoute
   rootRootLayoutCartIndexRoute: typeof rootRootLayoutCartIndexRoute
   rootRootLayoutCategoriesIndexRoute: typeof rootRootLayoutCategoriesIndexRoute
@@ -1030,6 +1050,7 @@ const rootRootLayoutRouteChildren: rootRootLayoutRouteChildren = {
   rootRootLayoutIndexRoute: rootRootLayoutIndexRoute,
   rootRootLayoutCategoriesSlugRoute: rootRootLayoutCategoriesSlugRoute,
   rootRootLayoutProductsSlugRoute: rootRootLayoutProductsSlugRoute,
+  rootRootLayoutShopSlugRoute: rootRootLayoutShopSlugRoute,
   rootRootLayoutVendorsSlugRoute: rootRootLayoutVendorsSlugRoute,
   rootRootLayoutCartIndexRoute: rootRootLayoutCartIndexRoute,
   rootRootLayoutCategoriesIndexRoute: rootRootLayoutCategoriesIndexRoute,
