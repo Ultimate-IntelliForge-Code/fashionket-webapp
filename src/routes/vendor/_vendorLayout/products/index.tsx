@@ -26,21 +26,9 @@ import { ErrorState } from '@/components/ui/error-state'
 import { StatsCard } from '@/components/ui/stats-card'
 import { ProductFilters } from '@/components/ui/product-filters'
 import { ProductGrid } from '@/components/ui/product-card'
-import { z } from 'zod'
+import { productSearchSchema } from '@/lib'
+import { IProductQueryFilters } from '@/types'
 
-export const productSearchSchema = z.object({
-  page: z.coerce.number().int().min(1).default(1).optional(),
-  limit: z.coerce.number().int().min(1).max(50).default(12).optional(),
-  search: z.string().optional(),
-  brand: z.string().optional(),
-  minPrice: z.coerce.number().optional(),
-  maxPrice: z.coerce.number().optional(),
-  tags: z.string().optional(),
-  sortBy: z.string().default('createdAt').optional(),
-  sortOrder: z.enum(['asc', 'desc']).default('desc').optional(),
-})
-
-export type IProductQueryFilters = z.infer<typeof productSearchSchema>
 
 export const Route = createFileRoute(
   '/vendor/_vendorLayout/products/',
@@ -124,11 +112,7 @@ function VendorProducts() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-mmp-primary2">Products</h1>
-          <p className="text-gray-600 mt-1">Manage your product inventory</p>
-        </div>
+      <div className="flex items-center justify-end">
         <Button
           onClick={() => navigate({ to: '/vendor/products/new' })}
           className="bg-mmp-primary hover:bg-mmp-primary2"
@@ -165,7 +149,7 @@ function VendorProducts() {
 
       {/* Filters and Products */}
       <div className="flex flex-col lg:flex-row gap-6">
-        <div className="lg:w-64 flex-shrink-0">
+        {/* <div className="lg:w-64 flex-shrink-0">
           <ProductFilters
             filters={search}
             onFilterChange={handleFilterChange}
@@ -173,7 +157,7 @@ function VendorProducts() {
             tags={tags}
             maxPrice={maxPrice}
           />
-        </div>
+        </div> */}
 
         <div className="flex-1 space-y-6">
           {products.length === 0 ? (

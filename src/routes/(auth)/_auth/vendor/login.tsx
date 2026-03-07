@@ -1,27 +1,21 @@
 import { createFileRoute, useNavigate, Navigate } from '@tanstack/react-router'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { z } from 'zod'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useAuth } from '@/hooks'
 import { Loader2 } from 'lucide-react'
 import { Link } from '@tanstack/react-router'
-import { useVendorLogin } from '@/api/queries'
+import { useVendorLogin } from '@/api/mutations'
 import { toast } from 'react-toastify'
 import { AuthFormWrapper } from '@/components/auth'
+import { LoginFormData, loginSchema } from '@/lib'
 
 export const Route = createFileRoute('/(auth)/_auth/vendor/login')({
   component: VendorLogin,
 })
 
-const loginSchema = z.object({
-  email: z.string().email('Invalid email address'),
-  password: z.string().min(6, 'Password must be at least 6 characters'),
-})
-
-type LoginFormData = z.infer<typeof loginSchema>
 
 function VendorLogin() {
   const { isAuthenticated, isVendor, setAuthVendor } = useAuth()
@@ -34,7 +28,7 @@ function VendorLogin() {
     formState: { errors },
     setError,
   } = useForm<LoginFormData>({
-    resolver: zodResolver(loginSchema),
+    resolver: zodResolver(loginSchema as any),
   })
 
   if (isAuthenticated && isVendor) {

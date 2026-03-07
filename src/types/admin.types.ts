@@ -14,7 +14,7 @@ export interface IAdmin extends IBaseDocument, ITimestamps, IBaseUser {
   fullName: string;
   phone: string;
   role: UserRole.ADMIN | UserRole.SUPER_ADMIN;
-  permissions?: IAdminPermissions;
+  permissions: IAdminPermissions;
   isActive: boolean;
   googleId?: string | null;
 }
@@ -43,9 +43,9 @@ export interface ICreateAdminPayload {
  */
 export interface IUpdateAdminPayload {
   fullName?: string;
+  email?: string;
   phone?: string;
   permissions?: Partial<IAdminPermissions>;
-  isActive?: boolean;
 }
 
 /**
@@ -54,5 +54,13 @@ export interface IUpdateAdminPayload {
 export interface IAdminAuthResponse {
   success: boolean;
   message: string;
-  data: IAdmin
+  data: IAdmin;
+}
+
+/**
+ * Admin profile response
+ */
+export interface IAdminProfileResponse {
+  success: boolean;
+  data: IAdmin;
 }

@@ -5,16 +5,10 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useRequestPasswordReset } from '@/api/queries/auth.query';
+import { useRequestPasswordReset } from '@/api/mutations';
 import { AuthFormWrapper } from '@/components/auth';
 import { CheckCircle } from 'lucide-react';
-import { z } from 'zod';
-
-const forgotPasswordSchema = z.object({
-  email: z.string().email('Invalid email address'),
-});
-
-type ForgotPasswordFormData = z.infer<typeof forgotPasswordSchema>;
+import { ForgotPasswordFormData, forgotPasswordSchema } from '@/lib';
 
 export const Route = createFileRoute('/(auth)/_auth/(root)/forgot-password')({
   component: ForgotPasswordPage,
@@ -30,7 +24,7 @@ function ForgotPasswordPage() {
     formState: { errors },
     setError,
   } = useForm<ForgotPasswordFormData>({
-    resolver: zodResolver(forgotPasswordSchema),
+    resolver: zodResolver(forgotPasswordSchema as any),
   });
 
   const onSubmit = async (data: ForgotPasswordFormData) => {

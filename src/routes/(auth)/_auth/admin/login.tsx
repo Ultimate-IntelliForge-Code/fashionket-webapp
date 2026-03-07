@@ -7,19 +7,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { useAdminLogin } from "@/api/queries/auth.query";
+import { useAdminLogin } from "@/api/mutations";
 import { useAuth } from "@/hooks";
 import { AuthFormWrapper, GoogleAuthButton } from "@/components/auth";
 import { Eye, EyeOff, Building2 } from "lucide-react";
 import { toast } from "react-toastify";
-
-const adminLoginSchema = z.object({
-  email: z.string().email("Invalid email address"),
-  password: z.string().min(1, "Password is required"),
-  rememberMe: z.boolean().optional(),
-});
-
-type AdminLoginFormData = z.infer<typeof adminLoginSchema>;
+import { LoginFormData, loginSchema } from "@/lib";
 
 export const Route = createFileRoute("/(auth)/_auth/admin/login")({
   component: AdminLoginPage,
@@ -39,14 +32,14 @@ function AdminLoginPage() {
     handleSubmit,
     formState: { errors },
     setError,
-  } = useForm<AdminLoginFormData>({
-    resolver: zodResolver(adminLoginSchema as any),
+  } = useForm<LoginFormData>({
+    resolver: zodResolver(loginSchema as any),
     defaultValues: {
       rememberMe: false,
     },
   });
 
-  const onSubmit = async (data: AdminLoginFormData) => {
+  const onSubmit = async (data: LoginFormData) => {
     try {
       login(data, {
         onSuccess: (response) => {

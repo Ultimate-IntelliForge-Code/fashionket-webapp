@@ -12,18 +12,19 @@ import { FilterBadge } from "@/components/ui/filter-badge";
 import React from "react";
 import { IProductQueryFilters } from "@/types";
 import { cn, formatCurrency } from "@/lib/utils";
+import { VendorProfile } from "@/components/vendor/vendor-profile";
 
 export const Route = createFileRoute("/(root)/_rootLayout/vendors/$slug")({
   component: VendorDetailPage,
   validateSearch: z
     .object({
-      page: z.number().optional(),
-      limit: z.number().optional(),
+      page: z.coerce.number().optional(),
+      limit: z.coerce.number().optional(),
       search: z.string().optional(),
       categoryId: z.string().optional(),
       brand: z.string().optional(),
-      minPrice: z.number().optional(),
-      maxPrice: z.number().optional(),
+      minPrice: z.coerce.number().optional(),
+      maxPrice: z.coerce.number().optional(),
       tags: z.string().optional(),
       sortBy: z.string().optional(),
       sortOrder: z.enum(["asc", "desc"]).optional(),
@@ -61,24 +62,31 @@ export const Route = createFileRoute("/(root)/_rootLayout/vendors/$slug")({
         .parse(params),
   },
   loader: async ({ context, deps, params }) => {
-    const vendor = await context.queryClient.ensureQueryData(
-      vendorBySlugQuery(params.slug),
-    );
+    try {
+      const [vendor, data] = await Promise.all([
+        context.queryClient.ensureQueryData(vendorBySlugQuery(params.slug)),
+        context.queryClient.ensureQueryData(
+          vendorProductsBySlugQuery(params.slug, deps),
+        ),
+      ]);
 
-    const data = await context.queryClient.ensureQueryData(
-      vendorProductsBySlugQuery(params.slug, deps),
-    );
+      console.log({ vendor, data });
 
-    const products = data.data;
-    const meta = data.pagination;
+      const products = data.data;
+      const meta = data.pagination;
 
-    const brands = Array.from(
-      new Set(products.map((p) => p.brand).filter(Boolean)),
-    ) as string[];
-    const tags = Array.from(new Set(products.flatMap((p) => p.tags)));
-    const maxPrice = Math.max(...products.map((p) => p.price), 0);
-
-    return { vendor, products, meta, brands, tags, maxPrice };
+      const brands = Array.from(
+        new Set(products.map((p) => p.brand).filter(Boolean)),
+      ) as string[];
+      const tags = Array.from(new Set(products.flatMap((p) => p.tags)));
+      const maxPrice = products.length
+        ? Math.max(...products.map((p) => p.price ?? 0))
+        : 0;
+      return { vendor, products, meta, brands, tags, maxPrice };
+    } catch (err) {
+      console.error("Loader error:", err);
+      throw err;
+    }
   },
 });
 
@@ -176,11 +184,15 @@ function VendorDetailPage() {
   return (
     <div className="min-h-screen bg-background">
       {/* Vendor Hero Section */}
-      <VendorHero vendor={vendor} refresh={handleRefresh} isRefreshing={isRefreshing} />
+      <VendorProfile
+        vendor={vendor}
+        refresh={handleRefresh}
+        isRefreshing={isRefreshing}
+      />
 
       {/* Vendor Info Section */}
       <div className="container mx-auto px-2 sm:px-4 py-4 sm:py-3 md:py-4">
-        <VendorInfo vendor={vendor} />
+        {/* <VendorInfo vendor={vendor} /> */}
 
         {/* Products Section */}
         <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 md:py-8">

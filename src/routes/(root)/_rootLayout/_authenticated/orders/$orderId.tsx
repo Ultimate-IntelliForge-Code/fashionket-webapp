@@ -164,7 +164,7 @@ function OrderDetailPage() {
     try {
       const paymentData = await initPayment({
         orderId: order._id,
-        callbackUrl: `${window.location.origin}/cart/payment-status`,
+        callbackUrl: `${window.location.origin}/checkout/payment-status`,
       })
       // Step 3: Redirect to payment gateway
       console.log('🌐 Redirecting to payment gateway...')

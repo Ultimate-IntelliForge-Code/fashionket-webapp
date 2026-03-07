@@ -1,7 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -10,25 +9,12 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuth } from '@/hooks';
 import { toast } from 'react-toastify';
 import { Upload } from 'lucide-react';
+import { SettingsFormData, settingsSchema } from '@/lib';
 
 export const Route = createFileRoute('/vendor/_vendorLayout/settings/')({
   component: VendorSettings,
 });
 
-const settingsSchema = z.object({
-  businessName: z.string().min(3, 'Business name must be at least 3 characters'),
-  email: z.string().email('Invalid email address'),
-  phone: z.string().min(10, 'Phone number must be at least 10 characters'),
-  description: z.string().optional(),
-  location: z.object({
-    street: z.string().min(1, 'Street address is required'),
-    city: z.string().min(1, 'City is required'),
-    state: z.string().min(1, 'State is required'),
-    country: z.string().min(1, 'Country is required'),
-  }),
-});
-
-type SettingsFormData = z.infer<typeof settingsSchema>;
 
 function VendorSettings() {
   const { vendor } = useAuth();
@@ -38,7 +24,7 @@ function VendorSettings() {
     handleSubmit,
     formState: { errors, isDirty },
   } = useForm<SettingsFormData>({
-    resolver: zodResolver(settingsSchema),
+    resolver: zodResolver(settingsSchema as any),
     defaultValues: {
       businessName: vendor?.businessName || '',
       email: vendor?.email || '',
@@ -65,12 +51,6 @@ function VendorSettings() {
 
   return (
     <div className="space-y-6 max-w-4xl">
-      {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold text-mmp-primary2">Settings</h1>
-        <p className="text-gray-600 mt-1">Manage your business profile and preferences</p>
-      </div>
-
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         {/* Business Profile */}
         <Card>

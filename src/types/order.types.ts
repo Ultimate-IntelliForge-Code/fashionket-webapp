@@ -4,8 +4,11 @@ import type { DeliveryMethod, OrderStatus } from "./enums";
 import type { IPayment } from "./payment.types";
 import type { IUser } from "./user.types";
 
+export interface IProductId extends IBaseDocument {
+  images: string | string[]
+}
 export interface IOrderItem {
-  productId: ObjectId;
+  productId: IProductId | ObjectId;
   nameSnapshot: string;
   priceSnapshot: number;
   quantity: number;

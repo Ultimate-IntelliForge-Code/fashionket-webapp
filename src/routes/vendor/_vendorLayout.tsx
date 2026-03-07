@@ -13,48 +13,48 @@ function VendorLayout() {
   const { isAuthenticated, isVendor } = useAuth();
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = React.useState(false);
 
-  const toggleMobileSidebar = () => {
-    setIsMobileSidebarOpen(!isMobileSidebarOpen);
-  };
+  // const toggleMobileSidebar = () => {
+  //   setIsMobileSidebarOpen(!isMobileSidebarOpen);
+  // };
+
+  if (!isAuthenticated || !isVendor) {
+    return <Navigate to="/vendor/login" />;
+  }
 
   return (
     <VendorAuthProvider>
-      {!isAuthenticated || !isVendor ? (
-        <Navigate to="/vendor/login" />
-      ) : (
-        <div className="min-h-screen bg-mmp-neutral">
-          {/* Mobile Sidebar Overlay */}
-          {isMobileSidebarOpen && (
-            <div
-              className="fixed inset-0 z-50 bg-black/50 lg:hidden"
-              onClick={() => setIsMobileSidebarOpen(false)}
-            />
-          )}
+      <div className="min-h-screen bg-mmp-neutral">
+        {/* Mobile Sidebar Overlay */}
+        {isMobileSidebarOpen && (
+          <div
+            className="fixed inset-0 z-50 bg-black/50 lg:hidden"
+            onClick={() => setIsMobileSidebarOpen(false)}
+          />
+        )}
 
-          {/* Sidebar */}
-          <div>
-            <VendorSideBar
-              isMobileOpen={isMobileSidebarOpen}
-              onMobileClose={() => setIsMobileSidebarOpen(false)}
-            />
-          </div>
-
-          {/* Main Content Area */}
-          <div className="lg:pl-64">
-            {/* Header - Sticky with same width as main content */}
-            <div className="sticky top-0 z-30 lg:z-20">
-              <VendorHeader onMenuClick={toggleMobileSidebar} />
-            </div>
-
-            {/* Main Content */}
-            <main className="min-h-[calc(100vh-4rem)]">
-              <div className="mx-auto px-4 sm:px-6 lg:px-8 py-6">
-                <Outlet />
-              </div>
-            </main>
-          </div>
+        {/* Sidebar */}
+        <div>
+          <VendorSideBar
+            isMobileOpen={isMobileSidebarOpen}
+            onMobileClose={() => setIsMobileSidebarOpen(false)}
+          />
         </div>
-      )}
+
+        {/* Main Content Area */}
+        <div className="lg:pl-64">
+          {/* Header - Sticky with same width as main content */}
+          <div className="sticky top-0 z-30 lg:z-20">
+            <VendorHeader onMobileOpen={() => setIsMobileSidebarOpen(true)} />
+          </div>
+
+          {/* Main Content */}
+          <main className="min-h-[calc(100vh-4rem)]">
+            <div className="mx-auto px-4 sm:px-6 lg:px-8 py-6">
+              <Outlet />
+            </div>
+          </main>
+        </div>
+      </div>
     </VendorAuthProvider>
   );
 }

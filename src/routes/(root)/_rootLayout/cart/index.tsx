@@ -28,7 +28,7 @@ export const Route = createFileRoute("/(root)/_rootLayout/cart/")({
 function CartPage() {
   const navigate = useNavigate();
   const {
-    items,
+    itkwems,
     subtotal,
     itemCount,
     isLoading,
@@ -143,7 +143,7 @@ function CartPage() {
 
   if (isEmpty) {
     return (
-      <div className="min-h-screen bg-gray-50 py-12">
+      <div className="min-h-screen bg-graysubtotal-50 py-12">
         <div className="container mx-auto px-4">
           <div className="text-center">
             <div className="inline-flex items-center justify-center w-24 h-24 rounded-full bg-mmp-primary/10 mb-6">
@@ -294,7 +294,7 @@ function CartPage() {
                           {/* Price - Mobile */}
                           <div className="mt-2 xs:hidden">
                             <span className="text-base font-bold text-mmp-primary2">
-                              {formatCurrency(item.priceSnapshot)}
+                              {formatCurrency(item.priceSnapshot * (1 - (item.discount ?? 0) / 100))}
                             </span>
                           </div>
                         </div>
@@ -304,7 +304,7 @@ function CartPage() {
                           {/* Price - Desktop */}
                           <div className="hidden xs:block">
                             <span className="text-sm sm:text-base font-bold text-mmp-primary2">
-                              {formatCurrency(item.priceSnapshot)}
+                              {formatCurrency(item.priceSnapshot * (1 - (item.discount ?? 0) / 100))}
                             </span>
                           </div>
 
@@ -362,7 +362,7 @@ function CartPage() {
                             <span className="text-xs sm:text-sm font-semibold text-gray-900">
                               Total:{" "}
                               {formatCurrency(
-                                item.priceSnapshot * item.quantity,
+                                item?.subtotal ?? 0,
                               )}
                             </span>
                           </div>

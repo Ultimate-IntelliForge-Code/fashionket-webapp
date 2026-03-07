@@ -9,3 +9,4 @@ export * from './order.mutation';
 export * from './product.mutation';
 export * from './address.mutation'
 export * from './payment.mutation'
+export * from './auth.muatation'

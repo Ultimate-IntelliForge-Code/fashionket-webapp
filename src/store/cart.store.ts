@@ -1,11 +1,11 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
-import type { 
-  ICart, 
-  ICartItem, 
+import type {
+  ICart,
+  ICartItem,
   ObjectId,
-  FrontendSafe, 
-  IVariantOptions
+  FrontendSafe,
+  IVariantOptions,
 } from '@/types';
 
 // Local cart storage key
@@ -19,15 +19,15 @@ interface LocalCart {
 interface CartState {
   // Local cart state (for unauthenticated users)
   localCart: LocalCart;
-  
+
   // Server cart state (for authenticated users)
   serverCart: FrontendSafe<ICart> | null;
-  
+
   // Loading states
   isLoading: boolean;
   isSyncing: boolean;
   error: string | null;
-  
+
   // Actions
   addToLocalCart: (payload: {
     productId: string;
@@ -37,36 +37,28 @@ interface CartState {
     quantity: number;
     variantOptions?: IVariantOptions;
   }) => void;
-  
+
   updateLocalCartItem: (payload: {
     productId: string;
     quantity: number;
   }) => void;
-  
+
   removeFromLocalCart: (productId: string) => void;
-  
+
   clearLocalCart: () => void;
-  
+
   getCartSummary: (isAuthenticated: boolean) => {
     itemCount: number;
     subtotal: number;
-    items: Array<{
-      _id?: string;
-      productId: string;
-      nameSnapshot: string;
-      priceSnapshot: number;
-      quantity: number;
-      variantOptions?: IVariantOptions;
-      productImage?: string;
-    }>;
+    items: ICartItem[]
   };
-  
+
   // Internal state setters
   setServerCart: (cart: FrontendSafe<ICart> | null) => void;
   setLoading: (loading: boolean) => void;
   setSyncing: (syncing: boolean) => void;
   setError: (error: string | null) => void;
-  
+
   // Reset store
   reset: () => void;
 }
@@ -114,7 +106,7 @@ export const useCartStore = create<CartState>()(
         );
 
         let updatedItems: ICartItem[];
-        
+
         if (existingItemIndex >= 0) {
           // Update existing item quantity
           updatedItems = [...localCart.items];
@@ -152,7 +144,7 @@ export const useCartStore = create<CartState>()(
 
         if (existingItemIndex >= 0) {
           const updatedItems = [...localCart.items];
-          
+
           if (payload.quantity <= 0) {
             // Remove item if quantity is 0 or less
             updatedItems.splice(existingItemIndex, 1);
@@ -201,23 +193,25 @@ export const useCartStore = create<CartState>()(
 
       getCartSummary: (isAuthenticated) => {
         const { localCart, serverCart } = get();
-        
+
         if (isAuthenticated && serverCart) {
           // Use server cart for authenticated users
           const items = serverCart.items.map(item => ({
-            _id: item._id,
+            _id: item._id ?? '',
             productId: item.productId.toString(),
             nameSnapshot: item.nameSnapshot,
             priceSnapshot: item.priceSnapshot,
             quantity: item.quantity,
+            subtotal: item.subtotal ?? 0,
+            discount: item.discount,
             variantOptions: item.variantOptions,
             productImage: item.productImage,
           }));
-          
+
           return {
             itemCount: items.reduce((total, item) => total + item.quantity, 0),
             subtotal: items.reduce(
-              (total, item) => total + (item.priceSnapshot * item.quantity),
+              (total, item) => total + (item.subtotal ?? 0),
               0
             ),
             items,
@@ -225,18 +219,21 @@ export const useCartStore = create<CartState>()(
         } else {
           // Use local cart for unauthenticated users
           const items = localCart.items.map(item => ({
+            _id: item._id ?? '',
             productId: item.productId.toString(),
             nameSnapshot: item.nameSnapshot,
             priceSnapshot: item.priceSnapshot,
             quantity: item.quantity,
+            subtotal: item.subtotal ?? 0,
+            discount: item.discount,
             variantOptions: item.variantOptions,
             productImage: item.productImage,
           }));
-          
+
           return {
             itemCount: items.reduce((total, item) => total + item.quantity, 0),
             subtotal: items.reduce(
-              (total, item) => total + (item.priceSnapshot * item.quantity),
+              (total, item) => total + (item.subtotal ?? 0),
               0
             ),
             items,
@@ -248,19 +245,19 @@ export const useCartStore = create<CartState>()(
       setServerCart: (cart) => {
         set({ serverCart: cart, error: null });
       },
-      
+
       setLoading: (loading) => {
         set({ isLoading: loading });
       },
-      
+
       setSyncing: (syncing) => {
         set({ isSyncing: syncing });
       },
-      
+
       setError: (error) => {
         set({ error });
       },
-      
+
       reset: () => {
         set(initialState);
       },

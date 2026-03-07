@@ -1,0 +1,415 @@
+/**
+ * FashionKet SEO Landing Page Styles
+ *
+ * Design: Editorial-luxury with warm off-white ground, obsidian type,
+ * and sharp terracotta accents. Grid layout with generous breathing room.
+ */
+
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500&display=swap');
+
+:root {
+  --color-ground:    #F9F6F2;
+  --color-surface:   #FFFFFF;
+  --color-ink:       #1A1714;
+  --color-ink-muted: #6B6460;
+  --color-accent:    #C05E3C;
+  --color-accent-lt: #F0D5CA;
+  --color-border:    #E8E3DC;
+  --color-gold:      #B8962E;
+
+  --font-display: 'Playfair Display', Georgia, serif;
+  --font-body:    'DM Sans', system-ui, sans-serif;
+
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+  --space-24: 6rem;
+
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 16px;
+
+  --shadow-card: 0 2px 8px rgba(26,23,20,0.06), 0 0 0 1px rgba(26,23,20,0.04);
+  --shadow-hover: 0 8px 32px rgba(26,23,20,0.12);
+
+  --transition: 200ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ─── Layout ────────────────────────────────────────────────────────────── */
+
+.seo-page {
+  background: var(--color-ground);
+  min-height: 100vh;
+  font-family: var(--font-body);
+  color: var(--color-ink);
+}
+
+.seo-page > * {
+  max-width: 1320px;
+  margin-inline: auto;
+  padding-inline: var(--space-6);
+}
+
+/* ─── Breadcrumbs ────────────────────────────────────────────────────────── */
+
+.seo-breadcrumbs {
+  padding-block: var(--space-4);
+  font-size: 0.8125rem;
+  color: var(--color-ink-muted);
+  letter-spacing: 0.01em;
+}
+
+.seo-breadcrumbs ol {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: center;
+}
+
+.seo-breadcrumbs a {
+  color: var(--color-ink-muted);
+  text-decoration: none;
+  transition: color var(--transition);
+}
+
+.seo-breadcrumbs a:hover {
+  color: var(--color-accent);
+}
+
+.seo-breadcrumbs span[aria-hidden] {
+  color: var(--color-border);
+  margin-inline: var(--space-1);
+}
+
+/* ─── Hero ───────────────────────────────────────────────────────────────── */
+
+.seo-hero {
+  padding-block: var(--space-12) var(--space-8);
+  border-bottom: 1px solid var(--color-border);
+  display: grid;
+  gap: var(--space-4);
+}
+
+.seo-h1 {
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 4vw, 3.5rem);
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  margin: 0;
+}
+
+.seo-intro {
+  max-width: 680px;
+  font-size: 1.0625rem;
+  line-height: 1.7;
+  color: var(--color-ink-muted);
+  margin: 0;
+  font-weight: 300;
+}
+
+.seo-stats {
+  font-size: 0.875rem;
+  color: var(--color-ink-muted);
+  font-weight: 500;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+/* ─── Product Section ───────────────────────────────────────────────────── */
+
+.seo-product-section {
+  padding-block: var(--space-12);
+}
+
+.seo-product-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: var(--space-6);
+}
+
+/* ─── Product Card ──────────────────────────────────────────────────────── */
+
+.seo-product-card {
+  background: var(--color-surface);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+  transition: box-shadow var(--transition), transform var(--transition);
+}
+
+.seo-product-card:hover {
+  box-shadow: var(--shadow-hover);
+  transform: translateY(-3px);
+}
+
+.seo-product-link {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+}
+
+.seo-product-image-wrap {
+  position: relative;
+  aspect-ratio: 3/4;
+  background: var(--color-ground);
+  overflow: hidden;
+}
+
+.seo-product-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 400ms ease;
+}
+
+.seo-product-card:hover .seo-product-image {
+  transform: scale(1.04);
+}
+
+.seo-product-colors {
+  position: absolute;
+  bottom: var(--space-3);
+  left: var(--space-3);
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.seo-color-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(255,255,255,0.7);
+  display: block;
+}
+
+.seo-color-more {
+  font-size: 0.6875rem;
+  color: #fff;
+  background: rgba(0,0,0,0.4);
+  border-radius: 99px;
+  padding: 0 4px;
+  backdrop-filter: blur(4px);
+}
+
+.seo-product-info {
+  padding: var(--space-4);
+  display: grid;
+  gap: var(--space-1);
+}
+
+.seo-product-brand {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-ink-muted);
+  margin: 0;
+}
+
+.seo-product-name {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 500;
+  line-height: 1.3;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.seo-product-rating {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.seo-stars {
+  color: var(--color-gold);
+  font-size: 0.75rem;
+  letter-spacing: 1px;
+}
+
+.seo-product-price {
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--color-ink);
+  margin: 0;
+}
+
+/* ─── Pagination ────────────────────────────────────────────────────────── */
+
+.seo-pagination {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-2);
+  padding-top: var(--space-12);
+  flex-wrap: wrap;
+}
+
+.seo-page-btn {
+  min-width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-decoration: none;
+  color: var(--color-ink);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  transition: all var(--transition);
+  padding-inline: var(--space-3);
+}
+
+.seo-page-btn:hover {
+  border-color: var(--color-ink);
+  background: var(--color-ink);
+  color: var(--color-surface);
+}
+
+.seo-page-btn--active {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: #fff;
+}
+
+/* ─── Related Links ─────────────────────────────────────────────────────── */
+
+.seo-related {
+  border-top: 1px solid var(--color-border);
+  padding-block: var(--space-12);
+}
+
+.seo-related-title {
+  font-family: var(--font-display);
+  font-size: 1.375rem;
+  font-weight: 600;
+  margin: 0 0 var(--space-6);
+}
+
+.seo-related-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.seo-related-link {
+  display: inline-block;
+  padding: var(--space-2) var(--space-4);
+  border-radius: 99px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: all var(--transition);
+}
+
+.seo-related-link--broader {
+  background: var(--color-accent-lt);
+  color: var(--color-accent);
+  border: 1px solid var(--color-accent-lt);
+}
+
+.seo-related-link--broader:hover {
+  background: var(--color-accent);
+  color: #fff;
+}
+
+.seo-related-link--related {
+  background: var(--color-surface);
+  color: var(--color-ink);
+  border: 1px solid var(--color-border);
+}
+
+.seo-related-link--related:hover {
+  border-color: var(--color-ink);
+  background: var(--color-ink);
+  color: #fff;
+}
+
+/* ─── Skeleton Loader ───────────────────────────────────────────────────── */
+
+@keyframes shimmer {
+  0%   { background-position: -400px 0; }
+  100% { background-position:  400px 0; }
+}
+
+.seo-skeleton {
+  background: linear-gradient(90deg, #ede8e1 25%, #f5f2ee 50%, #ede8e1 75%);
+  background-size: 800px 100%;
+  animation: shimmer 1.4s infinite;
+  border-radius: var(--radius-sm);
+}
+
+.seo-skeleton--h1    { height: 56px; max-width: 480px; margin-bottom: var(--space-4); }
+.seo-skeleton--text  { height: 20px; max-width: 600px; margin-bottom: var(--space-12); }
+.seo-skeleton--image { aspect-ratio: 3/4; border-radius: var(--radius-md); }
+.seo-skeleton--title { height: 18px; margin-top: var(--space-3); }
+.seo-skeleton--price { height: 18px; margin-top: var(--space-2); max-width: 60px; }
+
+.seo-product-card--skeleton {
+  box-shadow: none;
+  background: transparent;
+}
+
+/* ─── Empty / Error States ──────────────────────────────────────────────── */
+
+.seo-empty,
+.seo-page--error {
+  text-align: center;
+  padding-block: var(--space-24);
+}
+
+.seo-empty p,
+.seo-page--error p {
+  color: var(--color-ink-muted);
+}
+
+.seo-cta-btn {
+  display: inline-block;
+  margin-top: var(--space-6);
+  padding: var(--space-3) var(--space-8);
+  background: var(--color-accent);
+  color: #fff;
+  border-radius: var(--radius-sm);
+  font-weight: 500;
+  text-decoration: none;
+  transition: background var(--transition);
+}
+
+.seo-cta-btn:hover {
+  background: #a34d2e;
+}
+
+/* ─── Responsive ────────────────────────────────────────────────────────── */
+
+@media (max-width: 768px) {
+  .seo-product-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-4);
+  }
+
+  .seo-page > * {
+    padding-inline: var(--space-4);
+  }
+}
+
+@media (max-width: 480px) {
+  .seo-product-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-3);
+  }
+}

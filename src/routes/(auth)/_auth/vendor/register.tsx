@@ -1,7 +1,6 @@
 import { createFileRoute, useNavigate, Navigate } from '@tanstack/react-router'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { z } from 'zod'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -9,37 +8,16 @@ import { Textarea } from '@/components/ui/textarea'
 import { useAuth } from '@/hooks'
 import { Eye, EyeOff, Loader2, Shield } from 'lucide-react'
 import { Link } from '@tanstack/react-router'
-import { useVendorSignup } from '@/api/queries'
+import { useVendorSignup } from '@/api/mutations'
 import { toast } from 'react-toastify'
 import { AuthFormWrapper } from '@/components/auth'
 import React from 'react'
+import { VendorSignupFormData, vendorSignupSchema } from '@/lib'
 
 export const Route = createFileRoute('/(auth)/_auth/vendor/register')({
   component: VendorSignup,
 })
 
-const signupSchema = z
-  .object({
-    fullName: z.string("Invalid name"),
-    email: z.string().email('Invalid email address'),
-    phone: z.string().min(10, 'Phone number must be at least 10 characters'),
-    businessName: z.string().min(3, 'Store name must be at least 3 characters'),
-    description: z.string().optional(),
-    password: z.string().min(6, 'Password must be at least 6 characters'),
-    confirmPassword: z.string(),
-    location: z.object({
-      street: z.string().min(1, 'Street address is required'),
-      city: z.string().min(1, 'City is required'),
-      state: z.string().min(1, 'State is required'),
-      country: z.string().min(1, 'Country is required'),
-    }),
-  })
-  .refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords don't match",
-    path: ['confirmPassword'],
-  })
-
-type SignupFormData = z.infer<typeof signupSchema>
 
 function VendorSignup() {
   const [showPassword, setShowPassword] = React.useState(false)
@@ -54,8 +32,8 @@ function VendorSignup() {
     handleSubmit,
     formState: { errors },
     setError,
-  } = useForm<SignupFormData>({
-    resolver: zodResolver(signupSchema),
+  } = useForm<VendorSignupFormData>({
+    resolver: zodResolver(vendorSignupSchema as any),
     defaultValues: {
       location: {
         country: 'Nigeria',
@@ -67,7 +45,7 @@ function VendorSignup() {
     return <Navigate to="/vendor" />
   }
 
-  const onSubmit = async (data: SignupFormData) => {
+  const onSubmit = async (data: VendorSignupFormData) => {
     try {
       signup(data, {
         onSuccess: (response) => {

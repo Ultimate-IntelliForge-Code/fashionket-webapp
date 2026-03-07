@@ -2,20 +2,15 @@ import React from 'react'
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { z } from 'zod'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { useRequestPasswordReset } from '@/api/queries/auth.query'
+import { useRequestPasswordReset } from '@/api/mutations'
 import { AuthFormWrapper } from '@/components/auth'
 import { CheckCircle, Shield } from 'lucide-react'
 import { toast } from 'react-toastify'
+import { ForgotPasswordFormData, forgotPasswordSchema } from '@/lib'
 
-const adminForgotPasswordSchema = z.object({
-  email: z.string().email('Invalid email address'),
-})
-
-type AdminForgotPasswordFormData = z.infer<typeof adminForgotPasswordSchema>
 
 export const Route = createFileRoute('/(auth)/_auth/admin/forgot-password')({
   component: AdminForgotPasswordPage,
@@ -30,11 +25,11 @@ function AdminForgotPasswordPage() {
     handleSubmit,
     formState: { errors },
     setError,
-  } = useForm<AdminForgotPasswordFormData>({
-    resolver: zodResolver(adminForgotPasswordSchema),
+  } = useForm<ForgotPasswordFormData>({
+    resolver: zodResolver(forgotPasswordSchema as any),
   })
 
-  const onSubmit = async (data: AdminForgotPasswordFormData) => {
+  const onSubmit = async (data: ForgotPasswordFormData) => {
     try {
       await requestReset(data, {
         onSuccess: () => {

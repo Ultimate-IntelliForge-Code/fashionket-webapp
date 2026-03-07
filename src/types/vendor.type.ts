@@ -1,14 +1,13 @@
 import type { IBaseDocument, IBaseUser, ITimestamps } from "./base.types";
 import type { UserRole } from "./enums";
 
-
-export interface ILocation {
+export interface IVendorLocation {
+  lat?: number;
+  lng?: number;
   street: string;
   city: string;
   state: string;
   country: string;
-  lat?: string;
-  lng?: string;
 }
 
 export enum AccountStatus {
@@ -22,17 +21,18 @@ export enum AccountStatus {
  * Vendor base interface (excluding sensitive fields)
  */
 export interface IVendor extends IBaseDocument, ITimestamps, IBaseUser {
-  fullName: string;
+  fullName?: string;
   businessName: string;
   slug: string;
   description?: string;
   logoUrl?: string;
-  phone: string;
+  idDocument?: string;
+  phone?: string;
   role: UserRole.VENDOR;
   isActive: boolean;
   verified: boolean;
   accountStatus: AccountStatus;
-  location: ILocation;
+  location: IVendorLocation;
   ratingAverage: number;
   ratingCount: number;
   googleId?: string | null;
@@ -50,20 +50,15 @@ export interface IVendorWithPassword extends IVendor {
  * Vendor creation payload
  */
 export interface ICreateVendorPayload {
-  fullName: string;
   email: string;
-  phone: string;
-  businessName: string;
-  description?: string;
   password: string;
-  location: IVendorAddress
-}
-
-export interface IVendorAddress {
-  street: string;
-  city: string;
-  state: string;
-  country: string;
+  businessName: string;
+  fullName?: string;
+  description?: string;
+  logoUrl?: string;
+  idDocument?: string;
+  phone?: string;
+  location: IVendorLocation;
 }
 
 /**
@@ -71,9 +66,13 @@ export interface IVendorAddress {
  */
 export interface IUpdateVendorPayload {
   fullName?: string;
+  email?: string;
+  businessName?: string;
   description?: string;
-  location?: IVendorAddress;
+  logoUrl?: string;
+  idDocument?: string;
   phone?: string;
+  location?: Partial<IVendorLocation>;
 }
 
 /**
@@ -82,5 +81,13 @@ export interface IUpdateVendorPayload {
 export interface IVendorAuthResponse {
   success: boolean;
   message: string;
+  data: IVendor;
+}
+
+/**
+ * Vendor profile response
+ */
+export interface IVendorProfileResponse {
+  success: boolean;
   data: IVendor;
 }

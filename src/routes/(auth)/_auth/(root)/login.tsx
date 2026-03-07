@@ -6,7 +6,7 @@ import { z } from 'zod'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { useUserLogin } from '@/api/queries'
+import { useUserLogin } from '@/api/mutations'
 import { AuthFormWrapper, GoogleAuthButton } from '@/components/auth'
 import { Eye, EyeOff } from 'lucide-react'
 import { toast } from 'react-toastify'
@@ -37,7 +37,7 @@ function LoginPage() {
     formState: { errors },
     setError,
   } = useForm<LoginFormData>({
-    resolver: zodResolver(loginSchema),
+    resolver: zodResolver(loginSchema as any),
   })
 
   const onSubmit = (data: LoginFormData) => {

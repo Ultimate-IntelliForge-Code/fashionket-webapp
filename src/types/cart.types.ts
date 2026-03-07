@@ -6,6 +6,8 @@ export interface ICartItem extends IBaseDocument{
   nameSnapshot: string;
   priceSnapshot: number;
   productImage?: string;
+  discount?: number;
+  subtotal?: number;
   quantity: number;
   variantOptions?: IVariantOptions
 }

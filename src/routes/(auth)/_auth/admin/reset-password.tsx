@@ -6,28 +6,12 @@ import { z } from 'zod';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useResetPassword } from '@/api/queries/auth.query';
+import { useResetPassword } from '@/api/mutations';
 import { AuthFormWrapper } from '@/components/auth';
 import { Eye, EyeOff, CheckCircle, Shield } from 'lucide-react';
 import { toast } from 'react-toastify';
-import { validatePassword } from '@/lib/utils/validation.utils';
+import { ResetPasswordFormData, resetPasswordSchema } from '@/lib';
 
-const adminResetPasswordSchema = z.object({
-  token: z.string().min(1, 'Token is required'),
-  newPassword: z.string().min(8, 'Password must be at least 8 characters'),
-  confirmPassword: z.string(),
-}).refine((data) => data.newPassword === data.confirmPassword, {
-  message: "Passwords don't match",
-  path: ["confirmPassword"],
-}).refine((data) => {
-  const validation = validatePassword(data.newPassword);
-  return validation.valid;
-}, {
-  message: "Password must contain uppercase, lowercase, number, and special character",
-  path: ["newPassword"],
-});
-
-type AdminResetPasswordFormData = z.infer<typeof adminResetPasswordSchema>;
 
 export const Route = createFileRoute('/(auth)/_auth/admin/reset-password')({
   component: AdminResetPasswordPage,
@@ -49,8 +33,8 @@ function AdminResetPasswordPage() {
     formState: { errors },
     setError,
     watch,
-  } = useForm<AdminResetPasswordFormData>({
-    resolver: zodResolver(adminResetPasswordSchema),
+  } = useForm<ResetPasswordFormData>({
+    resolver: zodResolver(resetPasswordSchema as any),
     defaultValues: {
       token: search.token || '',
     },
@@ -58,7 +42,7 @@ function AdminResetPasswordPage() {
 
   const newPassword = watch('newPassword');
 
-  const onSubmit = async (data: AdminResetPasswordFormData) => {
+  const onSubmit = async (data: ResetPasswordFormData) => {
     try {
       await resetPassword(data, {
         onSuccess: () => {

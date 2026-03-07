@@ -10,10 +10,6 @@ import {
   MapPin,
   Shield,
   Heart,
-  Sparkles,
-  ChevronRight,
-  Globe,
-  MessageCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -72,10 +68,10 @@ const socialLinks = [
 ];
 
 const contactInfo = [
-  { icon: Phone, text: "+1 (555) 123-4567", href: "tel:+15551234567" },
+  { icon: Phone, text: "+234 (0) 701 526-2642", href: "tel:+2347015262642" },
   {
     icon: Mail,
-    text: "support@fashionket.com",
+    text: "media@fashionket.com",
     href: "mailto:support@fashionket.com",
   },
   {
@@ -165,9 +161,9 @@ export default function Footer() {
                 </div>
                 <div className="flex gap-2">
                   <Button
-                    variant="outline"
+                    variant="ghost"
                     size="sm"
-                    className="border-mmp-primary/30 hover:bg-mmp-primary/10 h-9 text-xs sm:text-sm px-3 sm:px-4"
+                    className="border-mmp-accent hover:bg-mmp-accent/10 hover:text-mmp-accent h-9 text-xs sm:text-sm px-3 sm:px-4"
                     asChild
                   >
                     <Link to="/vendor/login">Login</Link>

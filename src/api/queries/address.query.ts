@@ -35,7 +35,10 @@ export const addressQuery = (addressId: string) => ({
 export const shippingFeeQuery = (addressId: string) => ({
   queryKey: queryKeys.addresses.detail(addressId),
   queryFn: async (): Promise<FrontendSafe<IShippingResponse>> => {
-    const response = await apiClient.get<FrontendSafe<IShippingResponse>>(`/address/calculate/${addressId}`);
+    console.log('Fetching shipping fee for address ID:', addressId);
+    const path = `/address/calculate/${addressId}`;
+    console.log('API endpoint:', path);
+    const response = await apiClient.get<FrontendSafe<IShippingResponse>>(path);
 
     if (!response.success) {
       throw new Error(response.error.message);

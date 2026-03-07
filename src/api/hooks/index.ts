@@ -9,3 +9,4 @@ export * from './order.hook';
 export * from './product.hook';
 export * from './payment.hook';
 export * from './vendor.hook';
+export * from './seometa.hook'

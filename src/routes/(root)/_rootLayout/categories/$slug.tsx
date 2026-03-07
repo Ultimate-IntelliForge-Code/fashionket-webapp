@@ -1,6 +1,5 @@
 import React from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { z } from "zod";
 import { ProductGrid, ProductListItem } from "@/components/ui/product-card";
 import { Button } from "@/components/ui/button";
 import { cn, formatCurrency } from "@/lib/utils";
@@ -15,19 +14,8 @@ import {
 import { useProducts } from "@/api/hooks";
 import { Pagination } from "@/components/ui/pagination";
 import { FilterBadge } from "@/components/ui/filter-badge";
+import { productSearchSchema } from "@/lib";
 
-// Search params schema
-const productSearchSchema = z.object({
-  page: z.number().optional().default(1),
-  limit: z.number().optional().default(12),
-  search: z.string().optional(),
-  brand: z.string().optional(),
-  minPrice: z.number().optional(),
-  maxPrice: z.number().optional(),
-  tags: z.string().optional(),
-  sortBy: z.string().optional(),
-  sortOrder: z.enum(["asc", "desc"]).optional(),
-});
 
 export const Route = createFileRoute("/(root)/_rootLayout/categories/$slug")({
   component: CategoryProductsPage,

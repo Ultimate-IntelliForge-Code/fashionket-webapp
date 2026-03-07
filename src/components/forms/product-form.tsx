@@ -1,7 +1,6 @@
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -28,40 +27,10 @@ import {
   ArrowUpDown,
   Info,
 } from 'lucide-react';
-import { cn } from '@/lib/utils';
 import { toast } from 'react-toastify';
+import { productFormSchema, ProductFormData, cn } from '@/lib';
 
-// Product form schema
-const productFormSchema = z.object({
-  name: z.string()
-    .min(3, 'Name must be at least 3 characters')
-    .max(200, 'Name must not exceed 200 characters'),
-  description: z.string()
-    .max(2000, 'Description must not exceed 2000 characters')
-    .optional(),
-  categoryId: z.string().min(1, 'Category is required'),
-  brand: z.string().max(100, 'Brand must not exceed 100 characters').optional(),
-  price: z.number()
-    .min(0, 'Price must be positive')
-    .max(10000000, 'Price is too high'),
-  stock: z.number()
-    .min(0, 'Stock must be positive')
-    .max(10000, 'Stock is too high'),
-  discount: z.number()
-    .min(0, 'Discount cannot be negative')
-    .max(100, 'Discount cannot exceed 100%')
-    .default(0),
-  tags: z.string().optional(),
-  isActive: z.boolean().default(true),
-  variantOptions: z.object({
-    sizes: z.string().optional(),
-    colors: z.string().optional(),
-    materials: z.string().optional(),
-    genders: z.string().optional(),
-  }).optional(),
-});
 
-type ProductFormData = z.infer<typeof productFormSchema>;
 
 // Image item type
 type ImageItem = {
