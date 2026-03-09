@@ -49,6 +49,9 @@ export const AuthFormWrapper: React.FC<AuthFormWrapperProps> = ({
                 <img
                   src="/logo.png"
                   alt="FashionKet Logo"
+                  width={100}
+                  height={100}
+                  className="w-1/2"
                 />
               </Link>
               <div>{title}</div>

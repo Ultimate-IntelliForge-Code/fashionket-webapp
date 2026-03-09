@@ -47,8 +47,8 @@ export const useAuth = () => {
     } finally {
       clearAuth();
       queryClient.clear();
-      // Redirect to login page
-      window.location.href = '/login';
+      // Redirect to home page
+      window.location.href = '/';
     }
   }, [logoutMutate, clearAuth, queryClient]);
 

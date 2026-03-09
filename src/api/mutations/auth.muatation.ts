@@ -1,11 +1,10 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '../client';
 import { queryKeys } from '../cache-keys';
 import type {
   ILoginCredentials,
   ISignupCredentials,
   IUserAuthResponse,
-  ITokenValidationResponse,
   IPasswordResetRequest,
   IPasswordResetPayload,
   ICreateAdminPayload,
