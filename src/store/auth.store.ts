@@ -73,7 +73,7 @@ export const useAuthStore = create<AuthState>()(
           isAuthenticated: false,
           role: null,
           isLoading: false,
-          isInitialized: true,
+          isInitialized: false,
         }),
 
       setLoading: (loading) => set({ isLoading: loading }),

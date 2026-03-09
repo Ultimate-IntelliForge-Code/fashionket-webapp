@@ -97,13 +97,12 @@ function VendorSignup() {
     <AuthFormWrapper
       title={
         <div className="flex items-center justify-center gap-2">
-          <Shield className="h-6 w-6" />
           <span>Store Registration</span>
         </div>
       }
       description="Request access to manage your store on FashionKet"
       backLink="/"
-      backText="Back to store"
+      backText="Back to home"
       footer={footer}
     >
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">

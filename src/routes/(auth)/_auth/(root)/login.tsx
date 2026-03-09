@@ -11,13 +11,7 @@ import { AuthFormWrapper, GoogleAuthButton } from '@/components/auth'
 import { Eye, EyeOff } from 'lucide-react'
 import { toast } from 'react-toastify'
 import { useAuth } from '@/hooks'
-
-const loginSchema = z.object({
-  email: z.string().email('Invalid email address'),
-  password: z.string().min(1, 'Password is required'),
-})
-
-type LoginFormData = z.infer<typeof loginSchema>
+import { LoginFormData, loginSchema } from '@/lib'
 
 export const Route = createFileRoute('/(auth)/_auth/(root)/login')({
   component: LoginPage,
