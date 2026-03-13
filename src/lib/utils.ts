@@ -12,7 +12,6 @@ export const formatCurrency = (amount: string | number) => {
   return `₦${num.toLocaleString("en-NG", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 };
 
-
 export const formatDate = (dateString: string) => {
   const date = new Date(dateString);
   return date.toLocaleDateString('en-NG', {

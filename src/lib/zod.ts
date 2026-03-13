@@ -1,4 +1,5 @@
 import { OrderStatus } from "@/types";
+import { PaymentStatus } from "@/types";
 import z from "zod"
 import { validatePassword } from "./validation.utils";
 
@@ -70,6 +71,7 @@ export const orderSearchSchema = z.object({
   page: z.coerce.number().int().min(1).default(1).optional(),
   limit: z.coerce.number().int().min(1).max(100).default(20).optional(),
   status: z.nativeEnum(OrderStatus).optional(),
+  paymentStatus: z.nativeEnum(PaymentStatus).optional(),
   sortBy: z.string().default('createdAt').optional(),
   sortOrder: z.enum(['asc', 'desc']).default('desc').optional(),
 })

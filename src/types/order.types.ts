@@ -1,6 +1,6 @@
 import type { IAddress } from "./address.type";
 import type { IBaseDocument, ITimestamps, ObjectId } from "./base.types";
-import type { DeliveryMethod, OrderStatus } from "./enums";
+import type { DeliveryMethod, OrderStatus, PaymentStatus } from "./enums";
 import type { IPayment } from "./payment.types";
 import type { IUser } from "./user.types";
 
@@ -25,7 +25,9 @@ export interface IOrder extends IBaseDocument, ITimestamps {
   subtotalAmount: number;
   shippingFee: number;
   totalAmount: number;
+  taxAmount: number;
   status: OrderStatus;
+  paymentStatus: PaymentStatus;
   shippingAddress: IAddress;
   paymentId: ObjectId | null;
   paidAt: Date | string | null;
@@ -51,8 +53,12 @@ export interface IOrderWithRelations extends Omit<IOrder, 'userId' | 'paymentId'
 export interface IOrderListItem {
   _id: ObjectId;
   orderNumber: string;
+  subtotalAmount: number;
+  shippingFee: number;
+  taxAmount: number;
   totalAmount: number;
   status: OrderStatus;
+  paymentStatus: PaymentStatus;
   itemCount: number;
   createdAt: Date | string;
   paidAt?: Date | string | null;
@@ -94,6 +100,7 @@ export interface IOrderQueryFilters {
   page?: number;
   limit?: number;
   status?: OrderStatus;
+  paymentStatus?: PaymentStatus;
   userId?: ObjectId;
   orderNumber?: string;
   sortBy?: string;

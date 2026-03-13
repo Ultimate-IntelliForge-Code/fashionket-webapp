@@ -34,7 +34,7 @@ export function OrdersStats({ stats }: { stats?: any }) {
     },
   ];
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 md:gap-4 mb-4 sm:mb-6 md:mb-8">
+    <div className="grid grid-cols-2 gap-2 sm:gap-3 md:gap-4 mb-4 sm:mb-6 md:mb-8">
       {statItems.map((item, index) => (
         <Card key={index} className="border-gray-200 hover:shadow-sm transition-shadow">
           <CardContent className="p-3 sm:p-4">
@@ -48,7 +48,7 @@ export function OrdersStats({ stats }: { stats?: any }) {
                 </div>
               </div>
               <div className={`p-1.5 sm:p-2 rounded-lg ${item.bgColor}`}>
-                <item.icon className={`h-4 w-4 sm:h-5 sm:w-5 ${item.color}`} />
+                <item.icon className={`h-3 w-3 sm:h-4 sm:w-4 ${item.color}`} />
               </div>
             </div>
           </CardContent>

@@ -1,6 +1,7 @@
 import { formatCurrency } from "@/lib/utils";
 import { Card, CardContent } from "../ui/card";
 import { OrderStatusBadge } from "./order-status-badge";
+import { PaymentStatusBadge } from "./payment-status-badge";
 import { CheckCircle, Clock, Eye, Package, Truck } from "lucide-react";
 import { Button } from "../ui/button";
 import { Link } from "@tanstack/react-router";
@@ -22,7 +23,7 @@ export function OrderCard({ order }: { order: any }) {
 
             <div className="space-y-0.5 sm:space-y-1 text-xs sm:text-sm text-gray-600">
               <div className="flex items-center gap-1.5 sm:gap-2">
-                <Clock className="h-3 w-3 sm:h-3.5 sm:w-3.5 flex-shrink-0" />
+                <Clock className="h-3 w-3 sm:h-3.5 sm:w-3.5 shrink-0" />
                 <span>
                   Placed on{" "}
                   {new Date(order.createdAt).toLocaleDateString("en-US", {
@@ -34,16 +35,20 @@ export function OrderCard({ order }: { order: any }) {
               </div>
 
               <div className="flex items-center gap-1.5 sm:gap-2">
-                <Package className="h-3 w-3 sm:h-3.5 sm:w-3.5 flex-shrink-0" />
+                <Package className="h-3 w-3 sm:h-3.5 sm:w-3.5 shrink-0" />
                 <span>
                   {order.itemCount} {order.itemCount === 1 ? "item" : "items"} •
                   Total: {formatCurrency(order.totalAmount)}
                 </span>
               </div>
 
+              <div className="flex items-center gap-2">
+                <PaymentStatusBadge status={order.paymentStatus} />
+              </div>
+
               {order.paidAt && (
                 <div className="flex items-center gap-1.5 sm:gap-2 text-green-600">
-                  <CheckCircle className="h-3 w-3 sm:h-3.5 sm:w-3.5 flex-shrink-0" />
+                  <CheckCircle className="h-3 w-3 sm:h-3.5 sm:w-3.5 shrink-0" />
                   <span>
                     Paid on{" "}
                     {new Date(order.paidAt).toLocaleDateString("en-US", {

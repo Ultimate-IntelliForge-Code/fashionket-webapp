@@ -8,12 +8,12 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { formatCurrency } from '@/lib/utils';
 import { Eye } from 'lucide-react';
 import type { IOrderListItem, OrderStatus } from '@/types';
 import { format } from 'date-fns';
+import { PaymentStatusBadge } from './payment-status-badge';
 
 interface OrdersTableProps {
   orders: IOrderListItem[];
@@ -53,6 +53,7 @@ export const OrdersTable: React.FC<OrdersTableProps> = ({ orders, showActions = 
             <TableHead>Items</TableHead>
             <TableHead>Total</TableHead>
             <TableHead>Status</TableHead>
+            <TableHead>Payment</TableHead>
             {showActions && <TableHead className="text-right">Actions</TableHead>}
           </TableRow>
         </TableHeader>
@@ -68,9 +69,12 @@ export const OrdersTable: React.FC<OrdersTableProps> = ({ orders, showActions = 
                 {formatCurrency(order.totalAmount)}
               </TableCell>
               <TableCell>
-                <Badge className={getStatusColor(order.status)} variant="outline">
+                <span className={`inline-flex px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(order.status)}`}>
                   {order.status}
-                </Badge>
+                </span>
+              </TableCell>
+              <TableCell>
+                <PaymentStatusBadge status={order.paymentStatus} />
               </TableCell>
               {showActions && (
                 <TableCell className="text-right">

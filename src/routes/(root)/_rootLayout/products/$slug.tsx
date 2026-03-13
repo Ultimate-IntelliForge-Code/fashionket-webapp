@@ -591,7 +591,7 @@ function ProductDetailPage() {
             </div>
 
             {/* Desktop: Grid */}
-            <div className="hidden lg:grid lg:grid-cols-4 gap-6">
+            <div className="hidden lg:grid lg:grid-cols-4 gap-1 md:gap-3">
               {relatedProducts.map((relatedProduct) => (
                 <ProductCard
                   key={relatedProduct._id}

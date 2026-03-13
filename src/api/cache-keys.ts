@@ -59,6 +59,14 @@ export const queryKeys = {
     byNumber: (orderNumber: string) => ['orders', 'number', orderNumber] as const,
     stats: (userId?: string) => ['orders', 'stats', userId] as const,
   },
+  stats: {
+    vendorOverview: (vendorId?: string) => ['stats', 'vendor', 'overview', vendorId] as const,
+    vendorCharts: (vendorId?: string) => ['stats', 'vendor', 'charts', vendorId] as const,
+  },
+  wallet: {
+    stats: (vendorId?: string) => ['wallet', 'stats', vendorId] as const,
+    withdrawals: (vendorId?: string, filters?: Record<string, any>) => ['wallet', 'withdrawals', vendorId, filters] as const,
+  },
   addresses: {
     all: ['addresses'] as const,
     lists: () => [...queryKeys.addresses.all, 'list'] as const,

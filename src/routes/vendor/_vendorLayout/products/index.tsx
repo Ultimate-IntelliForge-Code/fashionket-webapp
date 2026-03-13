@@ -24,9 +24,8 @@ import {
 import { LoadingState } from '@/components/ui/loading-state'
 import { ErrorState } from '@/components/ui/error-state'
 import { StatsCard } from '@/components/ui/stats-card'
-import { ProductFilters } from '@/components/ui/product-filters'
 import { ProductGrid } from '@/components/ui/product-card'
-import { productSearchSchema } from '@/lib'
+import { formatCurrency, productSearchSchema } from '@/lib'
 import { IProductQueryFilters } from '@/types'
 
 
@@ -123,7 +122,7 @@ function VendorProducts() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-1 md:gap-3">
         <StatsCard
           title="Total Products"
           value={totalProducts}
@@ -142,13 +141,13 @@ function VendorProducts() {
         />
         <StatsCard
           title="Total Value"
-          value={`₦${(totalValue / 1000000).toFixed(1)}M`}
+          value={`${formatCurrency(totalValue)}`}
           icon={DollarSign}
         />
       </div>
 
       {/* Filters and Products */}
-      <div className="flex flex-col lg:flex-row gap-6">
+      <div className="flex flex-col lg:flex-row gap-1 md:gap-3">
         {/* <div className="lg:w-64 flex-shrink-0">
           <ProductFilters
             filters={search}

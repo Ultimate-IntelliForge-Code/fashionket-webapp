@@ -10,7 +10,7 @@ import {
   ShoppingCart,
 } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils';
-import { ordersQuery, productsQuery, orderStatsQuery } from '@/api/queries';
+import { vendorDashboardStatsQuery, vendorChartsStatsQuery } from '@/api/queries';
 import {
   LineChart,
   Line,
@@ -28,19 +28,19 @@ import { LoadingState } from '@/components/ui/loading-state';
 import { ErrorState } from '@/components/ui/error-state';
 import { StatsCard } from '@/components/ui/stats-card';
 import { OrdersTable } from '@/components/orders/order-table';
+import type { IVendorDashboardStats, IVendorChartsStats } from '@/types';
 
 export const Route = createFileRoute('/vendor/_vendorLayout/')({
   loader: async ({ context }) => {
     const queryClient = context.queryClient;
-    
-    // Prefetch data
-    const [orders, products, stats] = await Promise.all([
-      queryClient.ensureQueryData(ordersQuery({ page: 1, limit: 5, sortBy: 'createdAt', sortOrder: 'desc' })),
-      queryClient.ensureQueryData(productsQuery({ page: 1, limit: 100 })),
-      queryClient.ensureQueryData(orderStatsQuery()),
+
+    // Prefetch vendor dashboard stats
+    const [stats, charts] = await Promise.all([
+      queryClient.ensureQueryData<IVendorDashboardStats>(vendorDashboardStatsQuery()),
+      queryClient.ensureQueryData<IVendorChartsStats>(vendorChartsStatsQuery()),
     ]);
 
-    return { orders, products, stats };
+    return { stats, charts };
   },
   component: VendorDashboard,
   pendingComponent: LoadingState,
@@ -48,43 +48,29 @@ export const Route = createFileRoute('/vendor/_vendorLayout/')({
 });
 
 // Mock data for charts
-const salesData = [
-  { name: 'Mon', products: 12, profit: 24000 },
-  { name: 'Tue', products: 19, profit: 38000 },
-  { name: 'Wed', products: 15, profit: 30000 },
-  { name: 'Thu', products: 25, profit: 50000 },
-  { name: 'Fri', products: 22, profit: 44000 },
-  { name: 'Sat', products: 30, profit: 60000 },
-  { name: 'Sun', products: 18, profit: 36000 },
-];
-
-const orderStatusData = [
-  { name: 'Pending', value: 20, color: '#fbbf24' },
-  { name: 'Processing', value: 15, color: '#a78bfa' },
-  { name: 'Shipped', value: 25, color: '#60a5fa' },
-  { name: 'Delivered', value: 35, color: '#34d399' },
-  { name: 'Cancelled', value: 5, color: '#f87171' },
-];
-
 function VendorDashboard() {
-  const { data: ordersData } = useQuery(ordersQuery({ page: 1, limit: 5, sortBy: 'createdAt', sortOrder: 'desc' }));
-  const { data: productsData } = useQuery(productsQuery({ page: 1, limit: 100 }));
-  const { data: stats } = useQuery(orderStatsQuery());
+  const { data: stats } = useQuery<IVendorDashboardStats>(vendorDashboardStatsQuery());
+  const { data: charts } = useQuery<IVendorChartsStats>(vendorChartsStatsQuery());
 
-  const recentOrders = ordersData?.data || [];
-  const totalProducts = productsData?.pagination?.total || 0;
-  const totalOrders = stats?.total || 0;
-  const totalRevenue = stats?.totalRevenue || 0;
+  const totals = stats;
 
-  // Calculate mock values (in real app, these would come from API)
+  const recentOrders = totals?.recentOrders || [];
+  const totalProducts = totals?.totalProducts || 0;
+  const totalOrders = totals?.totalOrders || 0;
+  const totalRevenue = totals?.totalRevenue || 0;
+
+  // Financial breakdowns
   const netProfit = totalRevenue * 0.7; // 70% of revenue
   const balance = netProfit * 0.6; // 60% available
   const withdrawals = netProfit - balance;
 
+  const salesData = charts?.salesData || [];
+  const orderStatusData = charts?.orderStatusData || [];
+
   return (
     <div className="space-y-6">
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-1 md:gap-3">
         <StatsCard
           title="Total Revenue"
           value={formatCurrency(totalRevenue)}
@@ -121,7 +107,7 @@ function VendorDashboard() {
       </div>
 
       {/* Charts Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-1 md:gap-3">
         {/* Line Chart */}
         <Card>
           <CardHeader>

@@ -67,7 +67,7 @@ export const orderStatsQuery = (userId?: string) => ({
   queryKey: queryKeys.orders.stats(userId),
   queryFn: async (): Promise<IOrderStats> => {
     const params = userId ? `?userId=${userId}` : '';
-    const response = await apiClient.get<IOrderStats>(`/orders/stats${params}`);
+    const response = await apiClient.get<IOrderStats>(`/stats/orders${params}`);
 
     if (!response.success) {
       throw new Error(response.error.message);

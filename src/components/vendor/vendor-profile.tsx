@@ -267,7 +267,7 @@ export const VendorProfile: React.FC<VendorProfileProps> = ({
             More about {vendor.businessName}
           </summary>
           <Card className="p-6 mt-2">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-1 md:gap-3">
               <div>
                 <h4 className="font-semibold text-sm text-gray-500 mb-2">Address</h4>
             

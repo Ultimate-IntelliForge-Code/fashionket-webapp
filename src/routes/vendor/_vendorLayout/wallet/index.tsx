@@ -22,17 +22,12 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'react-toastify';
 import { StatsCard } from '@/components/ui/stats-card';
 import { WithdrawalFormData, withdrawalSchema } from '@/lib';
+import { useWalletStatsQuery, useWithdrawalsQuery, useRequestWithdrawalMutation } from '@/api/hooks/wallet.hook';
+import { WithdrawalStatusBadge } from '../../../../components/wallet/withdrawal-status-badge';
 
 export const Route = createFileRoute('/vendor/_vendorLayout/wallet/')({
   component: VendorWallet,
 });
-
-// Mock withdrawal data
-const mockWithdrawals = [
-  { id: '1', amount: 150000, status: 'completed', date: new Date('2024-01-15'), method: 'Bank Transfer' },
-  { id: '2', amount: 200000, status: 'pending', date: new Date('2024-01-20'), method: 'Bank Transfer' },
-  { id: '3', amount: 180000, status: 'completed', date: new Date('2024-01-10'), method: 'Bank Transfer' },
-];
 
 function VendorWallet() {
   const [open, setOpen] = useState(false);
@@ -54,16 +49,27 @@ function VendorWallet() {
     },
   });
 
-  // Mock data
-  const netProfit = 5240000;
-  const balance = 3500000;
-  const totalWithdrawals = 1740000;
-  const platformCharges = 524000; // 10%
+  const { data: walletStats, isLoading: walletLoading } = useWalletStatsQuery();
+  const {
+    data: withdrawalsData,
+    isLoading: withdrawalsLoading,
+    isFetching: withdrawalsFetching,
+  } = useWithdrawalsQuery({ page, limit });
+  const { mutateAsync: requestWithdrawal, isPending: submitting } = useRequestWithdrawalMutation();
+
+  const netProfit = walletStats?.netProfit ?? 0;
+  const balance = walletStats?.balance ?? 0;
+  const totalWithdrawals = walletStats?.totalWithdrawals ?? 0;
+  const platformCharges = walletStats?.platformCharges ?? 0;
 
   const onSubmit = async (data: WithdrawalFormData) => {
     try {
-      // In real app, call API here
-      console.log('Withdrawal request:', data);
+      await requestWithdrawal({
+        accountHolderName: data.accountHolderName,
+        bankName: data.bankName,
+        accountNumber: data.accountNumber,
+        amount: data.amount,
+      });
       toast.success('Withdrawal request submitted successfully');
       setOpen(false);
       reset();
@@ -72,8 +78,10 @@ function VendorWallet() {
     }
   };
 
-  const totalPages = Math.ceil(mockWithdrawals.length / limit);
-  const paginatedWithdrawals = mockWithdrawals.slice((page - 1) * limit, page * limit);
+  const totalPages = withdrawalsData?.pagination.totalPages ?? 1;
+  const total = withdrawalsData?.pagination.total ?? 0;
+  const paginatedWithdrawals = withdrawalsData?.items ?? [];
+  const isWithdrawalsLoading = withdrawalsLoading || withdrawalsFetching;
 
   return (
     <div className="space-y-6">
@@ -85,7 +93,7 @@ function VendorWallet() {
               Request Withdrawal
             </Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-[500px]">
+          <DialogContent className="sm:max-w-125">
             <DialogHeader>
               <DialogTitle>Withdrawal Request</DialogTitle>
               <DialogDescription>
@@ -149,8 +157,12 @@ function VendorWallet() {
                 <Button type="button" variant="outline" onClick={() => setOpen(false)} className="flex-1">
                   Cancel
                 </Button>
-                <Button type="submit" className="flex-1 bg-mmp-primary hover:bg-mmp-primary2">
-                  Submit Request
+                <Button
+                  type="submit"
+                  className="flex-1 bg-mmp-primary hover:bg-mmp-primary2"
+                  disabled={submitting}
+                >
+                  {submitting ? 'Submitting...' : 'Submit Request'}
                 </Button>
               </div>
             </form>
@@ -159,26 +171,26 @@ function VendorWallet() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-1 md:gap-3">
         <StatsCard
           title="Net Profit"
-          value={formatCurrency(netProfit)}
+          value={walletLoading ? 'Loading…' : formatCurrency(netProfit)}
           icon={DollarSign}
           trend={{ value: 12.5, isPositive: true }}
         />
         <StatsCard
           title="Available Balance"
-          value={formatCurrency(balance)}
+          value={walletLoading ? 'Loading…' : formatCurrency(balance)}
           icon={WalletIcon}
         />
         <StatsCard
           title="Total Withdrawals"
-          value={formatCurrency(totalWithdrawals)}
+          value={walletLoading ? 'Loading…' : formatCurrency(totalWithdrawals)}
           icon={TrendingDown}
         />
         <StatsCard
           title="Platform Charges"
-          value={formatCurrency(platformCharges)}
+          value={walletLoading ? 'Loading…' : formatCurrency(platformCharges)}
           icon={CreditCard}
         />
       </div>
@@ -190,37 +202,35 @@ function VendorWallet() {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {paginatedWithdrawals.map((withdrawal) => (
-              <div
-                key={withdrawal.id}
-                className="flex items-center justify-between p-4 border rounded-lg"
-              >
-                <div>
-                  <p className="font-medium">{formatCurrency(withdrawal.amount)}</p>
-                  <p className="text-sm text-gray-600">{withdrawal.method}</p>
-                  <p className="text-xs text-gray-500">
-                    {format(withdrawal.date, 'PPP')}
-                  </p>
+            {isWithdrawalsLoading ? (
+              <p className="text-sm text-gray-600">Loading withdrawals...</p>
+            ) : paginatedWithdrawals.length === 0 ? (
+              <p className="text-sm text-gray-600">No withdrawals yet.</p>
+            ) : (
+              paginatedWithdrawals.map((withdrawal) => (
+                <div
+                  key={withdrawal._id}
+                  className="flex items-center justify-between p-4 border rounded-lg"
+                >
+                  <div>
+                    <p className="font-medium">{formatCurrency(withdrawal.amount)}</p>
+                    <p className="text-sm text-gray-600">{withdrawal.method}</p>
+                    <p className="text-xs text-gray-500">
+                      {withdrawal.createdAt ? format(new Date(withdrawal.createdAt), 'PPP') : ''}
+                    </p>
+                  </div>
+                  <div>
+                    <WithdrawalStatusBadge status={withdrawal.status} />
+                  </div>
                 </div>
-                <div>
-                  <span
-                    className={`px-3 py-1 rounded-full text-xs font-medium ${
-                      withdrawal.status === 'completed'
-                        ? 'bg-green-100 text-green-800'
-                        : 'bg-yellow-100 text-yellow-800'
-                    }`}
-                  >
-                    {withdrawal.status}
-                  </span>
-                </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
 
           {totalPages > 1 && (
             <div className="mt-6">
               <Pagination
-                meta={{ page, limit, total: mockWithdrawals.length, totalPages }}
+                meta={{ page, limit, total, totalPages }}
                 onPageChange={setPage}
               />
             </div>

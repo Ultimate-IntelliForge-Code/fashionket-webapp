@@ -1,7 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { ordersQuery, orderStatsQuery } from '@/api/queries'
 import { Package, TrendingUp, Clock, CheckCircle } from 'lucide-react'
-import { OrderStatus } from '@/types'
+import { OrderStatus, PaymentStatus } from '@/types'
 import {
   Select,
   SelectContent,
@@ -14,7 +14,7 @@ import { LoadingState } from '@/components/ui/loading-state'
 import { ErrorState } from '@/components/ui/error-state'
 import { StatsCard } from '@/components/ui/stats-card'
 import { OrdersTable } from '@/components/orders/order-table'
-import { orderSearchSchema } from '@/lib'
+import { formatCurrency, orderSearchSchema } from '@/lib'
 
 
 export const Route = createFileRoute('/vendor/_vendorLayout/orders/')({
@@ -60,11 +60,21 @@ function VendorOrders() {
     })
   }
 
-  const handleStatusFilter = (status: OrderStatus) => {
+  const handleStatusFilter = (status: OrderStatus | 'all') => {
     navigate({
       search: (prev) => ({
         ...prev,
-        status: status ? undefined : status,
+        status: status === 'all' ? undefined : status,
+        page: 1,
+      }),
+    })
+  }
+
+  const handlePaymentFilter = (paymentStatus: PaymentStatus | 'all') => {
+    navigate({
+      search: (prev) => ({
+        ...prev,
+        paymentStatus: paymentStatus === 'all' ? undefined : paymentStatus,
         page: 1,
       }),
     })
@@ -73,11 +83,11 @@ function VendorOrders() {
   return (
     <div className="space-y-6">
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-1 md:gap-3">
         <StatsCard title="Total Orders" value={totalOrders} icon={Package} />
         <StatsCard
           title="Total Revenue"
-          value={`₦${(totalRevenue / 1000000).toFixed(2)}M`}
+          value={formatCurrency(totalRevenue)}
           icon={TrendingUp}
         />
         <StatsCard
@@ -100,17 +110,34 @@ function VendorOrders() {
           value={search.status || 'all'}
           onValueChange={handleStatusFilter}
         >
-          <SelectTrigger className="w-[200px]">
+          <SelectTrigger className="w-52">
             <SelectValue placeholder="Filter by status" />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Orders</SelectItem>
+            <SelectItem value="PENDING_PAYMENT">Pending Payment</SelectItem>
             <SelectItem value="PENDING">Pending</SelectItem>
-            <SelectItem value="CONFIRMED">Confirmed</SelectItem>
+            <SelectItem value="PAID">Paid</SelectItem>
             <SelectItem value="PROCESSING">Processing</SelectItem>
             <SelectItem value="SHIPPED">Shipped</SelectItem>
             <SelectItem value="DELIVERED">Delivered</SelectItem>
             <SelectItem value="CANCELLED">Cancelled</SelectItem>
+            <SelectItem value="REFUNDED">Refunded</SelectItem>
+          </SelectContent>
+        </Select>
+
+        <Select
+          value={search.paymentStatus || 'all'}
+          onValueChange={handlePaymentFilter}
+        >
+          <SelectTrigger className="w-52">
+            <SelectValue placeholder="Filter by payment" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Payments</SelectItem>
+            <SelectItem value="PENDING">Pending</SelectItem>
+            <SelectItem value="SUCCESS">Success</SelectItem>
+            <SelectItem value="FAILED">Failed</SelectItem>
           </SelectContent>
         </Select>
       </div>
