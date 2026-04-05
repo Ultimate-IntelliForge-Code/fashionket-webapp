@@ -24,6 +24,7 @@ import { StatsCard } from '@/components/ui/stats-card';
 import { WithdrawalFormData, withdrawalSchema } from '@/lib';
 import { useWalletStatsQuery, useWithdrawalsQuery, useRequestWithdrawalMutation } from '@/api/hooks/wallet.hook';
 import { WithdrawalStatusBadge } from '../../../../components/wallet/withdrawal-status-badge';
+import { ApiError } from '@/api/client';
 
 export const Route = createFileRoute('/vendor/_vendorLayout/wallet/')({
   component: VendorWallet,
@@ -74,7 +75,9 @@ function VendorWallet() {
       setOpen(false);
       reset();
     } catch (error: any) {
-      toast.error(error.message || 'Failed to submit withdrawal request');
+      const message = getWithdrawalErrorMessage(error);
+      console.log(message, error);
+      toast.error(message);
     }
   };
 
@@ -239,4 +242,50 @@ function VendorWallet() {
       </Card>
     </div>
   );
+}
+
+function getWithdrawalErrorMessage(error: unknown): string {
+  if (error instanceof ApiError) {
+    const details = error.details;
+    if (Array.isArray(details) && details.length) {
+      const first = details[0];
+      if (typeof first === 'string' && first.trim()) return first;
+      if (first && typeof first === 'object' && 'message' in first) {
+        const detailMessage = (first as any).message;
+        if (typeof detailMessage === 'string' && detailMessage.trim()) return detailMessage;
+      }
+    }
+
+    if (typeof details === 'string' && details.trim()) {
+      return details;
+    }
+
+    if (error.message) {
+      return error.message;
+    }
+  }
+
+  if (typeof error === 'string') return error;
+
+  if (error && typeof error === 'object') {
+    const maybeMessage =
+      (error as any).message ||
+      (error as any).error?.message ||
+      (error as any).response?.data?.error?.message ||
+      (error as any).response?.data?.message;
+
+    if (maybeMessage) return String(maybeMessage);
+
+    const details = (error as any).details || (error as any).error?.details;
+    if (Array.isArray(details) && details.length) {
+      const first = details[0];
+      if (typeof first === 'string' && first.trim()) return first;
+      if (first && typeof first === 'object' && 'message' in first) {
+        const detailMessage = (first as any).message;
+        if (typeof detailMessage === 'string' && detailMessage.trim()) return detailMessage;
+      }
+    }
+  }
+
+  return 'Insufficient funds or invalid withdrawal amount';
 }

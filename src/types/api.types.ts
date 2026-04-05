@@ -12,6 +12,7 @@ export interface IApiSuccessResponse<T = any> {
  */
 export interface IApiErrorResponse {
   success: false;
+  message: string;
   error: {
     code: string;
     message: string;

@@ -1,26 +1,26 @@
-import { createFileRoute, useNavigate, Navigate } from '@tanstack/react-router'
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { useAuth } from '@/hooks'
-import { Loader2 } from 'lucide-react'
-import { Link } from '@tanstack/react-router'
-import { useVendorLogin } from '@/api/mutations'
-import { toast } from 'react-toastify'
-import { AuthFormWrapper } from '@/components/auth'
-import { LoginFormData, loginSchema } from '@/lib'
+import { createFileRoute, useNavigate, Navigate } from "@tanstack/react-router";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useAuth } from "@/hooks";
+import { Loader2 } from "lucide-react";
+import { Link } from "@tanstack/react-router";
+import { useVendorLogin } from "@/api/mutations";
+import { toast } from "react-toastify";
+import { AuthFormWrapper } from "@/components/auth";
+import { LoginFormData, loginSchema } from "@/lib";
+import { ApiError } from "@/api";
 
-export const Route = createFileRoute('/(auth)/_auth/vendor/login')({
+export const Route = createFileRoute("/(auth)/_auth/vendor/login")({
   component: VendorLogin,
-})
-
+});
 
 function VendorLogin() {
-  const { isAuthenticated, isVendor, setAuthVendor } = useAuth()
-  const navigate = useNavigate()
-  const { mutateAsync: login, isPending } = useVendorLogin()
+  const { isAuthenticated, isVendor, setAuthVendor } = useAuth();
+  const navigate = useNavigate();
+  const { mutateAsync: login, isPending } = useVendorLogin();
 
   const {
     register,
@@ -29,39 +29,38 @@ function VendorLogin() {
     setError,
   } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema as any),
-  })
+  });
 
   if (isAuthenticated && isVendor) {
-    return <Navigate to="/vendor" />
+    return <Navigate to="/vendor" />;
   }
 
   const onSubmit = async (data: LoginFormData) => {
     try {
-      login(data, {
-        onSuccess: (response) => {
-          console.log(response)
-          if (response.success) {
-            setAuthVendor(response.data)
-            toast.success(response.message || 'Login Successfully!')
-            navigate({ to: '/vendor' })
-          }
-        },
-        onError: (error: any) => {
-          console.error(error)
-          toast.error(error.message || 'Login failed, Invalid credentials')
-        },
-      })
-    } catch (error: any) {
-      setError('root', {
-        message: error.message || 'Login failed. Please try again.',
-      })
+      const response = await login(data);
+
+      setAuthVendor(response.data);
+
+      toast.success(response.message || "Login Successfully!");
+
+      navigate({ to: "/vendor" });
+    } catch (error) {
+      const err = error as ApiError;
+
+      console.error(err);
+
+      toast.error(err.message || "Login failed");
+
+      setError("root", {
+        message: err.message || "Login failed. Please try again.",
+      });
     }
-  }
+  };
 
   const footer = (
     <div className="text-center space-y-2">
       <div className="text-sm text-gray-600">
-        Don't have an account?{' '}
+        Don't have an account?{" "}
         <Link
           to="/vendor/register"
           className="font-medium text-mmp-primary hover:text-mmp-primary2 hover:underline"
@@ -78,7 +77,7 @@ function VendorLogin() {
         </Link>
       </div>
       <div className="text-sm text-gray-600 pt-2 border-t border-gray-200">
-        Are you a customer?{' '}
+        Are you a customer?{" "}
         <Link
           to="/login"
           className="font-medium text-mmp-secondary hover:text-mmp-accent hover:underline"
@@ -87,7 +86,7 @@ function VendorLogin() {
         </Link>
       </div>
     </div>
-  )
+  );
 
   return (
     <AuthFormWrapper
@@ -108,7 +107,7 @@ function VendorLogin() {
             id="email"
             type="email"
             placeholder="vendor@example.com"
-            {...register('email')}
+            {...register("email")}
             disabled={isPending}
           />
           {errors.email && (
@@ -122,7 +121,7 @@ function VendorLogin() {
             id="password"
             type="password"
             placeholder="••••••••"
-            {...register('password')}
+            {...register("password")}
             disabled={isPending}
           />
           {errors.password && (
@@ -140,5 +139,5 @@ function VendorLogin() {
         </Button>
       </form>
     </AuthFormWrapper>
-  )
+  );
 }

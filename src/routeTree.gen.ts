@@ -52,6 +52,7 @@ import { Route as authAuthrootSignupRouteImport } from './routes/(auth)/_auth/(r
 import { Route as authAuthrootResetPasswordRouteImport } from './routes/(auth)/_auth/(root)/reset-password'
 import { Route as authAuthrootLoginRouteImport } from './routes/(auth)/_auth/(root)/login'
 import { Route as authAuthrootForgotPasswordRouteImport } from './routes/(auth)/_auth/(root)/forgot-password'
+import { Route as rootRootLayoutAuthenticatedWishlistIndexRouteImport } from './routes/(root)/_rootLayout/_authenticated/wishlist/index'
 import { Route as rootRootLayoutAuthenticatedOrdersIndexRouteImport } from './routes/(root)/_rootLayout/_authenticated/orders/index'
 import { Route as rootRootLayoutAuthenticatedCheckoutIndexRouteImport } from './routes/(root)/_rootLayout/_authenticated/checkout/index'
 import { Route as rootRootLayoutAuthenticatedAccountIndexRouteImport } from './routes/(root)/_rootLayout/_authenticated/account/index'
@@ -293,6 +294,12 @@ const authAuthrootForgotPasswordRoute =
     path: '/forgot-password',
     getParentRoute: () => authAuthRoute,
   } as any)
+const rootRootLayoutAuthenticatedWishlistIndexRoute =
+  rootRootLayoutAuthenticatedWishlistIndexRouteImport.update({
+    id: '/wishlist/',
+    path: '/wishlist/',
+    getParentRoute: () => rootRootLayoutAuthenticatedRoute,
+  } as any)
 const rootRootLayoutAuthenticatedOrdersIndexRoute =
   rootRootLayoutAuthenticatedOrdersIndexRouteImport.update({
     id: '/orders/',
@@ -370,6 +377,7 @@ export interface FileRoutesByFullPath {
   '/account/': typeof rootRootLayoutAuthenticatedAccountIndexRoute
   '/checkout/': typeof rootRootLayoutAuthenticatedCheckoutIndexRoute
   '/orders/': typeof rootRootLayoutAuthenticatedOrdersIndexRoute
+  '/wishlist/': typeof rootRootLayoutAuthenticatedWishlistIndexRoute
 }
 export interface FileRoutesByTo {
   '/contact': typeof rootRootLayoutContactRoute
@@ -415,6 +423,7 @@ export interface FileRoutesByTo {
   '/account': typeof rootRootLayoutAuthenticatedAccountIndexRoute
   '/checkout': typeof rootRootLayoutAuthenticatedCheckoutIndexRoute
   '/orders': typeof rootRootLayoutAuthenticatedOrdersIndexRoute
+  '/wishlist': typeof rootRootLayoutAuthenticatedWishlistIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -466,6 +475,7 @@ export interface FileRoutesById {
   '/(root)/_rootLayout/_authenticated/account/': typeof rootRootLayoutAuthenticatedAccountIndexRoute
   '/(root)/_rootLayout/_authenticated/checkout/': typeof rootRootLayoutAuthenticatedCheckoutIndexRoute
   '/(root)/_rootLayout/_authenticated/orders/': typeof rootRootLayoutAuthenticatedOrdersIndexRoute
+  '/(root)/_rootLayout/_authenticated/wishlist/': typeof rootRootLayoutAuthenticatedWishlistIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -515,6 +525,7 @@ export interface FileRouteTypes {
     | '/account/'
     | '/checkout/'
     | '/orders/'
+    | '/wishlist/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/contact'
@@ -560,6 +571,7 @@ export interface FileRouteTypes {
     | '/account'
     | '/checkout'
     | '/orders'
+    | '/wishlist'
   id:
     | '__root__'
     | '/(auth)/_auth'
@@ -610,6 +622,7 @@ export interface FileRouteTypes {
     | '/(root)/_rootLayout/_authenticated/account/'
     | '/(root)/_rootLayout/_authenticated/checkout/'
     | '/(root)/_rootLayout/_authenticated/orders/'
+    | '/(root)/_rootLayout/_authenticated/wishlist/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -922,6 +935,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof authAuthrootForgotPasswordRouteImport
       parentRoute: typeof authAuthRoute
     }
+    '/(root)/_rootLayout/_authenticated/wishlist/': {
+      id: '/(root)/_rootLayout/_authenticated/wishlist/'
+      path: '/wishlist'
+      fullPath: '/wishlist/'
+      preLoaderRoute: typeof rootRootLayoutAuthenticatedWishlistIndexRouteImport
+      parentRoute: typeof rootRootLayoutAuthenticatedRoute
+    }
     '/(root)/_rootLayout/_authenticated/orders/': {
       id: '/(root)/_rootLayout/_authenticated/orders/'
       path: '/orders'
@@ -1000,6 +1020,7 @@ interface rootRootLayoutAuthenticatedRouteChildren {
   rootRootLayoutAuthenticatedAccountIndexRoute: typeof rootRootLayoutAuthenticatedAccountIndexRoute
   rootRootLayoutAuthenticatedCheckoutIndexRoute: typeof rootRootLayoutAuthenticatedCheckoutIndexRoute
   rootRootLayoutAuthenticatedOrdersIndexRoute: typeof rootRootLayoutAuthenticatedOrdersIndexRoute
+  rootRootLayoutAuthenticatedWishlistIndexRoute: typeof rootRootLayoutAuthenticatedWishlistIndexRoute
 }
 
 const rootRootLayoutAuthenticatedRouteChildren: rootRootLayoutAuthenticatedRouteChildren =
@@ -1014,6 +1035,8 @@ const rootRootLayoutAuthenticatedRouteChildren: rootRootLayoutAuthenticatedRoute
       rootRootLayoutAuthenticatedCheckoutIndexRoute,
     rootRootLayoutAuthenticatedOrdersIndexRoute:
       rootRootLayoutAuthenticatedOrdersIndexRoute,
+    rootRootLayoutAuthenticatedWishlistIndexRoute:
+      rootRootLayoutAuthenticatedWishlistIndexRoute,
   }
 
 const rootRootLayoutAuthenticatedRouteWithChildren =

@@ -329,11 +329,11 @@ function CheckoutPage() {
                 }
               >
                 <TabsList className="grid w-full grid-cols-2 mb-6">
-                  <TabsTrigger value="delivery" className="gap-2">
+                  <TabsTrigger value={DeliveryMethod.DELIVERY} className="gap-2">
                     <Truck className="h-4 w-4" />
                     Home Delivery
                   </TabsTrigger>
-                  <TabsTrigger value="pickup" className="gap-2">
+                  <TabsTrigger value={DeliveryMethod.PICK_UP} className="gap-2">
                     <Store className="h-4 w-4" />
                     Store Pickup
                   </TabsTrigger>

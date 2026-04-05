@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { apiClient } from '../client';
+import { apiClient, ApiError } from '../client';
 import { queryKeys } from '../cache-keys';
 import type {
   ILoginCredentials,
@@ -11,6 +11,7 @@ import type {
   IUser,
   IAdmin, IVendorAuthResponse,
   IVendor,
+  IApiSuccessResponse,
 } from '@/types';
 
 
@@ -65,14 +66,45 @@ export const useVendorSignup = () => {
   });
 };
 
+// export const useVendorLogin = () => {
+//   const queryClient = useQueryClient();
+
+//   return useMutation({
+//     mutationFn: (data: ILoginCredentials) =>
+//       apiClient.post<IVendor>('/auth/vendor/signin', data),
+//     onSuccess: () => {
+//       queryClient.invalidateQueries({ queryKey: queryKeys.auth.validate() });
+//     },
+//   });
+// };
+
 export const useVendorLogin = () => {
   const queryClient = useQueryClient();
 
-  return useMutation({
-    mutationFn: (data: ILoginCredentials) =>
-      apiClient.post<IVendor>('/auth/vendor/signin', data),
+  return useMutation<
+    IApiSuccessResponse<IVendor>, // response
+    ApiError,                     // error
+    ILoginCredentials             // variables
+  >({
+    mutationFn: async (data) => {
+      const res = await apiClient.post<IVendor>('/auth/vendor/signin', data);
+
+      if (!res.success) {
+        throw new ApiError(
+          res.statusCode,
+          res.error.code,
+          res.error.message,
+          res.error.details
+        );
+      }
+
+      return res;
+    },
+
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.auth.validate() });
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.auth.validate(),
+      });
     },
   });
 };
