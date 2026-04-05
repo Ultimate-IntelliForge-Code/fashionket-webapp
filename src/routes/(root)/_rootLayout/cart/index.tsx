@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { toast } from "react-toastify";
 import { useCart } from "@/hooks/use-cart";
+import { TAX_PERCENT } from "@/config/env.config";
 
 export const Route = createFileRoute("/(root)/_rootLayout/cart/")({
   component: CartPage,
@@ -28,7 +29,7 @@ export const Route = createFileRoute("/(root)/_rootLayout/cart/")({
 function CartPage() {
   const navigate = useNavigate();
   const {
-    itkwems,
+    items,
     subtotal,
     itemCount,
     isLoading,
@@ -41,7 +42,7 @@ function CartPage() {
   const [couponCode, setCouponCode] = React.useState("");
   const [isApplyingCoupon, setIsApplyingCoupon] = React.useState(false);
   const shippingFee = itemCount > 0 ? 1500 : 0; // Fixed shipping fee
-  const tax = subtotal * 0.025; // 2.5% VAT
+  const tax = subtotal * TAX_PERCENT; // 2.5% VAT
   const total = subtotal + shippingFee + tax;
 
   const handleUpdateQuantity = async (

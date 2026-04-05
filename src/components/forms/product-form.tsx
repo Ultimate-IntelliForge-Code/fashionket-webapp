@@ -693,7 +693,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                 onValueChange={(value) => setValue('categoryId', value)}
                 disabled={totalLoading}
               >
-                <SelectTrigger className="mt-1.5 border-gray-300 focus:ring-mmp-primary">
+                <SelectTrigger className="mt-1.5 border-gray-300 focus:ring-mmp-primary w-full">
                   <SelectValue placeholder="Select category" />
                 </SelectTrigger>
                 <SelectContent>

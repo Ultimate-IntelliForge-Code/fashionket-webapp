@@ -35,9 +35,9 @@ import {
   RefreshCw,
   XCircle,
   CheckCircle2,
-  Clock,
 } from 'lucide-react'
-import { OrderStatus } from '@/types'
+import { OrderStatus, PaymentStatus } from '@/types'
+import { PaymentStatusBadge } from '@/components/orders/payment-status-badge'
 import { LoadingState } from '@/components/ui/loading-state'
 import { useOrderQuery } from '@/api/hooks'
 import { ConfirmToast } from '@/components/ui/cofirm-toast'
@@ -313,7 +313,7 @@ function OrderDetailHeader({
   loading?: boolean
 }) {
   return (
-    <div className="bg-gradient-to-r from-mmp-primary to-mmp-primary2 print:bg-white print:text-black">
+  <div className="bg-linear-to-r from-mmp-primary to-mmp-primary2 print:bg-white print:text-black">
       <div className="container mx-auto px-4 py-8">
         <div className="flex items-center justify-between">
           <div>
@@ -341,11 +341,12 @@ function OrderDetailHeader({
                 <h1 className="text-4xl font-bold text-white mb-2 print:text-black">
                   Order Details
                 </h1>
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3 flex-wrap">
                   <p className="text-white/80 print:text-gray-600">
                     #{order.orderNumber}
                   </p>
                   <OrderStatusBadge status={order.status} />
+                  <PaymentStatusBadge status={order.paymentStatus as PaymentStatus} />
                 </div>
               </>
             )}
@@ -423,7 +424,7 @@ function OrderItems({ order }: { order: any }) {
               key={`${item.productId}-${index}`}
               className="flex items-center gap-4 p-3 hover:bg-gray-50 rounded-lg"
             >
-              <div className="w-16 h-16 rounded-lg bg-gray-100 overflow-hidden flex-shrink-0">
+              <div className="w-16 h-16 rounded-lg bg-gray-100 overflow-hidden shrink-0">
                 <div className="w-full h-full flex items-center justify-center">
                   <Package className="h-8 w-8 text-gray-400" />
                 </div>
@@ -506,24 +507,14 @@ function OrderDetails({ order }: { order: any }) {
             <div className="space-y-4">
               <div>
                 <div className="text-sm text-gray-600">Payment Status</div>
-                <div className="font-medium">
-                  {order.paidAt ? (
-                    <div className="flex items-center gap-2 text-green-600">
-                      <CheckCircle2 className="h-4 w-4" />
-                      <span>Paid</span>
-                    </div>
-                  ) : (
-                    <div className="flex items-center gap-2 text-amber-600">
-                      <Clock className="h-4 w-4" />
-                      <span>Pending</span>
-                    </div>
+                <div className="font-medium flex items-center gap-2">
+                  <PaymentStatusBadge status={order.paymentStatus as PaymentStatus} />
+                  {order.paidAt && (
+                    <span className="text-xs text-gray-500">
+                      Paid on {new Date(order.paidAt).toLocaleDateString()}
+                    </span>
                   )}
                 </div>
-                {order.paidAt && (
-                  <div className="text-sm text-gray-600 mt-1">
-                    Paid on {new Date(order.paidAt).toLocaleDateString()}
-                  </div>
-                )}
               </div>
 
               <Separator />
@@ -536,6 +527,10 @@ function OrderDetails({ order }: { order: any }) {
                 <div className="flex justify-between">
                   <span className="text-gray-600">Shipping</span>
                   <span>{formatCurrency(order.shippingFee)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Tax</span>
+                  <span>{formatCurrency(order.taxAmount || 0)}</span>
                 </div>
                 <Separator />
                 <div className="flex justify-between text-lg font-bold">
@@ -576,9 +571,12 @@ function OrderSummary({ order }: { order: any }) {
               })}
             </span>
           </div>
-          <div className="flex justify-between">
+          <div className="flex justify-between items-center gap-2">
             <span className="text-gray-600">Status</span>
-            <OrderStatusBadge status={order.status} />
+            <div className="flex items-center gap-2">
+              <OrderStatusBadge status={order.status} />
+              <PaymentStatusBadge status={order.paymentStatus as PaymentStatus} />
+            </div>
           </div>
           {order.trackingNumber && (
             <div className="flex justify-between">
@@ -602,6 +600,10 @@ function OrderSummary({ order }: { order: any }) {
           <div className="flex justify-between">
             <span className="text-gray-600">Shipping</span>
             <span>{formatCurrency(order.shippingFee)}</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-gray-600">Tax</span>
+            <span>{formatCurrency(order.taxAmount || 0)}</span>
           </div>
           <Separator />
           <div className="flex justify-between text-lg font-bold">
@@ -791,19 +793,19 @@ function ReturnPolicyCard() {
       <CardContent>
         <div className="space-y-2 text-sm text-gray-600">
           <p className="flex items-start gap-2">
-            <CheckCircle2 className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+            <CheckCircle2 className="h-4 w-4 text-green-500 mt-0.5 shrink-0" />
             <span>Eligible for returns within 14 days</span>
           </p>
           <p className="flex items-start gap-2">
-            <CheckCircle2 className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+            <CheckCircle2 className="h-4 w-4 text-green-500 mt-0.5 shrink-0" />
             <span>Items must be in original condition</span>
           </p>
           <p className="flex items-start gap-2">
-            <CheckCircle2 className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+            <CheckCircle2 className="h-4 w-4 text-green-500 mt-0.5 shrink-0" />
             <span>Refunds processed in 5-7 business days</span>
           </p>
           <p className="flex items-start gap-2">
-            <CheckCircle2 className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+            <CheckCircle2 className="h-4 w-4 text-green-500 mt-0.5 shrink-0" />
             <span>Contact support for return authorization</span>
           </p>
         </div>

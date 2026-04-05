@@ -22,15 +22,15 @@ export const StatsCard: React.FC<StatsCardProps> = ({
 }) => {
   return (
     <Card className={cn('overflow-hidden', className)}>
-      <CardContent className="p-6">
-        <div className="flex items-center justify-between">
-          <div className="flex-1">
-            <p className="text-sm font-medium text-gray-600">{title}</p>
-            <p className="text-2xl font-bold text-mmp-primary2 mt-2">{value}</p>
+      <CardContent className="p-2 sm:p-4">
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex-1 space-y-1">
+            <p className="text-xs sm:text-sm font-medium text-gray-600 wrap-break-word">{title}</p>
+            <p className="text-base sm:text-lg font-bold text-mmp-primary2 leading-tight">{value}</p>
             {trend && (
               <p
                 className={cn(
-                  'text-sm mt-2 flex items-center gap-1',
+                  'text-xs sm:text-sm mt-1 sm:mt-2 flex items-center gap-1 sm:gap-1.5',
                   trend.isPositive ? 'text-green-600' : 'text-red-600'
                 )}
               >
@@ -40,8 +40,8 @@ export const StatsCard: React.FC<StatsCardProps> = ({
               </p>
             )}
           </div>
-          <div className="h-12 w-12 rounded-full bg-mmp-primary/10 flex items-center justify-center">
-            <Icon className="h-6 w-6 text-mmp-primary" />
+          <div className="h-9 w-9 sm:h-10 sm:w-10 rounded-full bg-mmp-primary/10 flex items-center justify-center shrink-0">
+            <Icon className="h-5 w-5 sm:h-6 sm:w-6 text-mmp-primary" />
           </div>
         </div>
       </CardContent>

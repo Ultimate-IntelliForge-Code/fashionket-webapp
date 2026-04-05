@@ -78,8 +78,8 @@ const HeroCarousel = ({heroSlides}: HeroProps) => {
                       </Button>
                       <Button
                         size="default"
-                        variant="outline"
-                        className={`border-2 ${slide.textColor} hover:bg-white/20 px-4 sm:px-6 md:px-8 py-2 sm:py-3 text-xs sm:text-sm w-full sm:w-auto`}
+                        variant="ghost"
+                        className={`border-2 ${slide.textColor} hover:bg-white/20 px-4 sm:px-6 md:px-8 py-2 sm:py-3 text-xs sm:text-sm w-full sm:w-auto border-mmp-accent`}
                       >
                         Learn More
                       </Button>

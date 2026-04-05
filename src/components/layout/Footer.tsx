@@ -181,7 +181,7 @@ export default function Footer() {
 
             {/* Contact & Social - Compact Grid */}
             <div className="mt-8 sm:mt-10 pt-6 sm:pt-8 border-t border-mmp-primary/30">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-1 md:gap-3">
                 {/* Contact Info - Simplified */}
                 <div>
                   <h4 className="font-semibold text-sm sm:text-base text-mmp-secondary mb-3">

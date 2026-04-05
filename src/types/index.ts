@@ -14,3 +14,5 @@ export * from './utility.types';
 export * from './guards';
 export * from './constants.type';
 export * from './address.type';
+export * from './stats.types';
+export * from './wallet.types';

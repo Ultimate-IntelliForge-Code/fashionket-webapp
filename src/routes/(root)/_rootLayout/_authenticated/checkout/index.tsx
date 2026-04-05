@@ -51,6 +51,7 @@ import { DeliveryMethod } from "@/types";
 import { useQueryClient } from "@tanstack/react-query";
 import { useShippingFeeQuery } from "@/api/hooks/address.hook";
 import { ShippingAddressFormData, shippingAddressSchema } from "@/lib/zod";
+import { TAX_PERCENT } from "@/config/env.config";
 
 export const Route = createFileRoute(
   "/(root)/_rootLayout/_authenticated/checkout/",
@@ -97,7 +98,7 @@ function CheckoutPage() {
   }, [deliveryMethod, selectedAddressId, shippingFeeData, isShippingError]);
 
   // Calculate totals
-  const tax = subtotal * 0.025;
+  const tax = subtotal * TAX_PERCENT;
   const total = subtotal + tax + shippingFee;
 
   // Auto-select first address if none selected
@@ -274,7 +275,7 @@ function CheckoutPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <div className="bg-gradient-to-r from-mmp-primary to-mmp-primary2">
+  <div className="bg-linear-to-r from-mmp-primary to-mmp-primary2">
         <div className="container mx-auto px-4 py-8">
           <div className="flex items-center justify-between">
             <div>
@@ -328,11 +329,11 @@ function CheckoutPage() {
                 }
               >
                 <TabsList className="grid w-full grid-cols-2 mb-6">
-                  <TabsTrigger value="delivery" className="gap-2">
+                  <TabsTrigger value={DeliveryMethod.DELIVERY} className="gap-2">
                     <Truck className="h-4 w-4" />
                     Home Delivery
                   </TabsTrigger>
-                  <TabsTrigger value="pickup" className="gap-2">
+                  <TabsTrigger value={DeliveryMethod.PICK_UP} className="gap-2">
                     <Store className="h-4 w-4" />
                     Store Pickup
                   </TabsTrigger>
@@ -419,7 +420,7 @@ function CheckoutPage() {
                         Add New Address
                       </Button>
                     </DialogTrigger>
-                    <DialogContent className="sm:max-w-[500px]">
+                    <DialogContent className="sm:max-w-125">
                       <DialogHeader>
                         <DialogTitle>Add New Address</DialogTitle>
                       </DialogHeader>
@@ -711,7 +712,7 @@ function CheckoutPage() {
               </h3>
               <Textarea
                 placeholder="Any special instructions for delivery, packaging preferences, or delivery timing..."
-                className="min-h-[100px] resize-none"
+                className="min-h-25 resize-none"
               />
               <p className="text-sm text-gray-500 mt-2">
                 We'll do our best to accommodate your requests
@@ -735,7 +736,7 @@ function CheckoutPage() {
                       key={item.productId}
                       className="flex items-center gap-3"
                     >
-                      <div className="w-16 h-16 rounded-lg bg-gray-100 overflow-hidden flex-shrink-0">
+                      <div className="w-16 h-16 rounded-lg bg-gray-100 overflow-hidden shrink-0">
                         {item.productImage ? (
                           <img
                             src={item.productImage}

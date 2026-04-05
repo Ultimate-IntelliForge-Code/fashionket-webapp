@@ -1,12 +1,11 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { Button } from "@/components/ui/button";
-import { ArrowLeft, CheckCircle, Package } from "lucide-react";
-import { toast } from "react-toastify";
+import { CheckCircle } from "lucide-react";
 import { LoadingState } from "@/components/ui/loading-state";
 import { ErrorState } from "@/components/ui/error-state";
 import { ProductForm } from "@/components/forms/product-form";
 import { categoriesQuery } from "@/api/queries";
 import { useCreateProduct } from "@/api/mutations";
+import { toast } from "react-toastify";
 
 export const Route = createFileRoute("/vendor/_vendorLayout/products/new")({
   component: NewProduct,
@@ -32,6 +31,7 @@ function NewProduct() {
     }
   };
 
+  console.log("Categories loaded:", categories);
   return (
     <div className="container mx-auto px-4max-w-6xl">
       {/* Breadcrumb */}

@@ -502,7 +502,7 @@ export default function Header() {
                           onClick={handleAdminDashboard}
                         >
                           <Shield className="h-4 w-4 text-mmp-secondary mr-2" />
-                          <span>Admin Dashboard</span>
+                          <span>Vendor Dashboard</span>
                         </DropdownMenuItem>
                         <DropdownMenuSeparator className="bg-white/20" />
                       </>

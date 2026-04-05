@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowLeft, Package, MapPin, CreditCard } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
 import { format } from "date-fns";
-import type { OrderStatus } from "@/types";
+import type { OrderStatus, PaymentStatus } from "@/types";
 import {
   Select,
   SelectContent,
@@ -19,6 +19,7 @@ import { Label } from "@/components/ui/label";
 import { toast } from "react-toastify";
 import { LoadingState } from "@/components/ui/loading-state";
 import { ErrorState } from "@/components/ui/error-state";
+import { PaymentStatusBadge } from "@/components/orders/payment-status-badge";
 
 export const Route = createFileRoute("/vendor/_vendorLayout/orders/$orderId")({
   loader: async ({ context, params }) => {
@@ -65,8 +66,6 @@ function VendorOrderDetail() {
     }
   };
 
-  console.log(order)
-
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -88,12 +87,15 @@ function VendorOrderDetail() {
             </p>
           </div>
         </div>
-        <Badge className={getStatusColor(order.status)} variant="outline">
-          {order.status}
-        </Badge>
+        <div className="flex flex-col items-end gap-2">
+          <Badge className={getStatusColor(order.status)} variant="outline">
+            {order.status}
+          </Badge>
+          <PaymentStatusBadge status={order.paymentStatus as PaymentStatus} />
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-1 md:gap-3">
         {/* Order Items */}
         <div className="lg:col-span-2 space-y-6">
           <Card>
@@ -107,7 +109,10 @@ function VendorOrderDetail() {
                   className="flex items-center gap-4 pb-4 border-b last:border-0"
                 >
                   <div className="h-16 w-16 rounded bg-gray-100 flex items-center justify-center">
-                    <img src={item.productId?.images ? item.productId.images[0] : '/logo.png'} className="h-8 w-8 text-gray-400" />
+                    <img
+                      src={typeof item.productId === 'object' && 'images' in item.productId && item.productId.images?.length ? item.productId.images[0] : '/logo.png'}
+                      className="h-8 w-8 text-gray-400"
+                    />
                   </div>
                   <div className="flex-1">
                     <h4 className="font-medium">{item.nameSnapshot}</h4>
@@ -147,12 +152,14 @@ function VendorOrderDetail() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
+                    <SelectItem value="PENDING_PAYMENT">Pending Payment</SelectItem>
                     <SelectItem value="PENDING">Pending</SelectItem>
-                    <SelectItem value="CONFIRMED">Confirmed</SelectItem>
+                    <SelectItem value="PAID">Paid</SelectItem>
                     <SelectItem value="PROCESSING">Processing</SelectItem>
                     <SelectItem value="SHIPPED">Shipped</SelectItem>
                     <SelectItem value="DELIVERED">Delivered</SelectItem>
                     <SelectItem value="CANCELLED">Cancelled</SelectItem>
+                    <SelectItem value="REFUNDED">Refunded</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -180,6 +187,12 @@ function VendorOrderDetail() {
                 <span className="text-gray-600">Shipping</span>
                 <span className="font-medium">
                   {formatCurrency(order.shippingFee)}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">Tax</span>
+                <span className="font-medium">
+                  {formatCurrency(order.taxAmount || 0)}
                 </span>
               </div>
               <div className="border-t pt-3 flex justify-between">
