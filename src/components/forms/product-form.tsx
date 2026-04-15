@@ -384,7 +384,6 @@ export const ProductForm: React.FC<ProductFormProps> = ({
         }
 
         if (Object.keys(variantData).length > 0) {
-          console.log('FormData variantOptions:', variantData);
           formData.append('variantOptions', JSON.stringify(variantData));
         }
       }
