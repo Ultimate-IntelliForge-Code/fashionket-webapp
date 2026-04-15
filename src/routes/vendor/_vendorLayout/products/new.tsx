@@ -31,9 +31,8 @@ function NewProduct() {
     }
   };
 
-  console.log("Categories loaded:", categories);
   return (
-    <div className="container mx-auto px-4max-w-6xl">
+    <div className="container mx-auto max-w-6xl px-4">
       {/* Breadcrumb */}
       <div className="mb-6 flex items-center text-sm text-gray-600">
         <span
@@ -53,9 +52,16 @@ function NewProduct() {
         <span className="font-medium text-mmp-primary2">Add New</span>
       </div>
 
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold text-gray-900">Create New Product</h1>
+        <p className="text-sm text-gray-600 mt-1">
+          Fill in all required fields and upload at least one image to publish.
+        </p>
+      </div>
+
       {/* Stats Card */}
       <div className="mb-8 grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-gradient-to-r from-blue-50 to-blue-100 border border-blue-200 rounded-xl p-4">
+  <div className="bg-linear-to-r from-blue-50 to-blue-100 border border-blue-200 rounded-xl p-4">
           <div className="text-sm font-medium text-blue-800">
             Required Fields
           </div>
@@ -64,7 +70,7 @@ function NewProduct() {
             Name, Category, Price, Stock, Images
           </div>
         </div>
-        <div className="bg-gradient-to-r from-green-50 to-green-100 border border-green-200 rounded-xl p-4">
+  <div className="bg-linear-to-r from-green-50 to-green-100 border border-green-200 rounded-xl p-4">
           <div className="text-sm font-medium text-green-800">
             Image Guidelines
           </div>
@@ -73,7 +79,7 @@ function NewProduct() {
             10MB each, first image is main
           </div>
         </div>
-        <div className="bg-gradient-to-r from-purple-50 to-purple-100 border border-purple-200 rounded-xl p-4">
+  <div className="bg-linear-to-r from-purple-50 to-purple-100 border border-purple-200 rounded-xl p-4">
           <div className="text-sm font-medium text-purple-800">Tips</div>
           <div className="text-xs text-purple-700">
             Use high-quality images, accurate descriptions, and competitive
@@ -83,7 +89,7 @@ function NewProduct() {
       </div>
 
       {/* Product Form */}
-      <div className="">
+      <div>
         <ProductForm
           categories={categories}
           onSubmit={handleSubmit}
@@ -93,31 +99,31 @@ function NewProduct() {
       </div>
 
       {/* Quick Tips */}
-      <div className="mt-8 p-6 bg-gradient-to-r from-mmp-primary/5 to-mmp-primary2/5 rounded-xl border border-mmp-primary/20">
+  <div className="mt-8 p-6 bg-linear-to-r from-mmp-primary/5 to-mmp-primary2/5 rounded-xl border border-mmp-primary/20">
         <h3 className="text-lg font-semibold text-mmp-primary2 mb-3">
           💡 Tips for Better Product Listings
         </h3>
         <ul className="space-y-2 text-sm text-gray-700">
           <li className="flex items-start gap-2">
-            <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+            <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 shrink-0" />
             <span>Use high-resolution images from multiple angles</span>
           </li>
           <li className="flex items-start gap-2">
-            <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+            <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 shrink-0" />
             <span>
               Write detailed descriptions with key features and benefits
             </span>
           </li>
           <li className="flex items-start gap-2">
-            <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+            <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 shrink-0" />
             <span>Set competitive pricing based on market research</span>
           </li>
           <li className="flex items-start gap-2">
-            <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+            <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 shrink-0" />
             <span>Add relevant tags to improve search visibility</span>
           </li>
           <li className="flex items-start gap-2">
-            <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+            <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 shrink-0" />
             <span>Specify accurate stock levels to avoid overselling</span>
           </li>
         </ul>
