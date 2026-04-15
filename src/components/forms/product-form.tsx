@@ -29,6 +29,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'react-toastify';
 import { productFormSchema, ProductFormData, cn } from '@/lib';
+import { ApiError } from '@/api/client';
 
 
 
@@ -77,6 +78,16 @@ const arrayToString = (arr?: string[]): string => {
   return arr.join(', ');
 };
 
+const nairaFromKobo = (amount?: number): number | undefined => {
+  if (amount === null || amount === undefined) return undefined;
+  return amount / 100;
+};
+
+const koboFromNaira = (amount?: number): number => {
+  if (amount === null || amount === undefined || Number.isNaN(amount)) return 0;
+  return Math.round(amount * 100);
+};
+
 export const ProductForm: React.FC<ProductFormProps> = ({
   product,
   categories,
@@ -84,6 +95,32 @@ export const ProductForm: React.FC<ProductFormProps> = ({
   isLoading = false,
   isUpdate = false,
 }) => {
+  const getDefaultValues = React.useCallback(() => ({
+    name: product?.name ?? '',
+    description: product?.description ?? '',
+    categoryId: product?.categoryId?.toString() ?? '',
+    brand: product?.brand ?? '',
+    price: nairaFromKobo(product?.price),
+    stock: product?.stock,
+    discount: product?.discount,
+    tags: product?.tags ? arrayToString(product.tags) : '',
+    isActive: product?.isActive ?? true,
+    variantOptions: {
+      sizes: product?.variantOptions?.sizes
+        ? arrayToString(product.variantOptions.sizes)
+        : '',
+      colors: product?.variantOptions?.colors
+        ? arrayToString(product.variantOptions.colors)
+        : '',
+      materials: product?.variantOptions?.materials
+        ? arrayToString(product.variantOptions.materials)
+        : '',
+      genders: product?.variantOptions?.genders
+        ? arrayToString(product.variantOptions.genders)
+        : '',
+    },
+  }), [product]);
+
   // Image state management
   const [imageItems, setImageItems] = React.useState<ImageItem[]>(() => {
     if (product?.images && product.images.length > 0) {
@@ -108,28 +145,33 @@ export const ProductForm: React.FC<ProductFormProps> = ({
     handleSubmit,
     formState: { errors, isDirty },
     setValue,
+    setError,
+    clearErrors,
     watch,
     reset,
   } = useForm<ProductFormData>({
     resolver: zodResolver(productFormSchema as any),
-    defaultValues: {
-      name: product?.name || '',
-      description: product?.description || '',
-      categoryId: product?.categoryId?.toString() || '',
-      brand: product?.brand || '',
-      price: product?.price || 0,
-      stock: product?.stock || 0,
-      discount: product?.discount || 0,
-      tags: product?.tags ? arrayToString(product.tags) : '',
-      isActive: product?.isActive ?? true,
-      variantOptions: {
-        sizes: product?.variantOptions?.sizes ? arrayToString(product.variantOptions.sizes) : '',
-        colors: product?.variantOptions?.colors ? arrayToString(product.variantOptions.colors) : '',
-        materials: product?.variantOptions?.materials ? arrayToString(product.variantOptions.materials) : '',
-        genders: product?.variantOptions?.genders ? arrayToString(product.variantOptions.genders) : '',
-      },
-    },
+    defaultValues: getDefaultValues(),
   });
+
+  React.useEffect(() => {
+    reset(getDefaultValues());
+
+    if (product?.images && product.images.length > 0) {
+      setImageItems(
+        product.images.map((url, index) => ({
+          type: 'url',
+          url,
+          id: `url-${index}-${Date.now()}`,
+          isMain: index === 0,
+          order: index,
+        }))
+      );
+      return;
+    }
+
+    setImageItems([]);
+  }, [product, getDefaultValues, reset]);
 
   // Clean up object URLs on unmount
   React.useEffect(() => {
@@ -293,12 +335,17 @@ export const ProductForm: React.FC<ProductFormProps> = ({
 
   // Form submission
   const onFormSubmit = async (data: ProductFormData) => {
+    clearErrors();
+
     if (imageItems.length === 0) {
       toast.error('Please upload at least one product image');
       return;
     }
 
     setIsUploading(true);
+    const loadingToastId = toast.loading(
+      isUpdate ? 'Updating product...' : 'Creating product...'
+    );
 
     try {
       // Create FormData
@@ -309,9 +356,9 @@ export const ProductForm: React.FC<ProductFormProps> = ({
       if (data.description) formData.append('description', data.description);
       formData.append('categoryId', data.categoryId);
       if (data.brand) formData.append('brand', data.brand);
-      formData.append('price', data.price.toString());
-      formData.append('stock', data.stock.toString());
-      formData.append('discount', data.discount.toString());
+  formData.append('price', koboFromNaira(data.price).toString());
+  formData.append('stock', (data.stock ?? 0).toString());
+  formData.append('discount', (data.discount ?? 0).toString());
       formData.append('isActive', data.isActive.toString());
       
       if (data.tags) {
@@ -337,6 +384,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
         }
 
         if (Object.keys(variantData).length > 0) {
+          console.log('FormData variantOptions:', variantData);
           formData.append('variantOptions', JSON.stringify(variantData));
         }
       }
@@ -368,14 +416,49 @@ export const ProductForm: React.FC<ProductFormProps> = ({
       });
 
       // Submit form data
-      await onSubmit(formData);
+      const submitWithRetry = async (attemptsLeft = 2): Promise<void> => {
+        try {
+          await onSubmit(formData);
+        } catch (error) {
+          if (error instanceof ApiError && error.statusCode === 0 && attemptsLeft > 0) {
+            await new Promise(resolve => setTimeout(resolve, 500));
+            return submitWithRetry(attemptsLeft - 1);
+          }
+          throw error;
+        }
+      };
+
+      await submitWithRetry();
 
       // Success notification
-      toast.success(isUpdate ? 'Product updated successfully!' : 'Product created successfully!');
+      toast.update(loadingToastId, {
+        render: isUpdate ? 'Product updated successfully!' : 'Product created successfully!',
+        type: 'success',
+        isLoading: false,
+        autoClose: 2500,
+      });
 
     } catch (error: any) {
       console.error('Form submission error:', error);
-      toast.error(error.message || `Failed to ${isUpdate ? 'update' : 'create'} product`);
+
+      if (error instanceof ApiError && error.details && typeof error.details === 'object') {
+        const details = error.details as Record<string, string | string[]>;
+        Object.entries(details).forEach(([field, message]) => {
+          const normalized = Array.isArray(message) ? message.join(', ') : message;
+          if (normalized) {
+            setError(field as any, { type: 'server', message: normalized });
+          }
+        });
+      }
+
+      toast.update(loadingToastId, {
+        render:
+          error?.message ||
+          `Failed to ${isUpdate ? 'update' : 'create'} product. Please try again.`,
+        type: 'error',
+        isLoading: false,
+        autoClose: 3500,
+      });
     } finally {
       setIsUploading(false);
     }
@@ -383,13 +466,32 @@ export const ProductForm: React.FC<ProductFormProps> = ({
 
   const totalLoading = isLoading || isUploading;
   const canAddMoreImages = imageItems.length < MAX_IMAGES;
-  const isFormValid = imageItems.length > 0 && isDirty;
+  const isFormValid = imageItems.length > 0 && (isUpdate || isDirty);
+
+  const handleReset = () => {
+    reset(getDefaultValues());
+
+    if (product?.images?.length) {
+      setImageItems(
+        product.images.map((url, index) => ({
+          type: 'url',
+          url,
+          id: `url-${index}-${Date.now()}`,
+          isMain: index === 0,
+          order: index,
+        }))
+      );
+      return;
+    }
+
+    setImageItems([]);
+  };
 
   return (
     <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-6">
       {/* Product Images Section */}
       <Card className="border-2 border-dashed border-gray-200 hover:border-mmp-primary transition-colors overflow-hidden pb-6">
-        <CardHeader className="bg-gradient-to-r from-mmp-primary/5 to-transparent">
+  <CardHeader className="bg-linear-to-r from-mmp-primary/5 to-transparent">
           <div className="flex items-center justify-between">
             <CardTitle className="flex items-center gap-2">
               <ImageIcon className="h-5 w-5 text-mmp-primary" />
@@ -533,7 +635,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                     </div>
 
                     {/* Image Info */}
-                    <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent p-2">
+                    <div className="absolute inset-x-0 bottom-0 bg-linear-to-t from-black/80 to-transparent p-2">
                       <div className="text-white text-xs truncate">
                         {item.type === 'file'
                           ? item.file?.name
@@ -642,7 +744,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
 
       {/* Basic Information */}
       <Card className="border-mmp-primary/20 shadow-sm pb-6">
-        <CardHeader className="bg-gradient-to-r from-mmp-primary/5 to-transparent">
+  <CardHeader className="bg-linear-to-r from-mmp-primary/5 to-transparent">
           <CardTitle className="text-mmp-primary2">Basic Information</CardTitle>
           <p className="text-sm text-gray-600">Essential product details</p>
         </CardHeader>
@@ -749,7 +851,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
 
       {/* Pricing & Inventory */}
       <Card className="border-mmp-primary/20 shadow-sm pb-6">
-        <CardHeader className="bg-gradient-to-r from-mmp-primary/5 to-transparent">
+  <CardHeader className="bg-linear-to-r from-mmp-primary/5 to-transparent">
           <CardTitle className="text-mmp-primary2">Pricing & Inventory</CardTitle>
           <p className="text-sm text-gray-600">Set pricing and stock information</p>
         </CardHeader>
@@ -768,7 +870,12 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                   type="number"
                   step="0.01"
                   min="0"
-                  {...register('price', { valueAsNumber: true })}
+                  {...register('price', {
+                    setValueAs: (value) =>
+                      value === '' || value === null || value === undefined
+                        ? undefined
+                        : Number(value),
+                  })}
                   placeholder="0.00"
                   className="pl-8 border-gray-300 focus:border-mmp-primary focus:ring-mmp-primary"
                   disabled={totalLoading}
@@ -790,7 +897,12 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                 id="stock"
                 type="number"
                 min="0"
-                {...register('stock', { valueAsNumber: true })}
+                {...register('stock', {
+                  setValueAs: (value) =>
+                    value === '' || value === null || value === undefined
+                      ? undefined
+                      : Number(value),
+                })}
                 placeholder="0"
                 className="mt-1.5 border-gray-300 focus:border-mmp-primary focus:ring-mmp-primary"
                 disabled={totalLoading}
@@ -813,7 +925,12 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                   type="number"
                   min="0"
                   max="100"
-                  {...register('discount', { valueAsNumber: true })}
+                  {...register('discount', {
+                    setValueAs: (value) =>
+                      value === '' || value === null || value === undefined
+                        ? undefined
+                        : Number(value),
+                  })}
                   placeholder="0"
                   className="border-gray-300 focus:border-mmp-primary focus:ring-mmp-primary"
                   disabled={totalLoading}
@@ -851,7 +968,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
 
       {/* Variant Options */}
       <Card className="border-mmp-primary/20 shadow-sm pb-6">
-        <CardHeader className="bg-gradient-to-r from-mmp-primary/5 to-transparent">
+  <CardHeader className="bg-linear-to-r from-mmp-primary/5 to-transparent">
           <CardTitle className="text-mmp-primary2">Variant Options</CardTitle>
           <p className="text-sm text-gray-600">Optional product variations</p>
         </CardHeader>
@@ -930,7 +1047,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
           type="button"
           variant="outline"
           className="border-gray-300 text-gray-700 hover:bg-gray-50"
-          onClick={() => reset()}
+          onClick={handleReset}
           disabled={totalLoading}
         >
           Reset Form
@@ -939,7 +1056,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
           type="submit"
           disabled={totalLoading || !isFormValid}
           className={cn(
-            "bg-gradient-to-r from-mmp-primary to-mmp-primary2 hover:from-mmp-primary2 hover:to-mmp-primary shadow-lg hover:shadow-xl transition-all duration-200 min-w-[140px]",
+            "bg-linear-to-r from-mmp-primary to-mmp-primary2 hover:from-mmp-primary2 hover:to-mmp-primary shadow-lg hover:shadow-xl transition-all duration-200 min-w-35",
             (totalLoading || !isFormValid) && "opacity-50 cursor-not-allowed"
           )}
         >

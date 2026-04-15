@@ -27,7 +27,7 @@ export const updateProductMutation = async ({
   data,
 }: {
   id: string;
-  data: IUpdateProductPayload;
+  data: IUpdateProductPayload | FormData;
 }): Promise<FrontendSafe<IProduct>> => {
   const response = await apiClient.patch<FrontendSafe<IProduct>>(`/products/${id}`, data);
 
@@ -112,6 +112,7 @@ export const useUpdateProduct = () => {
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['products', 'all'] });
       queryClient.invalidateQueries({ queryKey: ['products', 'detail', variables.id] });
+      queryClient.invalidateQueries({ queryKey: ['products', 'slug'] });
     },
   });
 };
