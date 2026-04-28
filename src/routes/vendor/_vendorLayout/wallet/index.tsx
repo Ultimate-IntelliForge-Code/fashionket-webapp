@@ -23,7 +23,7 @@ import { toast } from 'react-toastify';
 import { StatsCard } from '@/components/ui/stats-card';
 import { WithdrawalFormData, withdrawalSchema } from '@/lib';
 import { useWalletStatsQuery, useWithdrawalsQuery, useRequestWithdrawalMutation } from '@/api/hooks/wallet.hook';
-import { WithdrawalStatusBadge } from '../../../../components/wallet/withdrawal-status-badge';
+import { WithdrawalStatusBadge } from '../../../../components/ui/withdrawal-status-badge';
 import { ApiError } from '@/api/client';
 
 export const Route = createFileRoute('/vendor/_vendorLayout/wallet/')({

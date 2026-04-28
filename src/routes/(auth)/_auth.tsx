@@ -8,7 +8,7 @@ export const Route = createFileRoute('/(auth)/_auth')({
 function AuthLayout() {
   return (
     <AuthGuard requireAuth={false}>
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen">
         <Outlet />
       </div>
     </AuthGuard>
