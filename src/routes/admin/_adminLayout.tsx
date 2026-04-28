@@ -1,7 +1,7 @@
 import { createFileRoute, Outlet, Navigate } from "@tanstack/react-router";
 import { useAuth } from "@/hooks";
-import { AdminSidebar } from "@/components/admin/AdminSidebar";
-import { AdminHeader } from "@/components/admin/AdminHeader";
+import { AdminSidebar } from "@/components/layout/AdminSidebar";
+import { AdminHeader } from "@/components/layout/AdminHeader";
 import { AdminAuthProvider } from "@/providers/auth-provider";
 
 export const Route = createFileRoute("/admin/_adminLayout")({

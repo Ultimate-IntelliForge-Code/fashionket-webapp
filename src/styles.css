@@ -39,11 +39,12 @@
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
 
-  --color-mmp-primary: #1e40af;
-  --color-mmp-primary2: #041442;
-  --color-mmp-secondary: #38bdf8;
-  --color-mmp-accent: #0ea5e9;
-  --color-mmp-neutral: #f8fafc;
+  /* Updated color palette */
+  --color-mmp-primary: #1800ad;
+  --color-mmp-primary2: #b0a8ba;
+  --color-mmp-secondary: #7b7485;
+  --color-mmp-accent: #930000;
+  --color-mmp-neutral: #d40000;
 
   --font-sans: var(--font-sans);
   --font-mono: var(--font-mono);

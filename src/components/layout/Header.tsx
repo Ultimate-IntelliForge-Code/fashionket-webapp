@@ -4,19 +4,15 @@ import {
   Menu,
   Search,
   User,
-  Sparkles,
   Home,
   Package,
   Tag,
   ChevronRight,
   LogOut,
-  ShoppingBag,
   Heart,
   Settings,
-  CreditCard,
   Shield,
   Bell,
-  TrendingUp,
   Store,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -41,6 +37,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from "@/hooks";
 import { CartIcon } from "../cart";
 import { useLogout } from "@/api/mutations";
+import { motion, AnimatePresence } from "framer-motion";
 
 // Navigation links configuration
 const navLinks = [
@@ -48,7 +45,6 @@ const navLinks = [
   { href: "/categories", title: "Categories", icon: Tag },
   { href: "/products", title: "Products", icon: Package },
   { href: "/vendors", title: "Vendors", icon: Store },
-  // { href: '/new-arrivals', title: 'New Arrivals', icon: Sparkles },
 ];
 
 const userLinks = [
@@ -122,117 +118,109 @@ export default function Header() {
 
   return (
     <>
-      {/* Premium Announcement Bar - Mobile Optimized */}
-      <div className="bg-gradient-to-r from-mmp-primary to-mmp-accent text-white py-2 px-3 overflow-hidden relative">
-        <div className="container mx-auto flex flex-col xs:flex-row justify-center items-center gap-2 xs:gap-3">
-          <div className="flex items-center gap-1.5 sm:gap-2 animate-pulse-slow">
-            <Sparkles className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-white/90" />
-            <span className="text-[10px] xs:text-xs sm:text-sm font-medium tracking-wide text-white drop-shadow">
-              ✨ New Collection: Summer 2024
-            </span>
-            <Sparkles className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-white/90" />
-          </div>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="text-white bg-white/20 hover:bg-white/30 h-6 xs:h-7 text-[8px] xs:text-[10px] sm:text-xs px-2 rounded-full"
-            asChild
-          >
-            <Link to="/products">Shop Now</Link>
-          </Button>
-        </div>
-
-        {/* Animated border effect */}
-        <div className="absolute bottom-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-white/60 to-transparent animate-shimmer" />
-      </div>
-
       {/* Main Header */}
-      <header
-        className={`sticky top-0 z-50 transition-all duration-300 ${
+      <motion.header
+        initial={{ y: -100 }}
+        animate={{ y: 0 }}
+        transition={{ duration: 0.5, type: "spring", stiffness: 100 }}
+        className={`sticky top-0 z-50 transition-all duration-500 ${
           isScrolled
-            ? "bg-mmp-primary2/95 backdrop-blur-md shadow-lg"
-            : "bg-mmp-primary2"
+            ? "bg-white/95 backdrop-blur-md shadow-xl border-b border-mmp-primary2/20"
+            : "bg-white border-b border-mmp-primary2/10"
         }`}
       >
-        <div className="container mx-auto px-3 sm:px-4">
-          <div className="flex items-center justify-between h-14 sm:h-16 md:h-20">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16 sm:h-20 lg:h-24">
             {/* Logo & Mobile Menu */}
-            <div className="flex items-center gap-2 sm:gap-3 md:gap-6">
+            <div className="flex items-center gap-3 lg:gap-8">
               {/* Mobile Menu Button */}
               <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
                 <SheetTrigger asChild>
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="md:hidden hover:bg-mmp-primary/20 p-1.5 h-9 w-9"
+                    className="lg:hidden hover:bg-mmp-primary2/20 transition-all duration-300 rounded-xl h-10 w-10"
                     aria-label="Open menu"
                   >
-                    <Menu className="h-5 w-5 text-white" />
+                    <Menu className="h-5 w-5 text-mmp-primary" />
                   </Button>
                 </SheetTrigger>
 
                 {/* Mobile Navigation - Slide from left */}
                 <SheetContent
                   side="left"
-                  className="w-[85vw] max-w-sm p-0 bg-mmp-primary2 border-r border-mmp-primary/30"
+                  className="w-[85vw] max-w-sm p-0 bg-gradient-to-br from-white via-mmp-primary2/5 to-mmp-primary2/10 border-r border-mmp-primary2/20"
                 >
-                  <SheetHeader className="p-4 sm:p-5 border-b border-mmp-primary/30">
+                  <SheetHeader className="p-6 border-b border-mmp-primary2/20 bg-white/50 backdrop-blur-sm">
                     <SheetTitle className="text-center">
                       <Link
                         to="/"
                         onClick={() => setIsSidebarOpen(false)}
-                        className="flex items-center justify-center"
+                        className="flex items-center justify-center group"
                       >
-                        <img
+                        <motion.img
+                          whileHover={{ scale: 1.05 }}
                           src="/logo.png"
                           alt="FashionKet Logo"
-                          className="h-8 sm:h-10 w-auto"
+                          className="h-10 w-auto"
                         />
                       </Link>
                     </SheetTitle>
                   </SheetHeader>
 
-                  <div className="overflow-y-auto h-[calc(100vh-70px)] p-4 sm:p-5">
+                  <div className="overflow-y-auto h-[calc(100vh-80px)] p-6">
                     <div className="flex flex-col justify-between h-full">
-                      <div className="flex flex-col">
+                      <div className="flex flex-col space-y-6">
                         {/* Navigation Links */}
                         <nav className="space-y-2">
-                          {navLinks.map((link) => {
+                          {navLinks.map((link, index) => {
                             const Icon = link.icon;
                             const active = isActive(link.href);
                             return (
-                              <Link
+                              <motion.div
                                 key={link.href}
-                                to={link.href}
-                                onClick={() => setIsSidebarOpen(false)}
-                                className={`flex items-center justify-between px-3 py-1 rounded-lg transition-all group ${
-                                  active
-                                    ? "bg-mmp-accent rounded-l-none border-l-4 border-mmp-neutral"
-                                    : "hover:bg-white/10"
-                                }`}
+                                initial={{ x: -50, opacity: 0 }}
+                                animate={{ x: 0, opacity: 1 }}
+                                transition={{ delay: index * 0.05 }}
                               >
-                                <div className="flex items-center gap-3">
-                                  <div
-                                    className={`p-2 rounded-lg  text-white ${
-                                      active ?? "bg-white/10 text-white"
-                                    }`}
-                                  >
-                                    <Icon className="h-5 w-5" />
-                                  </div>
-                                  <span
-                                    className={`font-medium text-sm ${
-                                      active ? "text-white" : "text-white/80"
-                                    }`}
-                                  >
-                                    {link.title}
-                                  </span>
-                                </div>
-                                <ChevronRight
-                                  className={`h-4 w-4 transition-transform group-hover:translate-x-1 ${
-                                    active ? "text-white" : "text-white/60"
+                                <Link
+                                  to={link.href}
+                                  onClick={() => setIsSidebarOpen(false)}
+                                  className={`flex items-center justify-between px-4 py-3 rounded-xl transition-all duration-300 group ${
+                                    active
+                                      ? "bg-gradient-to-r from-mmp-primary/10 to-mmp-primary2/20 border-l-4 border-mmp-accent shadow-md"
+                                      : "hover:bg-mmp-primary2/10"
                                   }`}
-                                />
-                              </Link>
+                                >
+                                  <div className="flex items-center gap-3">
+                                    <div
+                                      className={`p-2 rounded-lg transition-all duration-300 ${
+                                        active
+                                          ? "bg-mmp-accent text-white shadow-md"
+                                          : "bg-mmp-primary2/20 text-mmp-primary group-hover:bg-mmp-primary2/30"
+                                      }`}
+                                    >
+                                      <Icon className="h-5 w-5" />
+                                    </div>
+                                    <span
+                                      className={`font-medium ${
+                                        active
+                                          ? "text-mmp-primary font-semibold"
+                                          : "text-mmp-primary/80"
+                                      }`}
+                                    >
+                                      {link.title}
+                                    </span>
+                                  </div>
+                                  <ChevronRight
+                                    className={`h-4 w-4 transition-all duration-300 group-hover:translate-x-1 ${
+                                      active
+                                        ? "text-mmp-accent"
+                                        : "text-mmp-primary/40"
+                                    }`}
+                                  />
+                                </Link>
+                              </motion.div>
                             );
                           })}
                         </nav>
@@ -240,27 +228,31 @@ export default function Header() {
                         {/* User Links */}
                         {isAuthenticated && (
                           <>
-                            <Separator className="my-6 bg-white/20" />
-                            <nav className="space-y-1">
-                              {userLinks.map((link) => {
+                            <Separator className="bg-mmp-primary2/20" />
+                            <nav className="space-y-2">
+                              {userLinks.map((link, index) => {
                                 const Icon = link.icon;
                                 const active = isActive(link.href);
                                 return (
-                                  <Link
+                                  <motion.div
                                     key={link.href}
-                                    to={link.href}
-                                    onClick={() => setIsSidebarOpen(false)}
-                                    className={`flex items-center gap-3 p-3 rounded-lg transition-colors ${
-                                      active
-                                        ? "bg-white/20 text-white"
-                                        : "hover:bg-white/10 text-white/80"
-                                    }`}
+                                    initial={{ x: -50, opacity: 0 }}
+                                    animate={{ x: 0, opacity: 1 }}
+                                    transition={{ delay: (index + 4) * 0.05 }}
                                   >
-                                    <Icon className="h-5 w-5" />
-                                    <span className="text-sm">
-                                      {link.title}
-                                    </span>
-                                  </Link>
+                                    <Link
+                                      to={link.href}
+                                      onClick={() => setIsSidebarOpen(false)}
+                                      className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 ${
+                                        active
+                                          ? "bg-gradient-to-r from-mmp-primary/10 to-mmp-primary2/20 text-mmp-primary font-semibold"
+                                          : "text-mmp-primary/80 hover:bg-mmp-primary2/10"
+                                      }`}
+                                    >
+                                      <Icon className="h-5 w-5" />
+                                      <span>{link.title}</span>
+                                    </Link>
+                                  </motion.div>
                                 );
                               })}
                             </nav>
@@ -268,25 +260,30 @@ export default function Header() {
                         )}
                       </div>
 
-                      {/* User Info Section - Moved to top for better UX */}
+                      {/* User Info Section */}
                       {isAuthenticated ? (
-                        <div className="flex gap-2 items-center mb-6">
+                        <motion.div
+                          initial={{ y: 50, opacity: 0 }}
+                          animate={{ y: 0, opacity: 1 }}
+                          transition={{ delay: 0.3 }}
+                          className="flex gap-3 mt-8"
+                        >
                           <Link
                             to="/account"
                             onClick={() => setIsSidebarOpen(false)}
-                            className="flex items-center gap-3 p-3 bg-mmp-primary/20 rounded-lg flex-1"
+                            className="flex items-center gap-3 p-4 bg-gradient-to-r from-mmp-primary/10 to-mmp-primary2/20 rounded-xl flex-1 group transition-all duration-300 hover:shadow-md"
                           >
-                            <Avatar className="h-10 w-10 sm:h-12 sm:w-12 ring-2 ring-white/20">
+                            <Avatar className="h-12 w-12 ring-2 ring-mmp-accent/30 group-hover:ring-mmp-accent/50 transition-all">
                               <AvatarImage src="" />
-                              <AvatarFallback className="bg-gradient-to-br from-mmp-accent to-mmp-secondary text-white text-sm">
+                              <AvatarFallback className="bg-gradient-to-br from-mmp-accent to-mmp-secondary text-white text-sm font-bold">
                                 {getUserInitials()}
                               </AvatarFallback>
                             </Avatar>
                             <div className="flex-1 min-w-0">
-                              <p className="font-semibold text-white text-sm truncate">
+                              <p className="font-semibold text-mmp-primary truncate">
                                 {getUserDisplayName()}
                               </p>
-                              <p className="text-xs text-white/70 truncate">
+                              <p className="text-xs text-mmp-primary/60 truncate">
                                 {user?.email}
                               </p>
                             </div>
@@ -296,29 +293,34 @@ export default function Header() {
                             size="icon"
                             onClick={handleLogout}
                             disabled={isLoggingOut}
-                            className="bg-red-600/20 hover:bg-red-600/30 py-8 w-9 rounded-lg"
+                            className="bg-red-500/10 hover:bg-red-500/20 transition-all duration-300 rounded-xl h-12 w-12"
                           >
-                            <LogOut className="h-4 w-4 text-red-400" />
+                            <LogOut className="h-5 w-5 text-red-600" />
                           </Button>
-                        </div>
+                        </motion.div>
                       ) : (
-                        <div className="grid grid-cols-2 gap-3 mb-6">
+                        <motion.div
+                          initial={{ y: 50, opacity: 0 }}
+                          animate={{ y: 0, opacity: 1 }}
+                          transition={{ delay: 0.3 }}
+                          className="grid grid-cols-2 gap-3 mt-8"
+                        >
                           <Button
-                            variant="ghost"
-                            className="border-mmp-accent text-white hover:bg-white/10 h-11 text-sm"
+                            variant="outline"
+                            className="border-mmp-primary/30 text-mmp-primary hover:bg-mmp-primary/10 transition-all duration-300 h-11 rounded-xl"
                             asChild
                             onClick={() => setIsSidebarOpen(false)}
                           >
                             <Link to="/login">Login</Link>
                           </Button>
                           <Button
-                            className="bg-gradient-to-r from-mmp-accent to-mmp-secondary text-white hover:opacity-90 h-11 text-sm"
+                            className="bg-gradient-to-r from-mmp-accent to-mmp-secondary text-white hover:shadow-lg transition-all duration-300 h-11 rounded-xl"
                             asChild
                             onClick={() => setIsSidebarOpen(false)}
                           >
                             <Link to="/signup">Register</Link>
                           </Button>
-                        </div>
+                        </motion.div>
                       )}
                     </div>
                   </div>
@@ -326,39 +328,43 @@ export default function Header() {
               </Sheet>
 
               {/* Logo */}
-              <Link to="/" className="flex items-center">
-                <img
+              <Link to="/" className="flex items-center group">
+                <motion.img
+                  whileHover={{ scale: 1.05 }}
+                  transition={{ duration: 0.3 }}
                   src="/logo.png"
                   alt="FashionKet Logo"
-                  className="h-7 sm:h-8 md:h-10 w-auto"
+                  className="h-8 sm:h-10 lg:h-12 w-auto"
                 />
               </Link>
             </div>
 
             {/* Desktop Navigation */}
             <div className="hidden lg:flex items-center justify-center flex-1">
-              <nav className="flex items-center gap-1">
+              <nav className="flex items-center gap-2">
                 {navLinks.map((link) => {
                   const active = isActive(link.href);
                   return (
                     <Link
                       key={link.href}
                       to={link.href}
-                      className={`relative px-3 xl:px-4 py-2 rounded-lg font-medium transition-all duration-200 text-sm xl:text-base ${
-                        active ? "text-white" : "text-white/80 hover:text-white"
+                      className={`relative px-5 py-2.5 font-medium rounded-t-lg transition-all duration-300 text-sm ${
+                        active
+                          ? "text-mmp-accent "
+                          : "text-mmp-primary hover:text-mmp-accent"
                       }`}
                     >
                       {link.title}
                       {active && (
-                        <>
-                          <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1/2 h-0.5 bg-gradient-to-r from-mmp-accent to-mmp-secondary rounded-full" />
-                          <span className="absolute -top-1 -right-1">
-                            <span className="relative flex h-2 w-2">
-                              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-mmp-secondary opacity-75"></span>
-                              <span className="relative inline-flex rounded-full h-2 w-2 bg-mmp-secondary"></span>
-                            </span>
-                          </span>
-                        </>
+                        <motion.div
+                          layoutId="activeNav"
+                          className="absolute bottom-0 left-0 right-0 h-0.5 bg-mmp-accent rounded-full"
+                          transition={{
+                            type: "spring",
+                            stiffness: 380,
+                            damping: 30,
+                          }}
+                        />
                       )}
                     </Link>
                   );
@@ -367,29 +373,29 @@ export default function Header() {
             </div>
 
             {/* Right Side Actions */}
-            <div className="flex items-center gap-1 sm:gap-2 md:gap-3">
+            <div className="flex items-center gap-2 lg:gap-3">
               {/* Mobile Search Button */}
               <Button
                 variant="ghost"
                 size="icon"
-                className="md:hidden hover:bg-white/10 h-9 w-9"
+                className="lg:hidden hover:bg-mmp-primary2/20 transition-all duration-300 rounded-xl h-10 w-10"
                 aria-label="Search"
                 onClick={() => setIsSearchExpanded(!isSearchExpanded)}
               >
-                <Search className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
+                <Search className="h-5 w-5 text-mmp-primary" />
               </Button>
 
               {/* Desktop Search */}
-              <div className="hidden md:block relative">
+              <div className="hidden lg:block relative">
                 <form onSubmit={handleSearch} className="relative">
                   <Input
                     type="search"
                     placeholder="Search products..."
-                    className="w-[180px] lg:w-[220px] pl-9 pr-3 h-9 lg:h-10 bg-white/10 border-white/20 text-white placeholder:text-white/60 rounded-lg text-sm focus:bg-white/20 focus:border-white/40"
+                    className="w-64 xl:w-80 pl-11 pr-4 h-11 bg-mmp-primary2/5 border-mmp-primary2/20 text-mmp-accent placeholder:text-mmp-primary/50  focus-visible:ring-mmp-primary/5 rounded-xl text-sm focus:bg-white focus:border-mmp-primary/30 transition-all duration-300"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                   />
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-3.5 w-3.5 text-white/60" />
+                  <Search className="absolute left-3.5 top-1/2 transform -translate-y-1/2 h-4 w-4 text-mmp-primary/50" />
                 </form>
               </div>
 
@@ -403,34 +409,39 @@ export default function Header() {
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="hover:bg-white/10 relative h-9 w-9"
+                      className="hover:bg-mmp-primary2/20 transition-all duration-300 rounded-xl relative h-10 w-10"
                     >
-                      <Bell className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
-                      <span className="absolute -top-1 -right-1 flex h-4 w-4">
-                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                        <span className="relative inline-flex rounded-full h-4 w-4 bg-mmp-accent text-[8px] font-bold text-white items-center justify-center">
-                          0
+                      <Bell className="h-5 w-5 text-mmp-primary" />
+                      <span className="absolute -top-1 -right-1 flex h-5 w-5">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-mmp-accent opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-5 w-5 bg-mmp-accent text-[10px] font-bold text-white items-center justify-center">
+                          3
                         </span>
                       </span>
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent
                     align="end"
-                    className="w-72 bg-mmp-primary2 border-white/20"
+                    className="w-80 mt-2 bg-white border-mmp-primary2/20 shadow-xl rounded-xl"
                   >
-                    <DropdownMenuLabel className="text-white">
+                    <DropdownMenuLabel className="text-mmp-primary font-semibold px-4 py-3">
                       Notifications
                     </DropdownMenuLabel>
-                    <DropdownMenuSeparator className="bg-white/20" />
-                    <div className="p-2">
-                      <div className="p-3 rounded-lg bg-white/10">
-                        <p className="text-sm font-medium text-white">
-                          Order Shipped
-                        </p>
-                        <p className="text-xs text-white/70">
-                          Your order #12345 has been shipped
-                        </p>
-                      </div>
+                    <DropdownMenuSeparator className="bg-mmp-primary2/20" />
+                    <div className="p-2 space-y-2">
+                      {[1, 2, 3].map((i) => (
+                        <div
+                          key={i}
+                          className="p-3 rounded-lg bg-mmp-primary2/5 hover:bg-mmp-primary2/10 transition-all duration-300 cursor-pointer"
+                        >
+                          <p className="text-sm font-medium text-mmp-primary">
+                            Order Shipped
+                          </p>
+                          <p className="text-xs text-mmp-primary/60 mt-1">
+                            Your order #{12345 + i} has been shipped
+                          </p>
+                        </div>
+                      ))}
                     </div>
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -438,16 +449,16 @@ export default function Header() {
 
               {/* Auth Buttons */}
               {!isAuthenticated ? (
-                <div className="hidden lg:flex gap-2 ml-2">
+                <div className="hidden lg:flex gap-3 ml-2">
                   <Button
                     variant="ghost"
-                    className="border-mmp-accent text-white hover:bg-white/10 h-9 px-3 text-sm"
+                    className="border border-mmp-primary text-mmp-primary hover:bg-mmp-primary/10 transition-all duration-300 h-11 px-6 rounded-xl text-sm font-medium"
                     asChild
                   >
                     <Link to="/login">Login</Link>
                   </Button>
                   <Button
-                    className="bg-gradient-to-r from-mmp-accent to-mmp-secondary text-white hover:opacity-90 h-9 px-3 text-sm"
+                    className="bg-mmp-accent text-white hover:shadow-lg transition-all duration-300 h-11 px-6 rounded-xl text-sm font-medium"
                     asChild
                   >
                     <Link to="/signup">Register</Link>
@@ -458,53 +469,53 @@ export default function Header() {
                   <DropdownMenuTrigger asChild>
                     <Button
                       variant="ghost"
-                      className="hover:bg-white/10 px-2 rounded-full h-9"
+                      className="hover:bg-mmp-primary2/20 transition-all duration-300 rounded-full h-11 px-2"
                     >
-                      <Avatar className="h-7 w-7 sm:h-8 sm:w-8">
+                      <Avatar className="h-9 w-9 ring-2 ring-mmp-accent/30 hover:ring-mmp-accent/50 transition-all">
                         <AvatarImage src="" />
-                        <AvatarFallback className="bg-gradient-to-br from-mmp-accent to-mmp-secondary text-white text-xs">
+                        <AvatarFallback className="bg-gradient-to-br from-mmp-accent to-mmp-secondary text-white text-xs font-bold">
                           {getUserInitials()}
                         </AvatarFallback>
                       </Avatar>
-                      <span className="hidden lg:inline ml-2 text-white font-medium text-sm max-w-[80px] truncate">
+                      <span className="hidden xl:inline ml-2 text-mmp-primary font-semibold text-sm max-w-[100px] truncate">
                         {getUserDisplayName()}
                       </span>
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent
                     align="end"
-                    className="w-56 bg-mmp-primary2 border-white/20"
+                    className="w-64 mt-2 bg-white border-mmp-primary2/20 shadow-xl rounded-xl"
                   >
-                    <DropdownMenuLabel className="text-white p-3">
+                    <DropdownMenuLabel className="p-4">
                       <div className="flex items-center gap-3">
-                        <Avatar className="h-10 w-10">
+                        <Avatar className="h-12 w-12 ring-2 ring-mmp-accent/30">
                           <AvatarImage src="" />
-                          <AvatarFallback className="bg-gradient-to-br from-mmp-accent to-mmp-secondary text-white">
+                          <AvatarFallback className="bg-gradient-to-br from-mmp-accent to-mmp-secondary text-white font-bold">
                             {getUserInitials()}
                           </AvatarFallback>
                         </Avatar>
                         <div className="flex-1 min-w-0">
-                          <p className="font-semibold text-white text-sm truncate">
+                          <p className="font-semibold text-mmp-primary truncate">
                             {user?.fullName}
                           </p>
-                          <p className="text-xs text-white/70 truncate">
+                          <p className="text-xs text-mmp-primary/60 truncate">
                             {user?.email}
                           </p>
                         </div>
                       </div>
                     </DropdownMenuLabel>
-                    <DropdownMenuSeparator className="bg-white/20" />
+                    <DropdownMenuSeparator className="bg-mmp-primary2/20" />
 
                     {isVendor && (
                       <>
                         <DropdownMenuItem
-                          className="text-white hover:bg-white/10 cursor-pointer py-2"
+                          className="text-mmp-primary hover:bg-mmp-primary2/10 cursor-pointer py-3 px-4 transition-all duration-300"
                           onClick={handleAdminDashboard}
                         >
-                          <Shield className="h-4 w-4 text-mmp-secondary mr-2" />
+                          <Shield className="h-4 w-4 text-mmp-accent mr-3" />
                           <span>Vendor Dashboard</span>
                         </DropdownMenuItem>
-                        <DropdownMenuSeparator className="bg-white/20" />
+                        <DropdownMenuSeparator className="bg-mmp-primary2/20" />
                       </>
                     )}
 
@@ -514,24 +525,24 @@ export default function Header() {
                         <DropdownMenuItem
                           key={link.href}
                           asChild
-                          className="text-white hover:bg-white/10 cursor-pointer py-2"
+                          className="text-mmp-primary hover:bg-mmp-primary2/10 cursor-pointer py-3 px-4 transition-all duration-300"
                         >
                           <Link to={link.href} className="flex items-center">
-                            <Icon className="h-4 w-4 text-mmp-secondary mr-2" />
+                            <Icon className="h-4 w-4 text-mmp-primary/60 mr-3" />
                             <span>{link.title}</span>
                           </Link>
                         </DropdownMenuItem>
                       );
                     })}
 
-                    <DropdownMenuSeparator className="bg-white/20" />
+                    <DropdownMenuSeparator className="bg-mmp-primary2/20" />
 
                     <DropdownMenuItem
-                      className="text-red-400 hover:bg-red-600/10 cursor-pointer py-2"
+                      className="text-red-600 hover:bg-red-50 cursor-pointer py-3 px-4 transition-all duration-300"
                       onClick={handleLogout}
                       disabled={isLoggingOut}
                     >
-                      <LogOut className="h-4 w-4 mr-2" />
+                      <LogOut className="h-4 w-4 mr-3" />
                       <span>{isLoggingOut ? "Logging out..." : "Logout"}</span>
                     </DropdownMenuItem>
                   </DropdownMenuContent>
@@ -541,23 +552,31 @@ export default function Header() {
           </div>
 
           {/* Mobile Search Bar */}
-          {isSearchExpanded && (
-            <div className="md:hidden py-2">
-              <form onSubmit={handleSearch} className="relative">
-                <Input
-                  type="search"
-                  placeholder="Search products..."
-                  className="w-full pl-9 pr-4 h-10 bg-white/10 border-white/20 text-white placeholder:text-white/60 rounded-lg text-sm"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  autoFocus
-                />
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/60" />
-              </form>
-            </div>
-          )}
+          <AnimatePresence>
+            {isSearchExpanded && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: "auto", opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.3 }}
+                className="lg:hidden py-3"
+              >
+                <form onSubmit={handleSearch} className="relative">
+                  <Input
+                    type="search"
+                    placeholder="Search products..."
+                    className="w-full pl-11 pr-4 h-11 bg-mmp-primary2/5 border-mmp-primary2/20 text-mmp-primary placeholder:text-mmp-primary/50 rounded-xl text-sm focus:bg-white focus:border-mmp-primary/30 transition-all duration-300"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    autoFocus
+                  />
+                  <Search className="absolute left-3.5 top-1/2 transform -translate-y-1/2 h-4 w-4 text-mmp-primary/50" />
+                </form>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
-      </header>
+      </motion.header>
     </>
   );
 }

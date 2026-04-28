@@ -9,16 +9,14 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground hover:bg-primary/90",
-        destructive:
-          "bg-destructive text-white hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60",
-        outline:
-          "bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50",
-        secondary:
-          "bg-secondary text-secondary-foreground hover:bg-secondary/80",
-        ghost:
-          "border border-transparent hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50",
-        link: "text-primary underline-offset-4 hover:underline",
+        default: "bg-mmp-primary text-white hover:bg-mmp-primary/90 shadow-sm transition-all hover:shadow-md",
+        destructive: "bg-mmp-accent text-white hover:bg-mmp-accent/90 focus-visible:ring-mmp-accent/20 dark:focus-visible:ring-mmp-accent/40 shadow-sm",
+        outline: "border-2 border-mmp-primary2 bg-transparent text-mmp-primary hover:bg-mmp-primary2/10 hover:text-mmp-primary dark:border-mmp-primary2/50 dark:hover:bg-mmp-primary2/20",
+        secondary: "bg-mmp-secondary text-white hover:bg-mmp-secondary/80 shadow-sm",
+        ghost: "border border-transparent text-mmp-primary hover:bg-mmp-primary2/10 hover:text-mmp-primary dark:hover:bg-mmp-primary2/20",
+        link: "text-mmp-primary underline-offset-4 hover:underline hover:text-mmp-primary/80",
+        accent: "bg-mmp-neutral text-white hover:bg-mmp-neutral/90 shadow-sm transition-all hover:shadow-md",
+        muted: "bg-mmp-primary2/20 text-mmp-primary hover:bg-mmp-primary2/30 dark:bg-mmp-primary2/10",
       },
       size: {
         default: "h-9 px-4 py-2 has-[>svg]:px-3",
