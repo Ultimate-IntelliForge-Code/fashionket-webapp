@@ -41,10 +41,10 @@
 
   /* Updated color palette */
   --color-mmp-primary: #1800ad;
-  --color-mmp-primary2: #b0a8ba;
-  --color-mmp-secondary: #7b7485;
-  --color-mmp-accent: #930000;
-  --color-mmp-neutral: #d40000;
+  --color-mmp-primary2: #1e1926;
+  --color-mmp-secondary: #b0a8ba;
+  --color-mmp-accent: #d40000;
+  --color-mmp-neutral: #930000;
 
   --font-sans: var(--font-sans);
   --font-mono: var(--font-mono);

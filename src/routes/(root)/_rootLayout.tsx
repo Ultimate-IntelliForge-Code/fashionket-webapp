@@ -12,7 +12,7 @@ function RouteComponent() {
   return (
       <CartProvider>
         <Header />
-        <div className='className="min-h-screen bg-gradient-to-b from-mmp-neutral via-white to-mmp-neutral/30"'>
+        <div className='className="min-h-screen"'>
           <Outlet />
         </div>
         <Footer />

@@ -126,10 +126,10 @@ export default function Footer() {
   };
 
   return (
-    <footer className="bg-black text-white relative overflow-hidden border-t-2 border-mmp-primary">
+    <footer className="bg-mmp-primary2 text-white relative overflow-hidden border-t-2 border-mmp-primary">
       {/* Decorative Background Elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-mmp-accent/10 rounded-full blur-3xl" />
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-mmp-primary/10 rounded-full blur-3xl" />
         <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-mmp-secondary/10 rounded-full blur-3xl" />
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-mmp-neutral/5 rounded-full blur-3xl" />
       </div>
@@ -148,7 +148,7 @@ export default function Footer() {
                   transition={{ delay: index * 0.1, duration: 0.3 }}
                   className="flex items-center gap-3 group cursor-pointer"
                 >
-                  <div className="p-2 rounded-xl bg-mmp-primary2/20 group-hover:bg-mmp-accent/20 transition-all duration-300">
+                  <div className="p-2 rounded-xl bg-mmp-primary2/20 group-hover:bg-mmp-primary/20 transition-all duration-300">
                     <Icon className="h-5 w-5 text-mmp-secondary group-hover:text-mmp-neutral transition-colors" />
                   </div>
                   <div className="flex-1 min-w-0">
@@ -204,7 +204,7 @@ export default function Footer() {
                   placeholder="Your email address"
                   className="bg-white/10 border-mmp-primary2/30 focus:border-mmp-secondary text-white placeholder:text-white/50 rounded-xl h-11 text-sm focus:bg-white/20 transition-all duration-300"
                 />
-                <Button className="bg-mmp-accent hover:shadow-lg hover:scale-105 transition-all duration-300 h-11 px-6 rounded-xl text-sm font-medium whitespace-nowrap group">
+                <Button className="bg-mmp-primary hover:shadow-lg hover:scale-105 transition-all duration-300 h-11 px-6 rounded-xl text-sm font-medium whitespace-nowrap group">
                   Subscribe
                   <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform" />
                 </Button>
@@ -226,7 +226,7 @@ export default function Footer() {
                 >
                   <h3 className="font-bold text-base capitalize text-mmp-secondary relative inline-block">
                     {category}
-                    <div className="absolute -bottom-1 left-0 w-8 h-0.5 bg-mmp-accent rounded-full" />
+                    <div className="absolute -bottom-1 left-0 w-8 h-0.5 bg-mmp-primary rounded-full" />
                   </h3>
                   <ul className="space-y-2.5">
                     {links.map((link) => (
@@ -265,14 +265,14 @@ export default function Footer() {
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="border-mmp-primary2/40 text-white hover:text-mmp-accent hover:bg-mmp-accent/10 hover:border-mmp-accent rounded-xl h-10 px-5 transition-all duration-300"
+                    className="border-mmp-primary2/40 text-white hover:text-mmp-primary hover:bg-mmp-primary/10 hover:border-mmp-primary rounded-xl h-10 px-5 transition-all duration-300"
                     asChild
                   >
                     <Link to="/vendor/login">Login</Link>
                   </Button>
                   <Button
                     size="sm"
-                    className="bg-mmp-accent hover:shadow-lg hover:scale-105 transition-all duration-300 rounded-xl h-10 px-5 font-medium"
+                    className="bg-mmp-primary hover:shadow-lg hover:scale-105 transition-all duration-300 rounded-xl h-10 px-5 font-medium"
                     asChild
                   >
                     <Link to="/vendor/register">Register Store</Link>
@@ -310,7 +310,7 @@ export default function Footer() {
                               : undefined
                           }
                         >
-                          <div className="p-1.5 rounded-lg bg-white/10 group-hover:bg-mmp-accent/20 transition-all duration-300">
+                          <div className="p-1.5 rounded-lg bg-white/10 group-hover:bg-mmp-primary/20 transition-all duration-300">
                             <Icon className="h-4 w-4" />
                           </div>
                           <span>{info.text}</span>
@@ -355,7 +355,7 @@ export default function Footer() {
       </div>
 
       {/* Bottom Bar */}
-      <div className="relative bg-mmp-primary/60 backdrop-blur-sm border-t border-mmp-primary2/20">
+      <div className="relative bg-mmp-primary2 backdrop-blur-sm border-t border-mmp-primary2/20">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             {/* Legal Links */}
@@ -403,8 +403,8 @@ export default function Footer() {
             transition={{ delay: 0.5 }}
             className="mt-4 text-center"
           >
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-mmp-accent/10 to-mmp-secondary/10 border border-mmp-primary2/30">
-              <Heart className="h-3.5 w-3.5 text-mmp-accent animate-pulse" />
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-mmp-primary/10 to-mmp-secondary/10 border border-mmp-primary2/30">
+              <Heart className="h-3.5 w-3.5 text-mmp-primary animate-pulse" />
               <span className="text-xs text-white/60">
                 Powered by{" "}
                 <span className="font-semibold text-mmp-secondary">

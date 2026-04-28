@@ -136,7 +136,7 @@ export default function HomeClient() {
                     {iconMap[category.icon] && (
                       <div className="p-1.5 sm:p-2 rounded-lg bg-gradient-to-r from-mmp-primary/10 to-mmp-accent/10 flex-shrink-0">
                         {React.createElement(iconMap[category.icon], {
-                          className: 'h-4 w-4 sm:h-5 sm:w-5 text-mmp-accent',
+                          className: 'h-4 w-4 sm:h-5 sm:w-5 text-mmp-secondary',
                         })}
                       </div>
                     )}
@@ -144,7 +144,7 @@ export default function HomeClient() {
                       {category.name}
                     </h3>
                   </div>
-                  <p className="text-mmp-accent text-[10px] sm:text-xs mt-1 truncate">
+                  <p className="text-mmp-secondary text-[10px] sm:text-xs mt-1 truncate">
                     Discover our latest {category.name.toLowerCase()} collection
                   </p>
                 </div>
@@ -153,7 +153,7 @@ export default function HomeClient() {
                 <Link
                   to="/categories/$slug"
                   params={{ slug: category.slug }}
-                  className="hidden md:flex items-center gap-2 text-mmp-accent text-sm hover:text-mmp-secondary font-medium group flex-shrink-0 ml-4"
+                  className="hidden md:flex items-center gap-2 text-mmp-secondary text-sm hover:text-mmp-secondary font-medium group flex-shrink-0 ml-4"
                 >
                   View All
                   <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
@@ -224,7 +224,7 @@ export default function HomeClient() {
                           <Card className="h-full border-mmp-primary/20 hover:border-mmp-secondary/50 transition-all duration-300 hover:shadow-lg group">
                             <CardContent className="p-3 sm:p-4 flex flex-col items-center justify-center text-center h-full">
                               <div className="w-12 h-12 sm:w-16 sm:h-16 mb-2 sm:mb-3 rounded-full bg-gradient-to-br from-mmp-primary/10 to-mmp-accent/10 flex items-center justify-center group-hover:from-mmp-accent/20 group-hover:to-mmp-secondary/20 transition-all">
-                                <ArrowRight className="h-5 w-5 sm:h-6 sm:w-6 text-mmp-accent group-hover:text-mmp-secondary transition-colors" />
+                                <ArrowRight className="h-5 w-5 sm:h-6 sm:w-6 text-mmp-secondary group-hover:text-mmp-secondary transition-colors" />
                               </div>
                               <h3 className="text-xs sm:text-sm font-bold text-mmp-primary2 line-clamp-2">
                                 View All {category.name}
@@ -232,7 +232,7 @@ export default function HomeClient() {
                               <p className="text-[10px] sm:text-xs text-mmp-neutral/60 mt-1 line-clamp-2">
                                 Explore collection
                               </p>
-                              <Badge className="mt-2 bg-gradient-to-r from-mmp-accent/20 to-mmp-secondary/20 text-mmp-accent border-0 text-[8px] sm:text-xs">
+                              <Badge className="mt-2 bg-gradient-to-r from-mmp-accent/20 to-mmp-secondary/20 text-mmp-secondary border-0 text-[8px] sm:text-xs">
                                 {productsByCategory[category._id]?.length}+ items
                               </Badge>
                             </CardContent>
@@ -247,12 +247,12 @@ export default function HomeClient() {
                         <Card className="border-mmp-primary/20">
                           <CardContent className="p-6 sm:p-8 flex flex-col items-center justify-center text-center">
                             <div className="w-16 h-16 sm:w-20 sm:h-20 mb-4 rounded-full bg-gradient-to-br from-mmp-primary/10 to-mmp-accent/10 flex items-center justify-center">
-                              <Telescope className="h-6 w-6 sm:h-8 sm:w-8 text-mmp-accent" />
+                              <Telescope className="h-6 w-6 sm:h-8 sm:w-8 text-mmp-secondary" />
                             </div>
                             <h3 className="text-sm sm:text-base font-bold text-mmp-primary2 mb-2">
                               Nothing here yet
                             </h3>
-                            <p className="text-xs sm:text-sm text-mmp-accent mb-2">
+                            <p className="text-xs sm:text-sm text-mmp-secondary mb-2">
                               We're adding new products behind the scenes.
                             </p>
                             <p className="text-[10px] sm:text-xs text-mmp-primary/70">

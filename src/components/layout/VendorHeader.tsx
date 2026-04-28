@@ -23,7 +23,7 @@ const pageConfig: Record<string, { title: string; icon: React.ElementType; descr
     title: 'Dashboard',
     icon: Home,
     description: 'Overview of your store performance',
-    gradient: 'from-mmp-primary to-mmp-accent',
+    gradient: 'from-mmp-primary to-mmp-primary',
   },
   '/vendor/products': {
     title: 'Products',
@@ -35,7 +35,7 @@ const pageConfig: Record<string, { title: string; icon: React.ElementType; descr
     title: 'Add New Product',
     icon: Package,
     description: 'Create a new product listing',
-    gradient: 'from-mmp-accent to-mmp-neutral',
+    gradient: 'from-mmp-primary to-mmp-neutral',
   },
   '/vendor/orders': {
     title: 'Orders',
@@ -47,7 +47,7 @@ const pageConfig: Record<string, { title: string; icon: React.ElementType; descr
     title: 'Wallet',
     icon: Wallet,
     description: 'Manage your earnings and transactions',
-    gradient: 'from-mmp-accent to-mmp-secondary',
+    gradient: 'from-mmp-primary to-mmp-secondary',
   },
   '/vendor/settings': {
     title: 'Settings',
@@ -63,7 +63,7 @@ export const VendorHeader: React.FC<VendorHeaderProps> = ({ onMobileOpen }) => {
   const [isMobileSearchOpen, setIsMobileSearchOpen] = React.useState<boolean>(false);
   const [currentPage, setCurrentPage] = React.useState(() => {
     const path = router.state.location.pathname;
-    return pageConfig[path] || { title: 'Store Dashboard', icon: Shield, gradient: 'from-mmp-primary to-mmp-accent' };
+    return pageConfig[path] || { title: 'Store Dashboard', icon: Shield, gradient: 'from-mmp-primary to-mmp-primary' };
   });
 
   // Update current page when route changes
@@ -82,7 +82,7 @@ export const VendorHeader: React.FC<VendorHeaderProps> = ({ onMobileOpen }) => {
               title: 'Edit Product',
               icon: Package,
               description: 'Update product details',
-              gradient: 'from-mmp-accent to-mmp-neutral',
+              gradient: 'from-mmp-primary to-mmp-neutral',
             };
           } else {
             config = {
@@ -102,14 +102,14 @@ export const VendorHeader: React.FC<VendorHeaderProps> = ({ onMobileOpen }) => {
         }
       }
 
-      setCurrentPage(config || { title: 'Store Dashboard', icon: Shield, gradient: 'from-mmp-primary to-mmp-accent' });
+      setCurrentPage(config || { title: 'Store Dashboard', icon: Shield, gradient: 'from-mmp-primary to-mmp-primary' });
     });
 
     return () => unsubscribe();
   }, [router]);
 
   const PageIcon = currentPage.icon;
-  const gradientClass = currentPage.gradient || 'from-mmp-primary to-mmp-accent';
+  const gradientClass = currentPage.gradient || 'from-mmp-primary to-mmp-primary';
 
   return (
     <motion.header
@@ -141,10 +141,10 @@ export const VendorHeader: React.FC<VendorHeaderProps> = ({ onMobileOpen }) => {
                     {currentPage.title}
                   </h1>
                   {currentPage.title === 'Dashboard' && (
-                    <Badge variant="outline" className="text-[10px] h-5 border-mmp-accent/30 text-mmp-accent bg-mmp-accent/10 font-medium">
+                    <Badge variant="outline" className="text-[10px] h-5 border-mmp-primary/30 text-mmp-primary bg-mmp-primary/10 font-medium">
                       <span className="relative flex h-1.5 w-1.5 mr-1">
-                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-mmp-accent opacity-75"></span>
-                        <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-mmp-accent"></span>
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-mmp-primary opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-mmp-primary"></span>
                       </span>
                       Live
                     </Badge>
@@ -185,7 +185,7 @@ export const VendorHeader: React.FC<VendorHeaderProps> = ({ onMobileOpen }) => {
                   <motion.span
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
-                    className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-gradient-to-r from-mmp-accent to-mmp-neutral text-[10px] text-white flex items-center justify-center border-2 border-white font-bold shadow-sm"
+                    className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-gradient-to-r from-mmp-primary to-mmp-neutral text-[10px] text-white flex items-center justify-center border-2 border-white font-bold shadow-sm"
                   >
                     3
                   </motion.span>
@@ -197,7 +197,7 @@ export const VendorHeader: React.FC<VendorHeaderProps> = ({ onMobileOpen }) => {
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="h-auto p-0 text-xs text-mmp-accent hover:text-mmp-accent/80 font-medium"
+                    className="h-auto p-0 text-xs text-mmp-primary hover:text-mmp-primary/80 font-medium"
                   >
                     Mark all read
                   </Button>
@@ -211,7 +211,7 @@ export const VendorHeader: React.FC<VendorHeaderProps> = ({ onMobileOpen }) => {
                             {idx === 0 ? 'New Order Received' : idx === 1 ? 'Payment Received' : 'Product Out of Stock'}
                           </p>
                           {idx < 2 && (
-                            <Badge className="text-[8px] h-4 bg-mmp-accent/10 text-mmp-accent border-mmp-accent/20">
+                            <Badge className="text-[8px] h-4 bg-mmp-primary/10 text-mmp-primary border-mmp-primary/20">
                               New
                             </Badge>
                           )}
@@ -227,7 +227,7 @@ export const VendorHeader: React.FC<VendorHeaderProps> = ({ onMobileOpen }) => {
                   ))}
                 </div>
                 <DropdownMenuSeparator className="bg-mmp-primary2/20" />
-                <DropdownMenuItem className="justify-center cursor-pointer text-mmp-accent hover:text-mmp-accent/80 font-medium text-sm p-3">
+                <DropdownMenuItem className="justify-center cursor-pointer text-mmp-primary hover:text-mmp-primary/80 font-medium text-sm p-3">
                   View all notifications
                 </DropdownMenuItem>
               </DropdownMenuContent>
@@ -244,7 +244,7 @@ export const VendorHeader: React.FC<VendorHeaderProps> = ({ onMobileOpen }) => {
               exit={{ opacity: 0, y: -10 }}
               className="hidden lg:flex items-center gap-2 text-xs text-black/60 mt-1 pb-2 border-t border-mmp-primary2/10 pt-3"
             >
-              <span className="text-black font-medium hover:text-mmp-accent transition-colors cursor-pointer">
+              <span className="text-black font-medium hover:text-mmp-primary transition-colors cursor-pointer">
                 Vendor
               </span>
               <ChevronRight className="h-3 w-3 text-black/40" />

@@ -7,12 +7,11 @@ import {
   ShoppingCart,
   Wallet,
   Settings,
-  User,
   LogOut,
   X,
   ChevronRight,
-  Store,
   BadgeCheck,
+  XIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks";
@@ -98,8 +97,8 @@ export const VendorSideBar: React.FC<VendorSideBarProps> = ({
                 "group relative flex items-center justify-between px-4 py-3 rounded-lg transition-all duration-300",
                 "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mmp-primary focus-visible:ring-offset-2 focus-visible:ring-offset-mmp-primary2",
                 isActive
-                  ? "bg-mmp-primary text-white shadow-md rounded-l-none border-l-4 border-mmp-accent"
-                  : "text-mmp-primary/70 hover:bg-mmp-primary2/20 hover:text-mmp-primary",
+                  ? "bg-mmp-secondary text-white shadow-md rounded-l-none border-l-4 border-white"
+                  : "text-mmp-secondary/70 hover:bg-mmp-primary2/20 hover:text-mmp-secondary",
                 isItemHovered && !isActive && "translate-x-1",
               )}
             >
@@ -108,15 +107,12 @@ export const VendorSideBar: React.FC<VendorSideBarProps> = ({
                   <item.icon
                     className={cn(
                       "h-5 w-5 transition-all duration-300",
-                      isActive ? "text-white" : "text-mmp-primary/60",
+                      isActive ? "text-mmp-primary" : "text-mmp-secondary",
                       isItemHovered &&
                         !isActive &&
-                        "scale-110 text-mmp-primary",
+                        "scale-110 text-mmp-secondary",
                     )}
                   />
-                  {isActive && (
-                    <span className="absolute -right-1 -top-1 h-2 w-2 rounded-full bg-mmp-accent animate-pulse" />
-                  )}
                 </div>
                 <span
                   className={cn(
@@ -130,13 +126,13 @@ export const VendorSideBar: React.FC<VendorSideBarProps> = ({
 
               {/* Active Indicator */}
               {isActive && (
-                <ChevronRight className="h-4 w-4 text-mmp-accent animate-pulse" />
+                <ChevronRight className="h-4 w-4 text-mmp-primary animate-pulse" />
               )}
             </Link>
           </TooltipTrigger>
           <TooltipContent
             side="right"
-            className="hidden lg:block bg-mmp-primary text-white border-mmp-primary2"
+            className="hidden lg:block bg-mmp-primary text-white border-mmp-secondary2"
           >
             <p>{item.title}</p>
           </TooltipContent>
@@ -166,17 +162,17 @@ export const VendorSideBar: React.FC<VendorSideBarProps> = ({
       >
         <div className="flex h-full flex-col bg-mmp-primary2 min-h-0 overflow-hidden relative">
           {/* Mobile Header */}
-          <div className="flex items-center justify-between px-6 py-5 border-b border-mmp-primary/20 bg-mmp-primary2/95">
+          <div className="flex items-center justify-between px-6 py-5 border-b border-mmp-secondary/20 bg-mmp-primary2/95">
             <div className="flex flex-col items-start gap-3">
               <div className="">
                 <img
                   src="/logo.png"
                   alt="FashionKet Logo"
-                  className="h-auto w-[240px]"
+                  className="h-auto w-[240px] rounded-lg"
                 />
               </div>
               <div>
-                <span className="text-xl text-mmp-primary/80 font-bold ">
+                <span className="text-xl text-mmp-secondary font-bold ">
                   Store Dashboard
                 </span>
               </div>
@@ -185,10 +181,10 @@ export const VendorSideBar: React.FC<VendorSideBarProps> = ({
               variant="ghost"
               size="icon"
               onClick={onMobileClose}
-              className="text-mmp-accent hover:bg-mmp-accent/10 hover:scale-110 transition-all absolute top-10 right-2 bg-mmp-accent/30 rounded-full"
+              className="text-white bg-mmp-secondary/10 hover:scale-110 transition-all absolute top-8 right-2 rounded-full"
               aria-label="Close menu"
             >
-              <X className="h-8 w-8 font-bold" />
+              <XIcon className="h-10 w-10 font-bold" />
             </Button>
           </div>
 
@@ -202,24 +198,24 @@ export const VendorSideBar: React.FC<VendorSideBarProps> = ({
           </div>
 
           {/* Mobile Footer */}
-          <div className="flex-shrink-0 border-t border-mmp-primary/20 p-6 bg-mmp-primary2/95">
+          <div className="flex-shrink-0 border-t border-mmp-secondary p-6 bg-mmp-primary2/95">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3 mb-4 group">
                 <div className="relative">
-                  <div className="h-12 w-12 rounded-full bg-mmp-primary/10 flex items-center justify-center ring-2 ring-mmp-primary/20 group-hover:ring-mmp-primary/40 transition-all">
+                  <div className="h-12 w-12 rounded-full bg-mmp-primary/10 flex items-center justify-center ring-2 ring-mmp-primary group-hover:ring-mmp-primary/40 transition-all">
                     <img
                       src={vendor?.logoUrl || "/logo.png"}
                       alt="Store logo"
                       className="h-10 w-10 rounded-full object-cover"
                     />
                   </div>
-                  <BadgeCheck className="absolute -bottom-1 -right-1 h-5 w-5 text-mmp-accent fill-white" />
+                  <BadgeCheck className="absolute -bottom-1 -right-1 h-5 w-5 text-mmp-primary fill-white" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-mmp-primary truncate flex items-center gap-1">
+                  <p className="font-semibold text-mmp-secondary truncate flex items-center gap-1">
                     {vendor?.businessName || "Store Name"}
                   </p>
-                  <p className="text-xs text-mmp-primary/60 truncate">
+                  <p className="text-xs text-mmp-secondary/60 truncate">
                     ID: {vendor?.auth_id?.toString().slice(-8) || "VEN-1234"}
                   </p>
                 </div>
@@ -236,7 +232,7 @@ export const VendorSideBar: React.FC<VendorSideBarProps> = ({
 
             {/* Version Info */}
             <div className="mt-4 text-center">
-              <span className="text-[10px] text-mmp-primary/40">
+              <span className="text-[10px] text-mmp-secondary/40">
                 v2.0.0 • Store Portal
               </span>
             </div>
@@ -254,14 +250,14 @@ export const VendorSideBar: React.FC<VendorSideBarProps> = ({
                 <img
                   src="/logo.png"
                   alt="FashionKet Logo"
-                  className="h-auto w-[280px]"
+                  className="h-auto w-[280px] rounded-lg"
                 />
               </div>
               <div className="flex flex-col">
-                <span className="text-xl font-semibold text-mmp-primary">
+                <span className="text-xl font-semibold text-mmp-secondary">
                   Store Portal
                 </span>
-                <span className="text-xs text-mmp-primary/60">
+                <span className="text-xs text-mmp-secondary/60">
                   Vendor Dashboard
                 </span>
               </div>
@@ -276,24 +272,24 @@ export const VendorSideBar: React.FC<VendorSideBarProps> = ({
           </div>
 
           {/* Profile Section */}
-          <div className="flex-shrink-0 border-t border-mmp-primary/20 p-6 bg-mmp-primary2/95">
+          <div className="flex-shrink-0 border-t border-mmp-secondary p-6 bg-mmp-primary2/95">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3 group">
                 <div className="relative">
-                  <div className="h-12 w-12 rounded-full bg-mmp-primary/10 flex items-center justify-center ring-2 ring-mmp-primary/20 group-hover:ring-mmp-primary/40 transition-all">
+                  <div className="h-12 w-12 rounded-full bg-mmp-primary/10 flex items-center justify-center ring-2 ring-mmp-primary group-hover:ring-mmp-primary/40 transition-all">
                     <img
                       src={vendor?.logoUrl || "/logo.png"}
                       alt="Store logo"
                       className="h-10 w-10 rounded-full object-cover"
                     />
                   </div>
-                  <BadgeCheck className="absolute -bottom-1 -right-1 h-5 w-5 text-mmp-accent fill-white" />
+                  <BadgeCheck className="absolute -bottom-1 -right-1 h-5 w-5 text-mmp-primary fill-white" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-mmp-primary truncate">
+                  <p className="font-semibold text-mmp-secondary truncate">
                     {vendor?.businessName || "Store Name"}
                   </p>
-                  <p className="text-xs text-mmp-primary/60 truncate">
+                  <p className="text-xs text-mmp-secondary/60 truncate">
                     ID: {vendor?.auth_id?.toString().slice(-8) || "VEN-1234"}
                   </p>
                 </div>
@@ -321,8 +317,8 @@ export const VendorSideBar: React.FC<VendorSideBarProps> = ({
             </div>
 
             {/* Version Info */}
-            <div className="mt-4 pt-4 text-center border-t border-mmp-primary/10">
-              <span className="text-[10px] text-mmp-primary/40">
+            <div className="mt-4 pt-4 text-center border-t border-mmp-secondary/10">
+              <span className="text-[10px] text-mmp-secondary/40">
                 v2.0.0 • Store Portal
               </span>
             </div>
