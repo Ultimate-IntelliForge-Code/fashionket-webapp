@@ -9,15 +9,16 @@ import {
   Store,
   MapPin,
   Phone,
-  Mail,
   Clock,
-  Package,
-  Truck,
   Shield,
+  Mail,
+  Package,
   ChevronRight,
-  LocateFixed,
+  Truck,
+  Award,
 } from "lucide-react";
 import type { IVendor } from "@/types";
+import { cn } from "@/lib/utils";
 
 interface VendorProfileProps {
   vendor: IVendor;
@@ -42,257 +43,320 @@ export const VendorProfile: React.FC<VendorProfileProps> = ({
       })
     : null;
 
+  // Calculate total products if available
+  // const totalProducts = vendor.products?.length || 0;
+
   return (
-    <div className="relative">
-      {/* Cover Photo Area - Facebook style gradient cover */}
-      <div className="h-32 sm:h-40 md:h-48 bg-gradient-to-r from-mmp-primary2 to-mmp-primary relative">
+    <div className="relative bg-white">
+      {/* Cover Photo Area - Premium gradient cover */}
+      <div className="relative h-32 sm:h-40 md:h-48 lg:h-56 bg-gradient-to-br from-brand-primary via-brand-primary-hover to-brand-dark overflow-hidden">
+        {/* Decorative pattern overlay */}
+        <div className="absolute inset-0 opacity-10">
+          <div
+            className="absolute inset-0"
+            style={{
+              backgroundImage: `radial-gradient(circle at 20% 50%, rgba(255,255,255,0.1) 0%, transparent 50%)`,
+            }}
+          />
+        </div>
+
         {/* Navigation buttons - positioned absolutely on cover */}
-        <div className="absolute top-4 left-4 flex gap-2">
-          <Button
-            onClick={() => window.history.back()}
-            size="sm"
-            className="bg-white/0 shadow-lg"
+        <div className="absolute top-4 left-4 right-4 flex justify-between items-center">
+          <div className="flex gap-2">
+            <Button
+              onClick={() => window.history.back()}
+              size="sm"
+              variant="secondary"
+              className="bg-white/5 backdrop-blur-sm hover:bg-white shadow-lg border-0"
+            >
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back
+            </Button>
+            <Button
+              variant="secondary"
+              size="sm"
+              className="bg-white/5 backdrop-blur-sm hover:bg-white shadow-lg border-0"
+              onClick={refresh}
+              disabled={isRefreshing}
+            >
+              <RefreshCcw
+                className={cn("h-4 w-4", isRefreshing && "animate-spin")}
+              />
+            </Button>
+          </div>
+
+          {/* Desktop action buttons */}
+          <div className="hidden md:flex gap-2">
+            {onContact && (
+              <Button
+                onClick={onContact}
+                className="bg-white/90 backdrop-blur-sm text-brand-dark hover:bg-white shadow-lg border-0"
+              >
+                <Mail className="h-4 w-4 mr-2" />
+                Contact
+              </Button>
+            )}
+            {onViewProducts && (
+              <Button
+                onClick={onViewProducts}
+                className="bg-brand-primary text-white hover:bg-brand-primary-hover shadow-lg"
+              >
+                <Package className="h-4 w-4 mr-2" />
+                View Products
+              </Button>
+            )}
+          </div>
+        </div>
+
+        {/* Bottom curve decoration */}
+        <div className="absolute bottom-0 left-0 right-0">
+          <svg
+            className="w-full h-8 text-white"
+            preserveAspectRatio="none"
+            viewBox="0 0 1440 120"
           >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back
-          </Button>
-          <Button
-            variant="secondary"
-            size="sm"
-            className="bg-white/90 hover:bg-white shadow-lg"
-            onClick={refresh}
-            disabled={isRefreshing}
-          >
-            <RefreshCcw
-              className={`h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`}
+            <path
+              fill="currentColor"
+              d="M0,64L80,58.7C160,53,320,43,480,48C640,53,800,75,960,80C1120,85,1280,75,1360,69.3L1440,64L1440,120L1360,120C1280,120,1120,120,960,120C800,120,640,120,480,120C320,120,160,120,80,120L0,120Z"
             />
-          </Button>
+          </svg>
         </div>
       </div>
 
       {/* Profile Section - Facebook style overlapping profile */}
-      <div className="container mx-auto px-4">
-        <div className="relative flex flex-row md:items-end gap-4 -mt-16 sm:-mt-20 md:-mt-24 pb-4">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="relative flex flex-col md:flex-row md:items-end gap-4 -mt-12 sm:-mt-16 md:-mt-20 pb-6">
           {/* Profile Picture */}
-          <div className="ml-0 md:ml-8">
-            <div className="w-24 h-24 sm:w-32 sm:h-32 md:w-40 md:h-40 rounded-2xl border-4 border-white shadow-xl overflow-hidden bg-white">
-              {vendor.logoUrl ? (
-                <img
-                  src={vendor.logoUrl}
-                  alt={vendor.businessName}
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center bg-gray-100">
-                  <Store className="h-12 w-12 sm:h-16 sm:w-16 text-mmp-primary2/40" />
+          <div className="md:ml-8">
+            <div className="relative">
+              <div className="w-24 h-24 sm:w-28 sm:h-28 md:w-36 md:h-36 rounded-2xl border-4 border-white shadow-xl overflow-hidden bg-brand-surface">
+                {vendor.logoUrl ? (
+                  <img
+                    src={vendor.logoUrl}
+                    alt={vendor.businessName}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-brand-primary-soft to-brand-surface">
+                    <Store className="h-10 w-10 sm:h-12 sm:w-12 text-brand-primary/40" />
+                  </div>
+                )}
+              </div>
+
+              {/* Verified badge overlay */}
+              {vendor.verified && (
+                <div className="absolute -bottom-1 -right-1 bg-white rounded-full p-0.5 shadow-md">
+                  <Shield className="h-5 w-5 text-brand-success" />
                 </div>
               )}
             </div>
           </div>
 
           {/* Business Info */}
-          <div className="flex-1 md:pb-4">
+          <div className="flex-1 pb-2 md:pb-4">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div>
                 <div className="flex items-center gap-2 flex-wrap">
-                  <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white">
+                  <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-brand-dark">
                     {vendor.businessName}
                   </h1>
                   {vendor.verified && (
-                    <Badge className="bg-green-500 text-white border-0 px-3 py-1">
-                      <Shield className="w-3 h-3 mr-1" />
-                      Verified
+                    <Badge className="bg-brand-success text-white border-0 px-3 py-1 gap-1">
+                      <Shield className="w-3 h-3" />
+                      Verified Seller
                     </Badge>
                   )}
                 </div>
 
-                {/* Rating - Prominently displayed like Facebook reviews */}
-                <div className="flex items-center gap-4 mt-2">
-                  <div className="flex items-center gap-1">
+                {/* Rating Section */}
+                <div className="flex items-center gap-3 mt-2">
+                  <div className="flex items-center gap-2">
                     <div className="flex">
                       {[...Array(5)].map((_, i) => (
                         <Star
                           key={i}
-                          className={`w-4 h-4 ${
+                          className={cn(
+                            "w-4 h-4",
                             i < Math.floor(vendor.ratingAverage)
-                              ? "fill-yellow-400 text-yellow-400"
-                              : "text-mmp-accent"
-                          }`}
+                              ? "fill-brand-accent text-brand-accent"
+                              : "text-brand-muted",
+                          )}
                         />
                       ))}
                     </div>
-                    <span className="font-semibold text-mmp-accent">
+                    <span className="font-semibold text-brand-dark">
                       {vendor.ratingAverage.toFixed(1)}
                     </span>
                   </div>
-                  <span className="text-mmp-accent text-sm">
-                    {vendor.ratingCount}{" "}
+                  <span className="text-brand-muted text-sm">
+                    {vendor.ratingCount.toLocaleString()}{" "}
                     {vendor.ratingCount === 1 ? "review" : "reviews"}
                   </span>
 
-                  {/* {vendor.totalProducts && (
+                  {/* {totalProducts > 0 && (
                     <>
-                      <span className="text-gray-300">•</span>
-                      <span className="text-gray-500 text-sm">
-                        <Package className="w-4 h-4 inline mr-1" />
-                        {vendor.totalProducts} products
+                      <span className="text-brand-muted">•</span>
+                      <span className="text-brand-muted text-sm">
+                        {totalProducts} {totalProducts === 1 ? "product" : "products"}
                       </span>
                     </>
                   )} */}
                 </div>
               </div>
 
-              {/* Action Buttons - Like Facebook's "Follow" and "Message" */}
-              {/* <div className="flex gap-2">
-                <Button
-                  onClick={onContact}
-                  variant="default"
-                  className="bg-mmp-primary hover:bg-mmp-primary2"
-                >
-                  <Mail className="w-4 h-4 mr-2" />
-                  Contact
-                </Button>
-                <Button
-                  onClick={onViewProducts}
-                  variant="outline"
-                >
-                  <Package className="w-4 h-4 mr-2" />
-                  View Products
-                  <ChevronRight className="w-4 h-4 ml-2" />
-                </Button>
-              </div> */}
+              {/* Mobile action buttons */}
+              <div className="flex md:hidden gap-2">
+                {onContact && (
+                  <Button
+                    onClick={onContact}
+                    variant="outline"
+                    size="sm"
+                    className="flex-1 border-brand-primary-soft text-brand-dark"
+                  >
+                    <Mail className="h-4 w-4 mr-2" />
+                    Contact
+                  </Button>
+                )}
+                {onViewProducts && (
+                  <Button
+                    onClick={onViewProducts}
+                    size="sm"
+                    className="flex-1 bg-brand-primary text-white hover:bg-brand-primary-hover"
+                  >
+                    <Package className="h-4 w-4 mr-2" />
+                    Shop
+                  </Button>
+                )}
+              </div>
             </div>
 
             {/* Business Description */}
             {vendor.description && (
-              <p className="text-gray-600 mt-3 max-w-3xl">
+              <p className="text-brand-muted mt-3 max-w-3xl text-sm sm:text-base leading-relaxed">
                 {vendor.description}
               </p>
             )}
           </div>
         </div>
 
-        {/* Info Cards - Like Facebook's "About" section */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-6 mb-8">
+        {/* Info Cards Grid */}
+        <div className="hidden md:grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-6 mb-8">
           {/* Contact Card */}
-          <Card className="p-4 hover:shadow-md transition-shadow">
+          <Card className="group p-4 hover:shadow-md transition-all duration-300 border border-brand-primary-soft hover:border-brand-primary/30 hover:-translate-y-0.5">
             <div className="flex items-start gap-3">
-              <div className="p-2 bg-blue-50 rounded-lg">
-                <Phone className="w-4 h-4 text-blue-600" />
+              <div className="p-2 rounded-lg bg-brand-primary-soft group-hover:bg-brand-primary group-hover:scale-110 transition-all duration-300">
+                <Phone className="h-4 w-4 text-brand-primary group-hover:text-white" />
               </div>
               <div className="flex-1 min-w-0">
-                <h3 className="font-semibold text-sm text-gray-500 mb-1">
+                <h3 className="font-semibold text-xs text-brand-muted uppercase tracking-wide mb-1">
                   Contact
                 </h3>
                 {vendor.phone && (
-                  <p className="text-sm text-gray-900 truncate">
+                  <p className="text-sm text-brand-dark font-medium truncate">
                     {vendor.phone}
                   </p>
                 )}
-                <p className="text-sm text-gray-900 truncate">{vendor.email}</p>
+                <p className="text-sm text-brand-muted truncate">
+                  {vendor.email}
+                </p>
               </div>
             </div>
           </Card>
 
           {/* Location Card */}
-          <div className="grid grid-cols-2 md:flex gap-2">
-            <Card className="p-4 hover:shadow-md transition-shadow">
-              <div className="flex items-start gap-3">
-                <div className="p-2 bg-green-50 rounded-lg">
-                  <MapPin className="w-4 h-4 text-green-600" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <h3 className="font-semibold text-sm text-gray-500 mb-1">
-                    Location
-                  </h3>
-                  <p className="text-sm text-gray-900">
-                    {vendor.location.city}, {vendor.location.state}
-                  </p>
-                  <p className="text-sm text-gray-500 truncate">
-                    {vendor.location.country}
-                  </p>
-                </div>
-              </div>
-            </Card>
-
-            {/* Status Card */}
-            <Card className="p-4 hover:shadow-md transition-shadow">
-              <div className="flex items-start gap-3">
-                <div className="p-2 bg-purple-50 rounded-lg">
-                  <Clock className="w-4 h-4 text-purple-600" />
-                </div>
-                <div className="flex-1">
-                  <h3 className="font-semibold text-sm text-gray-500 mb-1">
-                    Status
-                  </h3>
-                  <div className="flex flex-col md:flex-row md:items-center gap-2">
-                    <Badge
-                      variant={vendor.isActive ? "default" : "secondary"}
-                      className="text-xs"
-                    >
-                      {vendor.isActive ? "Active" : "Inactive"}
-                    </Badge>
-                    {joinDate && (
-                      <span className="text-xs text-gray-500">
-                        Joined {joinDate}
-                      </span>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </Card>
-          </div>
-
-          {/* Shipping/Delivery Card - E-commerce specific
-          <Card className="p-4 hover:shadow-md transition-shadow">
+          <Card className="group p-4 hover:shadow-md transition-all duration-300 border border-brand-primary-soft hover:border-brand-primary/30 hover:-translate-y-0.5">
             <div className="flex items-start gap-3">
-              <div className="p-2 bg-orange-50 rounded-lg">
-                <LocateFixed className="w-4 h-4 text-orange-600" />
+              <div className="p-2 rounded-lg bg-brand-primary-soft group-hover:bg-brand-primary group-hover:scale-110 transition-all duration-300">
+                <MapPin className="h-4 w-4 text-brand-primary group-hover:text-white" />
               </div>
-              <div className="flex-1">
-                <h3 className="font-semibold text-sm text-gray-500 mb-1">Address</h3>
-                   <p className="text-gray-900 text-sm">
-                  {vendor.location.street}<br />
-                  {vendor.location.city}, {vendor.location.state}<br />
+              <div className="flex-1 min-w-0">
+                <h3 className="font-semibold text-xs text-brand-muted uppercase tracking-wide mb-1">
+                  Location
+                </h3>
+                <p className="text-sm text-brand-dark font-medium">
+                  {vendor.location.city}, {vendor.location.state}
+                </p>
+                <p className="text-sm text-brand-muted">
                   {vendor.location.country}
                 </p>
               </div>
             </div>
-          </Card> */}
-        </div>
+          </Card>
 
-        {/* Additional Info - Like Facebook's detailed about section (collapsible) */}
-        {/* <details className="mb-8">
-          <summary className="cursor-pointer text-sm font-semibold text-gray-700 mb-2">
-            More about {vendor.businessName}
-          </summary>
-          <Card className="p-6 mt-2">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-1 md:gap-3">
-              <div>
-                <h4 className="font-semibold text-sm text-gray-500 mb-2">Address</h4>
-            
+          {/* Status Card */}
+          <Card className="group p-4 hover:shadow-md transition-all duration-300 border border-brand-primary-soft hover:border-brand-primary/30 hover:-translate-y-0.5">
+            <div className="flex items-start gap-3">
+              <div className="p-2 rounded-lg bg-brand-primary-soft group-hover:bg-brand-primary group-hover:scale-110 transition-all duration-300">
+                <Clock className="h-4 w-4 text-brand-primary group-hover:text-white" />
               </div>
-              
-              <div>
-                <h4 className="font-semibold text-sm text-gray-500 mb-2">Business Details</h4>
-                <dl className="space-y-1">
-                  <div className="flex">
-                    <dt className="w-24 text-sm text-gray-500">Tax ID:</dt>
-                    <dd className="text-sm text-gray-900">{vendor.taxId || "Not provided"}</dd>
-                  </div>
-                  <div className="flex">
-                    <dt className="w-24 text-sm text-gray-500">Founded:</dt>
-                    <dd className="text-sm text-gray-900">{vendor.foundedYear || "N/A"}</dd>
-                  </div>
-                  <div className="flex">
-                    <dt className="w-24 text-sm text-gray-500">Employees:</dt>
-                    <dd className="text-sm text-gray-900">{vendor.employeeCount || "N/A"}</dd>
-                  </div>
-                </dl>
+              <div className="flex-1">
+                <h3 className="font-semibold text-xs text-brand-muted uppercase tracking-wide mb-1">
+                  Status
+                </h3>
+                <div className="flex flex-col gap-1">
+                  <Badge
+                    variant={vendor.isActive ? "default" : "secondary"}
+                    className={cn(
+                      "text-xs w-fit",
+                      vendor.isActive && "bg-brand-success text-white",
+                    )}
+                  >
+                    {vendor.isActive ? "Active" : "Inactive"}
+                  </Badge>
+                  {joinDate && (
+                    <span className="text-xs text-brand-muted">
+                      Joined {joinDate}
+                    </span>
+                  )}
+                </div>
               </div>
             </div>
           </Card>
-        </details> */}
+
+          {/* Shipping/Delivery Card */}
+          <Card className="group p-4 hover:shadow-md transition-all duration-300 border border-brand-primary-soft hover:border-brand-primary/30 hover:-translate-y-0.5">
+            <div className="flex items-start gap-3">
+              <div className="p-2 rounded-lg bg-brand-primary-soft group-hover:bg-brand-primary group-hover:scale-110 transition-all duration-300">
+                <Truck className="h-4 w-4 text-brand-primary group-hover:text-white" />
+              </div>
+              <div className="flex-1">
+                <h3 className="font-semibold text-xs text-brand-muted uppercase tracking-wide mb-1">
+                  Delivery
+                </h3>
+                <p className="text-sm text-brand-dark font-medium">
+                  Nationwide Shipping
+                </p>
+                <p className="text-xs text-brand-muted">
+                  Fast & reliable delivery
+                </p>
+              </div>
+            </div>
+          </Card>
+        </div>
+
+        {/* Trust Badges Section */}
+        {vendor.verified && (
+          <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 py-4 mb-4 border-t border-brand-primary-soft">
+            <div className="flex items-center gap-2">
+              <Award className="h-5 w-5 text-brand-primary" />
+              <span className="text-xs text-brand-muted">
+                Quality Guaranteed
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Shield className="h-5 w-5 text-brand-primary" />
+              <span className="text-xs text-brand-muted">Secure Checkout</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Truck className="h-5 w-5 text-brand-primary" />
+              <span className="text-xs text-brand-muted">Fast Delivery</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Phone className="h-5 w-5 text-brand-primary" />
+              <span className="text-xs text-brand-muted">24/7 Support</span>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

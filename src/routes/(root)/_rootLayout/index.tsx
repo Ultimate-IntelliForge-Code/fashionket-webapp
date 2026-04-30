@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
-import React, { useRef } from 'react'
+import React, { useRef, useEffect, useMemo } from 'react'
 import { Link } from '@tanstack/react-router'
 import {
   ChevronLeft,
@@ -13,6 +13,8 @@ import {
   Zap,
   Crown,
   Telescope,
+  Gift,
+  Package,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -26,7 +28,7 @@ import CategoriesCarousel from '@/components/ui/categories-carousel'
 import { ProductCard } from '@/components/ui/product-card'
 import { categoriesQuery, productsQuery } from '@/api/queries'
 
-// Hero Carousel Data
+// Hero Carousel Data with theme colors
 const heroSlides: HeroType[] = [
   {
     id: '1',
@@ -36,7 +38,7 @@ const heroSlides: HeroType[] = [
     image:
       'https://images.unsplash.com/photo-1445205170230-053b83016050?w=1600&h=600&fit=crop',
     cta: 'Shop Now',
-    bgColor: 'from-mmp-primary/90 to-mmp-accent/70',
+    bgColor: 'from-brand-primary/90 to-brand-accent/70',
     textColor: 'text-white',
   },
   {
@@ -47,8 +49,8 @@ const heroSlides: HeroType[] = [
     image:
       'https://images.unsplash.com/photo-1539109136881-3be0616acf4b?w=1600&h=600&fit=crop',
     cta: 'Explore',
-    bgColor: 'from-mmp-primary2/90 to-mmp-secondary/70',
-    textColor: 'text-mmp-neutral',
+    bgColor: 'from-brand-dark/90 to-brand-muted/70',
+    textColor: 'text-white',
   },
   {
     id: '3',
@@ -58,12 +60,12 @@ const heroSlides: HeroType[] = [
     image:
       'https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?w=1600&h=600&fit=crop',
     cta: 'Discover',
-    bgColor: 'from-mmp-accent/90 to-mmp-secondary/70',
+    bgColor: 'from-brand-accent/90 to-brand-primary/70',
     textColor: 'text-white',
   },
 ]
 
-// Icon mapping
+// Icon mapping with better organization
 const iconMap: Record<string, any> = {
   Shirt,
   Watch,
@@ -72,6 +74,7 @@ const iconMap: Record<string, any> = {
   TrendingUp,
   Zap,
   Crown,
+  default: Gift,
 }
 
 export const Route = createFileRoute('/(root)/_rootLayout/')({
@@ -90,214 +93,269 @@ export default function HomeClient() {
   const { categories, products } = Route.useLoaderData()
   const scrollRefs = useRef<Record<string, HTMLDivElement | null>>({})
 
+  // Scroll handlers with improved experience
   const scrollLeft = (categoryId: string) => {
     const scrollContainer = scrollRefs.current[categoryId]
     if (scrollContainer) {
-      scrollContainer.scrollBy({ left: -200, behavior: 'smooth' }) // Reduced scroll amount for mobile
+      const scrollAmount = Math.min(320, scrollContainer.clientWidth)
+      scrollContainer.scrollBy({ 
+        left: -scrollAmount, 
+        behavior: 'smooth' 
+      })
     }
   }
 
   const scrollRight = (categoryId: string) => {
     const scrollContainer = scrollRefs.current[categoryId]
     if (scrollContainer) {
-      scrollContainer.scrollBy({ left: 200, behavior: 'smooth' }) // Reduced scroll amount for mobile
+      const scrollAmount = Math.min(320, scrollContainer.clientWidth)
+      scrollContainer.scrollBy({ 
+        left: scrollAmount, 
+        behavior: 'smooth' 
+      })
     }
   }
 
-  // Group products by category
-  const productsByCategory = categories.reduce(
-    (acc, category) => {
-      acc[category._id] = products.data
-        .filter((p) => p.categoryId === category._id)
-        .slice(0, 10)
+  // Group products by category and filter categories with products
+  const { categoriesWithProducts, productsByCategory } = useMemo(() => {
+    // First, group products by category
+    const productsByCat = categories.reduce(
+      (acc, category) => {
+        acc[category._id] = products.data
+          .filter((p) => p.categoryId === category._id)
+          .slice(0, 10) // Limit to 10 products per category
+        return acc
+      },
+      {} as Record<string, IProductListItem[]>
+    )
 
-      return acc
-    },
-    {} as Record<string, IProductListItem[]>,
-  )
+    // Filter categories that have at least one product
+    const filteredCategories = categories.filter(
+      (category) => productsByCat[category._id]?.length > 0
+    )
+
+    return {
+      categoriesWithProducts: filteredCategories,
+      productsByCategory: productsByCat,
+    }
+  }, [categories, products.data])
+
+  // Get icon with fallback
+  const getCategoryIcon = (iconName: string) => {
+    const Icon = iconMap[iconName] || iconMap.default
+    return Icon
+  }
+
+  // Check if scroll buttons should be shown
+  const shouldShowScrollButtons = (productCount: number) => {
+    return productCount > 3
+  }
 
   return (
-    <div className="overflow-x-hidden"> {/* Prevent horizontal overflow */}
+    <div className="min-h-screen bg-white">
       {/* Hero Carousel */}
       <HeroCarousel heroSlides={heroSlides} />
 
-      {/* Categories Section */}
-      <CategoriesCarousel categories={categories} />
+      {/* Categories Section - Only show if there are categories with products */}
+      {categoriesWithProducts.length > 0 && (
+        <CategoriesCarousel categories={categories} />
+      )}
 
-      {/* Featured Products by Category */}
-      <section className="md:pb-16">
-        <div className="container mx-auto px-3 sm:px-4">
-          {categories.slice(0, 5).map((category) => (
-            <div key={category._id} className="mb-8 md:mb-12">
-              {/* Category Header */}
-              <div className="flex items-center justify-between mb-4 md:mb-6">
-                <div className="flex-1 min-w-0"> {/* Added min-w-0 to prevent overflow */}
-                  <div className="flex items-center gap-2 sm:gap-3">
-                    {iconMap[category.icon] && (
-                      <div className="p-1.5 sm:p-2 rounded-lg bg-gradient-to-r from-mmp-primary/10 to-mmp-accent/10 flex-shrink-0">
-                        {React.createElement(iconMap[category.icon], {
-                          className: 'h-4 w-4 sm:h-5 sm:w-5 text-mmp-secondary',
-                        })}
-                      </div>
-                    )}
-                    <h3 className="text-sm sm:text-base font-bold text-mmp-primary2 truncate">
-                      {category.name}
-                    </h3>
+      {/* Featured Products by Category - Only categories with products */}
+      <section className="py-6 md:py-12">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          {categoriesWithProducts.map((category, index) => {
+            const categoryProducts = productsByCategory[category._id] || []
+            const CategoryIcon = getCategoryIcon(category.icon)
+            const showScrollButtons = shouldShowScrollButtons(categoryProducts.length)
+            const productCount = categoryProducts.length
+            
+            return (
+              <div key={category._id} className="mb-6 ">
+                {/* Category Header */}
+                <div className="flex items-start justify-between mb-6 md:mb-8">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 md:gap-3 flex-wrap">
+                      {CategoryIcon && (
+                        <div className="p-2 rounded-lg bg-brand-primary-soft shrink-0">
+                          <CategoryIcon className="h-4 w-4 md:h-5 md:w-5 text-brand-primary" />
+                        </div>
+                      )}
+                      <h2 className="text-lg md:text-xl lg:text-2xl font-bold text-brand-dark">
+                        {category.name}
+                      </h2>
+                      <Badge 
+                        variant="secondary" 
+                        className="bg-brand-accent-soft text-brand-accent border-0 text-xs font-semibold"
+                      >
+                        {productCount} {productCount === 1 ? 'item' : 'items'}
+                      </Badge>
+                    </div>
+                    <p className="text-brand-muted text-xs md:text-sm mt-2 line-clamp-2 max-w-2xl">
+                      {category.description || `Discover our latest ${category.name.toLowerCase()} collection`}
+                    </p>
                   </div>
-                  <p className="text-mmp-secondary text-[10px] sm:text-xs mt-1 truncate">
-                    Discover our latest {category.name.toLowerCase()} collection
-                  </p>
+
+                  {/* Desktop View All Link */}
+                  <Link
+                    to="/categories/$slug"
+                    params={{ slug: category.slug }}
+                    className="hidden md:flex items-center gap-2 text-brand-primary text-sm font-semibold hover:text-brand-primary-hover transition-colors group shrink-0 ml-4"
+                  >
+                    View All
+                    <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                  </Link>
                 </div>
 
-                {/* Desktop View All Link */}
-                <Link
-                  to="/categories/$slug"
-                  params={{ slug: category.slug }}
-                  className="hidden md:flex items-center gap-2 text-mmp-secondary text-sm hover:text-mmp-secondary font-medium group flex-shrink-0 ml-4"
-                >
-                  View All
-                  <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
-                </Link>
-              </div>
+                {/* Products Section */}
+                <div className="relative">
+                  {/* Scroll Buttons - Desktop only */}
+                  {showScrollButtons && (
+                    <>
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 z-10 bg-white shadow-lg hover:shadow-xl border-brand-primary-soft hover:border-brand-primary rounded-full hidden lg:flex h-10 w-10"
+                        onClick={() => scrollLeft(category._id)}
+                        aria-label="Scroll left"
+                      >
+                        <ChevronLeft className="h-4 w-4 text-brand-dark" />
+                      </Button>
 
-              {/* Products Grid - Horizontal Scroll */}
-              <div className="relative">
-                {/* Scroll Buttons for Desktop */}
-                {productsByCategory[category._id].length > 3 && (
-                  <>
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 z-10 bg-white shadow-lg hover:bg-mmp-neutral border-mmp-primary/20 hidden lg:flex"
-                      onClick={() => scrollLeft(category._id)}
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 z-10 bg-white shadow-lg hover:shadow-xl border-brand-primary-soft hover:border-brand-primary rounded-full hidden lg:flex h-10 w-10"
+                        onClick={() => scrollRight(category._id)}
+                        aria-label="Scroll right"
+                      >
+                        <ChevronRight className="h-4 w-4 text-brand-dark" />
+                      </Button>
+                    </>
+                  )}
+
+                  {/* Scrollable Products Container */}
+                  <ScrollArea className="w-full rounded-none">
+                    <div
+                      ref={(el) => {
+                        if (el) scrollRefs.current[category._id] = el
+                      }}
+                      className="flex gap-4 md:gap-5 pb-6 overflow-x-auto scrollbar-hide"
+                      style={{ scrollBehavior: 'smooth' }}
                     >
-                      <ChevronLeft className="h-4 w-4" />
-                    </Button>
-
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 z-10 bg-white shadow-lg hover:bg-mmp-neutral border-mmp-primary/20 hidden lg:flex"
-                      onClick={() => scrollRight(category._id)}
-                    >
-                      <ChevronRight className="h-4 w-4" />
-                    </Button>
-                  </>
-                )}
-
-                {/* Scrollable Products Container */}
-                <ScrollArea className="w-full">
-                  <div
-                    // ref={(el) => (scrollRefs.current[category._id] = el)}
-                    className="flex gap-3 sm:gap-4 pb-4"
-                    style={{ scrollBehavior: 'smooth' }}
-                  >
-                    {/* Products - First 5 */}
-                    {productsByCategory[category._id]
-                      ?.slice(0, 5)
-                      .map((product) => (
-                        <div key={product._id} className="flex-none w-[140px] sm:w-[180px] md:w-[200px]">
+                      {/* Product Cards */}
+                      {categoryProducts.map((product) => (
+                        <div 
+                          key={product._id} 
+                          className="flex-none w-[170px] sm:w-[200px] md:w-[220px] lg:w-[240px]"
+                        >
                           <ProductCard product={product} />
                         </div>
                       ))}
 
-                    {/* Products - Next 5 (if available) */}
-                    {productsByCategory[category._id]?.length > 5 && (
-                      <>
-                        {productsByCategory[category._id]
-                          ?.slice(5, 10)
-                          .map((product) => (
-                            <div key={product._id} className="flex-none w-[140px] sm:w-[180px] md:w-[200px]">
-                              <ProductCard product={product} />
-                            </div>
-                          ))}
-                      </>
-                    )}
-
-                    {/* View More Card - Only show if there are products */}
-                    {productsByCategory[category._id].length > 0 && (
-                      <div className="flex-none w-[140px] sm:w-[180px] md:w-[200px]">
+                      {/* View More Card */}
+                      <div className="flex-none w-[170px] sm:w-[200px] md:w-[220px] lg:w-[240px]">
                         <Link
                           to="/categories/$slug"
                           params={{ slug: category.slug }}
+                          className="block h-full"
                         >
-                          <Card className="h-full border-mmp-primary/20 hover:border-mmp-secondary/50 transition-all duration-300 hover:shadow-lg group">
-                            <CardContent className="p-3 sm:p-4 flex flex-col items-center justify-center text-center h-full">
-                              <div className="w-12 h-12 sm:w-16 sm:h-16 mb-2 sm:mb-3 rounded-full bg-gradient-to-br from-mmp-primary/10 to-mmp-accent/10 flex items-center justify-center group-hover:from-mmp-accent/20 group-hover:to-mmp-secondary/20 transition-all">
-                                <ArrowRight className="h-5 w-5 sm:h-6 sm:w-6 text-mmp-secondary group-hover:text-mmp-secondary transition-colors" />
+                          <Card className="h-full border-brand-primary-soft hover:border-brand-primary transition-all duration-300 hover:shadow-lg group cursor-pointer bg-gradient-to-br from-white to-brand-surface">
+                            <CardContent className="p-6 flex flex-col items-center justify-center text-center h-full min-h-[300px] md:min-h-[340px]">
+                              <div className="w-14 h-14 md:w-16 md:h-16 mb-4 rounded-full bg-brand-primary-soft flex items-center justify-center group-hover:bg-brand-primary transition-all duration-300 group-hover:scale-110">
+                                <Package className="h-6 w-6 md:h-7 md:w-7 text-brand-primary group-hover:text-white transition-colors" />
                               </div>
-                              <h3 className="text-xs sm:text-sm font-bold text-mmp-primary2 line-clamp-2">
+                              <h3 className="text-sm md:text-base font-bold text-brand-dark mb-2">
                                 View All {category.name}
                               </h3>
-                              <p className="text-[10px] sm:text-xs text-mmp-neutral/60 mt-1 line-clamp-2">
-                                Explore collection
+                              <p className="text-xs text-brand-muted mb-4 line-clamp-2">
+                                Explore complete {category.name.toLowerCase()} collection
                               </p>
-                              <Badge className="mt-2 bg-gradient-to-r from-mmp-accent/20 to-mmp-secondary/20 text-mmp-secondary border-0 text-[8px] sm:text-xs">
-                                {productsByCategory[category._id]?.length}+ items
+                              <Badge className="bg-brand-accent-soft text-brand-accent hover:bg-brand-accent-soft border-0 text-xs font-semibold">
+                                {productCount}+ items
                               </Badge>
+                              <ArrowRight className="h-4 w-4 text-brand-primary group-hover:text-brand-primary-hover mt-4 opacity-0 group-hover:opacity-100 transition-all group-hover:translate-x-1" />
                             </CardContent>
                           </Card>
                         </Link>
                       </div>
-                    )}
+                    </div>
+                    <ScrollBar orientation="horizontal" className="lg:hidden" />
+                  </ScrollArea>
+                </div>
 
-                    {/* Empty State */}
-                    {productsByCategory[category._id].length <= 0 && (
-                      <div className="flex-none w-full">
-                        <Card className="border-mmp-primary/20">
-                          <CardContent className="p-6 sm:p-8 flex flex-col items-center justify-center text-center">
-                            <div className="w-16 h-16 sm:w-20 sm:h-20 mb-4 rounded-full bg-gradient-to-br from-mmp-primary/10 to-mmp-accent/10 flex items-center justify-center">
-                              <Telescope className="h-6 w-6 sm:h-8 sm:w-8 text-mmp-secondary" />
-                            </div>
-                            <h3 className="text-sm sm:text-base font-bold text-mmp-primary2 mb-2">
-                              Nothing here yet
-                            </h3>
-                            <p className="text-xs sm:text-sm text-mmp-secondary mb-2">
-                              We're adding new products behind the scenes.
-                            </p>
-                            <p className="text-[10px] sm:text-xs text-mmp-primary/70">
-                              Check back soon — you won't miss out 👀
-                            </p>
-                          </CardContent>
-                        </Card>
-                      </div>
-                    )}
-                  </div>
-                  <ScrollBar orientation="horizontal" className="flex" />
-                </ScrollArea>
+                {/* Mobile View All Link */}
+                <div className="mt-3 text-center md:hidden">
+                  <Link
+                    to="/categories/$slug"
+                    params={{ slug: category.slug }}
+                    className="inline-flex items-center gap-2 text-brand-primary text-sm font-semibold hover:text-brand-primary-hover transition-colors"
+                  >
+                    View All {category.name}
+                    <ArrowRight className="h-4 w-4" />
+                  </Link>
+                </div>
+
+                {/* Category Separator */}
+                {index < categoriesWithProducts.length - 1 && (
+                  <Separator className="mt-2 bg-gradient-to-r from-transparent via-brand-primary-soft to-transparent" />
+                )}
               </div>
-              <Separator className="mt-2bg-gradient-to-r from-transparent via-mmp-primary/20 to-transparent" />
+            )
+          })}
+
+          {/* Empty State - No categories with products */}
+          {categoriesWithProducts.length === 0 && (
+            <div className="text-center py-16 md:py-24">
+              <div className="w-24 h-24 md:w-32 md:h-32 mx-auto mb-6 rounded-full bg-brand-primary-soft flex items-center justify-center">
+                <Telescope className="h-10 w-10 md:h-12 md:w-12 text-brand-primary" />
+              </div>
+              <h3 className="text-xl md:text-2xl font-bold text-brand-dark mb-3">
+                Coming Soon!
+              </h3>
+              <p className="text-brand-muted text-sm md:text-base max-w-md mx-auto">
+                We're preparing amazing products for you. 
+                Check back soon for our latest collections.
+              </p>
+              <Button 
+                className="mt-6 bg-brand-primary text-white hover:bg-brand-primary-hover"
+                onClick={() => window.location.reload()}
+              >
+                Refresh
+              </Button>
             </div>
-          ))}
+          )}
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="py-8 md:py-12 bg-gradient-to-r from-mmp-primary/5 to-mmp-accent/5">
-        <div className="container mx-auto px-4 text-center">
-          <div className="max-w-3xl mx-auto">
-            <Badge className="mb-3 md:mb-4 bg-gradient-to-r from-mmp-accent to-mmp-secondary text-white border-0 text-xs md:text-sm">
-              <Crown className="h-3 w-3 mr-1" />
+      {/* CTA Section - Premium Membership */}
+      <section className="py-12 md:py-20 bg-gradient-to-r from-brand-primary-soft to-brand-accent-soft">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="max-w-4xl mx-auto text-center">
+            <Badge className="mb-4 md:mb-5 bg-gradient-to-r from-brand-accent to-brand-primary text-white border-0 text-xs md:text-sm px-3 py-1.5">
+              <Crown className="h-3 w-3 md:h-3.5 md:w-3.5 mr-1.5" />
               Exclusive Membership
             </Badge>
-            <h2 className="text-xl sm:text-2xl md:text-4xl font-bold text-mmp-primary2 mb-3 md:mb-4">
+            
+            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-brand-dark mb-4 md:mb-5">
               Join Our Fashion Community
             </h2>
-            <p className="text-sm sm:text-base md:text-lg text-mmp-neutral/60 mb-6 md:mb-8 px-4">
-              Get early access to sales, personalized recommendations, and
-              exclusive offers
+            
+            <p className="text-brand-muted text-sm sm:text-base md:text-lg mb-8 md:mb-10 max-w-2xl mx-auto">
+              Get early access to sales, personalized recommendations, and exclusive offers
             </p>
-            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center px-4">
+            
+            <div className="flex flex-col sm:flex-row gap-3 md:gap-4 justify-center">
               <Button
-                size="default"
-                className="bg-gradient-to-r from-mmp-accent to-mmp-secondary hover:opacity-90 text-white border-0 px-6 py-2 text-sm sm:text-base w-full sm:w-auto"
+                size="lg"
+                className="bg-brand-primary text-white hover:bg-brand-primary-hover shadow-md hover:shadow-lg transition-all duration-300 px-6 md:px-8 py-2.5 md:py-3 text-sm md:text-base"
               >
                 Sign Up Free
               </Button>
               <Button
-                size="default"
+                size="lg"
                 variant="outline"
-                className="border-2 border-mmp-primary/30 hover:border-mmp-secondary/50 px-6 py-2 text-sm sm:text-base w-full sm:w-auto"
+                className="border-2 border-brand-primary/30 hover:border-brand-primary hover:bg-brand-primary-soft text-brand-dark transition-all duration-300 px-6 md:px-8 py-2.5 md:py-3 text-sm md:text-base"
               >
                 Learn More
               </Button>

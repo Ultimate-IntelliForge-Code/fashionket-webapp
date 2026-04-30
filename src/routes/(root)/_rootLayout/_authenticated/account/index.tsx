@@ -29,6 +29,7 @@ import {
   Trash2,
   Home,
   Star,
+  AlertCircle,
 } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -60,15 +61,19 @@ export const Route = createFileRoute(
   pendingComponent: () => {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        <div className="text-center">
+          <Loader2 className="w-10 h-10 animate-spin text-brand-primary mx-auto mb-3" />
+          <p className="text-brand-muted text-sm">Loading your profile...</p>
+        </div>
       </div>
     );
   },
   errorComponent: () => {
     return (
       <div className="container mx-auto px-4 py-12">
-        <Alert variant="destructive">
-          <AlertDescription>
+        <Alert variant="destructive" className="border-brand-error/20 bg-brand-error/10">
+          <AlertCircle className="h-4 w-4 text-brand-error" />
+          <AlertDescription className="text-brand-error">
             Failed to load profile. Please try again later.
           </AlertDescription>
         </Alert>
@@ -224,48 +229,55 @@ function UserAccountPage() {
   const user = profile as IUser;
 
   return (
-    <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 md:py-8 max-w-6xl">
-      {/* Header */}
-      <div className="mb-6 sm:mb-8">
-        <h1 className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight text-mmp-primary2">
-          My Account
-        </h1>
-        <p className="text-xs sm:text-sm text-mmp-primary2/70 mt-1 sm:mt-2">
-          Manage your account settings and preferences
+    <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-12 max-w-6xl">
+      {/* Header Section */}
+      <div className="mb-8 sm:mb-10">
+        <div className="flex items-center gap-3 mb-2">
+          <div className="p-2 bg-brand-primary-soft rounded-lg">
+            <User className="w-5 h-5 text-brand-primary" />
+          </div>
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-brand-dark">
+            My Account
+          </h1>
+        </div>
+        <p className="text-brand-muted text-sm sm:text-base ml-11">
+          Manage your account settings, profile information, and saved addresses
         </p>
       </div>
 
-      <Tabs defaultValue="profile" className="space-y-4 sm:space-y-6">
-        {/* Mobile-Optimized Tabs */}
-        <TabsList className="grid w-full grid-cols-2 h-auto  bg-mmp-primary/10">
+      <Tabs defaultValue="profile" className="space-y-6 sm:space-y-8">
+        {/* Tabs Navigation */}
+        <TabsList className="inline-flex h-auto p-1 bg-brand-surface rounded-xl gap-1">
           <TabsTrigger
             value="profile"
-            className="flex items-center justify-center gap-1.5 sm:gap-2 py-1 sm:py-1 data-[state=active]:bg-mmp-neutral data-[state=active]:shadow-sm text-mmp-primary2 data-[state=active]:text-mmp-primary2"
+            className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg data-[state=active]:bg-white data-[state=active]:text-brand-primary data-[state=active]:shadow-sm text-brand-muted hover:text-brand-dark transition-all"
           >
-            <User className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-            <span className="text-xs sm:text-sm">Profile</span>
+            <User className="w-4 h-4" />
+            <span className="hidden sm:inline">Profile Information</span>
+            <span className="sm:hidden">Profile</span>
           </TabsTrigger>
           <TabsTrigger
             value="addresses"
-            className="flex items-center justify-center gap-1.5 sm:gap-2 py-1 sm:py-1 data-[state=active]:bg-mmp-neutral data-[state=active]:shadow-sm text-mmp-primary2 data-[state=active]:text-mmp-primary2"
+            className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg data-[state=active]:bg-white data-[state=active]:text-brand-primary data-[state=active]:shadow-sm text-brand-muted hover:text-brand-dark transition-all"
           >
-            <MapPin className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-            <span className="text-xs sm:text-sm">Addresses</span>
+            <MapPin className="w-4 h-4" />
+            <span className="hidden sm:inline">Saved Addresses</span>
+            <span className="sm:hidden">Addresses</span>
           </TabsTrigger>
         </TabsList>
 
         {/* Profile Tab */}
-        <TabsContent value="profile" className="space-y-4 sm:space-y-6">
-          <div className="flex flex-col lg:grid lg:grid-cols-3 gap-4 sm:gap-6">
-            {/* Profile Info Card */}
-            <Card className="lg:col-span-2 overflow-hidden border border-mmp-primary/10">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 p-4 sm:p-6 pb-2 sm:pb-4">
-                <div className="space-y-0.5">
-                  <CardTitle className="text-sm sm:text-base text-mmp-primary2">
+        <TabsContent value="profile" className="space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Profile Information Card */}
+            <Card className="lg:col-span-2 border-brand-primary-soft shadow-sm hover:shadow-md transition-shadow">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+                <div>
+                  <CardTitle className="text-lg sm:text-xl text-brand-dark">
                     Profile Information
                   </CardTitle>
-                  <CardDescription className="text-xs text-mmp-primary2/70">
-                    Update your personal details
+                  <CardDescription className="text-brand-muted text-sm">
+                    Update your personal details and contact information
                   </CardDescription>
                 </div>
                 {!isEditing && (
@@ -273,94 +285,86 @@ function UserAccountPage() {
                     variant="outline"
                     size="sm"
                     onClick={() => setIsEditing(true)}
-                    className="h-8 sm:h-9 text-xs sm:text-sm border-mmp-primary/30 text-mmp-primary hover:bg-mmp-primary/10"
+                    className="border-brand-primary-soft text-brand-primary hover:bg-brand-primary-soft hover:border-brand-primary"
                   >
-                    <Edit2 className="w-3 h-3 sm:w-4 sm:h-4 mr-1.5 sm:mr-2" />
-                    Edit
+                    <Edit2 className="w-4 h-4 mr-2" />
+                    Edit Profile
                   </Button>
                 )}
               </CardHeader>
-              <CardContent className="p-4 sm:p-6 pt-0 sm:pt-2">
+              <CardContent className="pt-2">
                 {isEditing ? (
-                  <form
-                    onSubmit={form.handleSubmit(onSubmit)}
-                    className="space-y-4 sm:space-y-5"
-                  >
-                    <div className="space-y-1.5 sm:space-y-2">
-                      <Label
-                        htmlFor="fullName"
-                        className="text-xs sm:text-sm text-mmp-primary2"
-                      >
+                  <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
+                    {/* Full Name Field */}
+                    <div className="space-y-2">
+                      <Label htmlFor="fullName" className="text-brand-dark font-medium">
                         Full Name
                       </Label>
                       <Input
                         id="fullName"
                         placeholder="John Doe"
-                        className="h-9 sm:h-10 text-xs sm:text-sm border-mmp-primary/20 focus:border-mmp-accent focus:ring-mmp-accent/20"
+                        className="border-brand-primary-soft focus:border-brand-primary focus:ring-brand-primary-soft"
                         {...form.register("fullName")}
                       />
                       {form.formState.errors.fullName && (
-                        <p className="text-xs text-red-500">
+                        <p className="text-sm text-brand-error">
                           {form.formState.errors.fullName.message}
                         </p>
                       )}
                     </div>
 
-                    <div className="space-y-1.5 sm:space-y-2">
-                      <Label
-                        htmlFor="email"
-                        className="text-xs sm:text-sm text-mmp-primary2"
-                      >
-                        Email
+                    {/* Email Field */}
+                    <div className="space-y-2">
+                      <Label htmlFor="email" className="text-brand-dark font-medium">
+                        Email Address
                       </Label>
                       <Input
                         id="email"
                         type="email"
                         placeholder="john@example.com"
-                        className="h-9 sm:h-10 text-xs sm:text-sm border-mmp-primary/20 focus:border-mmp-accent focus:ring-mmp-accent/20"
+                        className="border-brand-primary-soft focus:border-brand-primary focus:ring-brand-primary-soft"
                         {...form.register("email")}
                       />
                       {form.formState.errors.email && (
-                        <p className="text-xs text-red-500">
+                        <p className="text-sm text-brand-error">
                           {form.formState.errors.email.message}
                         </p>
                       )}
                     </div>
 
-                    <div className="space-y-1.5 sm:space-y-2">
-                      <Label
-                        htmlFor="phone"
-                        className="text-xs sm:text-sm text-mmp-primary2"
-                      >
-                        Phone
+                    {/* Phone Field */}
+                    <div className="space-y-2">
+                      <Label htmlFor="phone" className="text-brand-dark font-medium">
+                        Phone Number
                       </Label>
                       <Input
                         id="phone"
                         placeholder="+234 800 000 0000"
-                        className="h-9 sm:h-10 text-xs sm:text-sm border-mmp-primary/20 focus:border-mmp-accent focus:ring-mmp-accent/20"
+                        className="border-brand-primary-soft focus:border-brand-primary focus:ring-brand-primary-soft"
                         {...form.register("phone")}
                       />
                       {form.formState.errors.phone && (
-                        <p className="text-xs text-red-500">
+                        <p className="text-sm text-brand-error">
                           {form.formState.errors.phone.message}
                         </p>
                       )}
                     </div>
 
-                    <div className="flex flex-col xs:flex-row gap-2 pt-3 sm:pt-4">
+                    {/* Form Actions */}
+                    <div className="flex flex-col sm:flex-row gap-3 pt-4">
                       <Button
                         type="submit"
                         disabled={updateProfile.isPending}
-                        className="flex-1 h-9 sm:h-10 text-xs sm:text-sm bg-mmp-accent hover:bg-mmp-secondary text-white"
+                        className="flex-1 bg-brand-primary text-white hover:bg-brand-primary-hover"
                       >
                         {updateProfile.isPending ? (
                           <>
-                            <Loader2 className="w-3 h-3 sm:w-4 sm:h-4 mr-1.5 animate-spin" />
-                            Saving...
+                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                            Saving Changes...
                           </>
                         ) : (
                           <>
-                            <Check className="w-3 h-3 sm:w-4 sm:h-4 mr-1.5" />
+                            <Check className="w-4 h-4 mr-2" />
                             Save Changes
                           </>
                         )}
@@ -372,46 +376,45 @@ function UserAccountPage() {
                           setIsEditing(false);
                           form.reset();
                         }}
-                        className="flex-1 xs:flex-none h-9 sm:h-10 text-xs sm:text-sm border-mmp-primary/30 text-mmp-primary hover:bg-mmp-primary/10"
+                        className="flex-1 border-brand-primary-soft text-brand-dark hover:bg-brand-primary-soft"
                       >
-                        <X className="w-3 h-3 sm:w-4 sm:h-4 mr-1.5" />
+                        <X className="w-4 h-4 mr-2" />
                         Cancel
                       </Button>
                     </div>
                   </form>
                 ) : (
-                  <div className="space-y-4 sm:space-y-5">
-                    <div className="flex items-start gap-2 sm:gap-3">
-                      <User className="w-4 h-4 sm:w-5 sm:h-5 text-mmp-secondary mt-0.5 flex-shrink-0" />
-                      <div className="flex-1 min-w-0">
-                        <p className="text-[10px] sm:text-xs text-mmp-primary2/70">
-                          Full Name
-                        </p>
-                        <p className="text-xs sm:text-sm font-medium text-mmp-primary2 truncate">
+                  <div className="space-y-4">
+                    {/* Display Fields */}
+                    <div className="flex items-start gap-3 p-3 rounded-lg hover:bg-brand-surface transition-colors">
+                      <User className="w-5 h-5 text-brand-primary mt-0.5" />
+                      <div className="flex-1">
+                        <p className="text-xs text-brand-muted uppercase tracking-wide">Full Name</p>
+                        <p className="text-base font-medium text-brand-dark mt-0.5">
                           {user.fullName || "Not set"}
                         </p>
                       </div>
                     </div>
-                    <Separator className="bg-mmp-primary/10" />
-                    <div className="flex items-start gap-2 sm:gap-3">
-                      <Mail className="w-4 h-4 sm:w-5 sm:h-5 text-mmp-secondary mt-0.5 flex-shrink-0" />
-                      <div className="flex-1 min-w-0">
-                        <p className="text-[10px] sm:text-xs text-mmp-primary2/70">
-                          Email
-                        </p>
-                        <p className="text-xs sm:text-sm font-medium text-mmp-primary2 break-all">
+                    
+                    <Separator className="bg-brand-primary-soft" />
+                    
+                    <div className="flex items-start gap-3 p-3 rounded-lg hover:bg-brand-surface transition-colors">
+                      <Mail className="w-5 h-5 text-brand-primary mt-0.5" />
+                      <div className="flex-1">
+                        <p className="text-xs text-brand-muted uppercase tracking-wide">Email Address</p>
+                        <p className="text-base font-medium text-brand-dark mt-0.5 break-all">
                           {user.email}
                         </p>
                       </div>
                     </div>
-                    <Separator className="bg-mmp-primary/10" />
-                    <div className="flex items-start gap-2 sm:gap-3">
-                      <Phone className="w-4 h-4 sm:w-5 sm:h-5 text-mmp-secondary mt-0.5 flex-shrink-0" />
-                      <div className="flex-1 min-w-0">
-                        <p className="text-[10px] sm:text-xs text-mmp-primary2/70">
-                          Phone
-                        </p>
-                        <p className="text-xs sm:text-sm font-medium text-mmp-primary2">
+                    
+                    <Separator className="bg-brand-primary-soft" />
+                    
+                    <div className="flex items-start gap-3 p-3 rounded-lg hover:bg-brand-surface transition-colors">
+                      <Phone className="w-5 h-5 text-brand-primary mt-0.5" />
+                      <div className="flex-1">
+                        <p className="text-xs text-brand-muted uppercase tracking-wide">Phone Number</p>
+                        <p className="text-base font-medium text-brand-dark mt-0.5">
                           {user.phone || "Not set"}
                         </p>
                       </div>
@@ -422,81 +425,77 @@ function UserAccountPage() {
             </Card>
 
             {/* Account Status Card */}
-            <Card className="border border-mmp-primary/10">
-              <CardHeader className="p-4 sm:p-6 pb-2 sm:pb-4">
-                <CardTitle className="text-sm sm:text-base text-mmp-primary2">
-                  Account Status
-                </CardTitle>
+            <Card className="border-brand-primary-soft shadow-sm">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-lg text-brand-dark">Account Status</CardTitle>
               </CardHeader>
-              <CardContent className="p-4 sm:p-6 pt-0 sm:pt-2 space-y-4 sm:space-y-5">
+              <CardContent className="space-y-4">
+                {/* Status Badge */}
                 <div>
-                  <p className="text-[10px] sm:text-xs text-mmp-primary2/70 mb-1.5">
-                    Status
-                  </p>
+                  <p className="text-xs text-brand-muted mb-2">Account Status</p>
                   <Badge
                     variant={user.isActive ? "default" : "secondary"}
                     className={cn(
-                      "text-[10px] sm:text-xs px-2 py-0.5",
+                      "px-3 py-1 text-sm font-medium",
                       user.isActive
-                        ? "bg-green-100 text-green-700 hover:bg-green-100"
-                        : "bg-gray-100 text-gray-700 hover:bg-gray-100",
+                        ? "bg-brand-success/10 text-brand-success border-brand-success/20"
+                        : "bg-brand-muted/10 text-brand-muted border-brand-muted/20"
                     )}
                   >
                     {user.isActive ? "Active" : "Inactive"}
                   </Badge>
                 </div>
-                <Separator className="bg-mmp-primary/10" />
-                <div className="flex items-start gap-2 sm:gap-3">
-                  <Calendar className="w-4 h-4 sm:w-5 sm:h-5 text-mmp-secondary mt-0.5 flex-shrink-0" />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-[10px] sm:text-xs text-mmp-primary2/70">
-                      Member Since
-                    </p>
-                    <p className="text-xs sm:text-sm font-medium text-mmp-primary2">
-                      {new Date(
-                        user.createdAt || new Date(),
-                      ).toLocaleDateString("en-US", {
+                
+                <Separator className="bg-brand-primary-soft" />
+                
+                {/* Member Since */}
+                <div className="flex items-start gap-3">
+                  <Calendar className="w-5 h-5 text-brand-primary mt-0.5" />
+                  <div>
+                    <p className="text-xs text-brand-muted">Member Since</p>
+                    <p className="text-sm font-medium text-brand-dark mt-0.5">
+                      {new Date(user.createdAt || new Date()).toLocaleDateString("en-US", {
                         year: "numeric",
-                        month: "short",
+                        month: "long",
                         day: "numeric",
                       })}
                     </p>
                   </div>
                 </div>
-                <Separator className="bg-mmp-primary/10" />
+                
+                <Separator className="bg-brand-primary-soft" />
+                
+                {/* User Role */}
                 <div>
-                  <p className="text-[10px] sm:text-xs text-mmp-primary2/70 mb-1.5">
-                    Role
-                  </p>
+                  <p className="text-xs text-brand-muted mb-2">Account Role</p>
                   <Badge
                     variant="outline"
-                    className="text-[10px] sm:text-xs px-2 py-0.5 border-mmp-accent/30 text-mmp-accent"
+                    className="px-3 py-1 text-sm font-medium border-brand-primary-soft text-brand-primary bg-brand-primary-soft/30"
                   >
-                    {user.role}
+                    {user.role?.toUpperCase() || "CUSTOMER"}
                   </Badge>
                 </div>
               </CardContent>
             </Card>
           </div>
 
-          {/* Security Settings */}
-          <Card className="border border-mmp-primary/10">
-            <CardHeader className="p-4 sm:p-6 pb-2 sm:pb-4">
-              <CardTitle className="flex items-center gap-1.5 sm:gap-2 text-sm sm:text-base text-mmp-primary2">
-                <Shield className="w-4 h-4 sm:w-5 sm:h-5 text-mmp-secondary" />
-                Security Settings
-              </CardTitle>
-              <CardDescription className="text-xs text-mmp-primary2/70">
+          {/* Security Settings Card */}
+          <Card className="border-brand-primary-soft shadow-sm">
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <Shield className="w-5 h-5 text-brand-primary" />
+                <CardTitle className="text-lg text-brand-dark">Security Settings</CardTitle>
+              </div>
+              <CardDescription className="text-brand-muted">
                 Manage your password and security preferences
               </CardDescription>
             </CardHeader>
-            <CardContent className="p-4 sm:p-6 pt-0 sm:pt-2">
+            <CardContent>
               <Button
                 variant="outline"
-                size="sm"
-                className="h-9 text-xs sm:text-sm border-mmp-primary/30 text-mmp-primary hover:bg-mmp-primary/10"
+                className="border-brand-primary-soft text-brand-primary hover:bg-brand-primary-soft"
               >
-                <Settings className="w-3 h-3 sm:w-4 sm:h-4 mr-1.5" />
+                <Settings className="w-4 h-4 mr-2" />
                 Change Password
               </Button>
             </CardContent>
@@ -504,364 +503,338 @@ function UserAccountPage() {
         </TabsContent>
 
         {/* Addresses Tab */}
-        <TabsContent value="addresses">
-          <div className="space-y-4 sm:space-y-6">
-            {/* Add New Address Form */}
-            {(isAddingAddress || editingAddressId) && (
-              <Card className="border border-mmp-primary/10">
-                <CardHeader className="p-4 sm:p-6 pb-2 sm:pb-4">
-                  <CardTitle className="text-sm sm:text-base text-mmp-primary2">
-                    {editingAddressId ? "Edit Address" : "Add New Address"}
-                  </CardTitle>
-                  <CardDescription className="text-xs text-mmp-primary2/70">
-                    {editingAddressId
-                      ? "Update your delivery address details"
-                      : "Enter your delivery address details"}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="p-4 sm:p-6">
-                  <form
-                    onSubmit={addressForm.handleSubmit((data) => {
-                      console.log("Getting data", data);
-                      if (editingAddressId) {
-                        handleUpdateAddress(editingAddressId, data);
-                      } else {
-                        handleAddNewAddress(data);
-                      }
-                    })}
-                    className="space-y-4 sm:space-y-5"
-                  >
+        <TabsContent value="addresses" className="space-y-6">
+          {/* Address Form (Add/Edit Mode) */}
+          {(isAddingAddress || editingAddressId) && (
+            <Card className="border-brand-primary-soft shadow-sm">
+              <CardHeader>
+                <CardTitle className="text-lg text-brand-dark">
+                  {editingAddressId ? "Edit Address" : "Add New Address"}
+                </CardTitle>
+                <CardDescription className="text-brand-muted">
+                  {editingAddressId
+                    ? "Update your delivery address details"
+                    : "Enter your delivery address details below"}
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <form
+                  onSubmit={addressForm.handleSubmit((data) => {
+                    if (editingAddressId) {
+                      handleUpdateAddress(editingAddressId, data);
+                    } else {
+                      handleAddNewAddress(data);
+                    }
+                  })}
+                  className="space-y-5"
+                >
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {/* Full Name */}
-                    <div className="space-y-1.5 sm:space-y-2">
-                      <Label
-                        htmlFor="fullName"
-                        className="text-xs sm:text-sm text-mmp-primary2"
-                      >
-                        Full Name <span className="text-red-500">*</span>
+                    <div className="space-y-2">
+                      <Label htmlFor="addressFullName" className="text-brand-dark font-medium">
+                        Full Name <span className="text-brand-error">*</span>
                       </Label>
                       <Input
-                        id="fullName"
+                        id="addressFullName"
                         placeholder="John Doe"
+                        className="border-brand-primary-soft focus:border-brand-primary"
                         {...addressForm.register("fullName")}
                       />
                       {addressForm.formState.errors.fullName && (
-                        <p className="text-xs text-red-500">
+                        <p className="text-sm text-brand-error">
                           {addressForm.formState.errors.fullName.message}
                         </p>
                       )}
                     </div>
 
                     {/* Phone */}
-                    <div className="space-y-1.5 sm:space-y-2">
-                      <Label
-                        htmlFor="addressPhone"
-                        className="text-xs sm:text-sm text-mmp-primary2"
-                      >
-                        Phone Number <span className="text-red-500">*</span>
+                    <div className="space-y-2">
+                      <Label htmlFor="addressPhone" className="text-brand-dark font-medium">
+                        Phone Number <span className="text-brand-error">*</span>
                       </Label>
                       <Input
                         id="addressPhone"
                         type="tel"
                         placeholder="+234 800 000 0000"
+                        className="border-brand-primary-soft focus:border-brand-primary"
                         {...addressForm.register("phone")}
                       />
                       {addressForm.formState.errors.phone && (
-                        <p className="text-xs text-red-500">
+                        <p className="text-sm text-brand-error">
                           {addressForm.formState.errors.phone.message}
                         </p>
                       )}
                     </div>
+                  </div>
 
-                    <div className="space-y-1.5 sm:space-y-2">
-                      <Label
-                        htmlFor="addressLine1"
-                        className="text-xs sm:text-sm text-mmp-primary2"
-                      >
-                        Street Address Line 1
+                  {/* Address Line 1 */}
+                  <div className="space-y-2">
+                    <Label htmlFor="addressLine1" className="text-brand-dark font-medium">
+                      Street Address <span className="text-brand-error">*</span>
+                    </Label>
+                    <Input
+                      id="addressLine1"
+                      placeholder="123 Main Street"
+                      className="border-brand-primary-soft focus:border-brand-primary"
+                      {...addressForm.register("addressLine1")}
+                    />
+                    {addressForm.formState.errors.addressLine1 && (
+                      <p className="text-sm text-brand-error">
+                        {addressForm.formState.errors.addressLine1.message}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Address Line 2 (Optional) */}
+                  <div className="space-y-2">
+                    <Label htmlFor="addressLine2" className="text-brand-dark font-medium">
+                      Apartment, Suite, etc. (Optional)
+                    </Label>
+                    <Input
+                      id="addressLine2"
+                      placeholder="Apt 4B, Suite 100"
+                      className="border-brand-primary-soft focus:border-brand-primary"
+                      {...addressForm.register("addressLine2")}
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {/* City */}
+                    <div className="space-y-2">
+                      <Label htmlFor="city" className="text-brand-dark font-medium">
+                        City <span className="text-brand-error">*</span>
                       </Label>
                       <Input
-                        id="addressLine1"
-                        placeholder="123 Main Street"
-                        className="h-9 sm:h-10 text-xs sm:text-sm border-mmp-primary/20 focus:border-mmp-accent focus:ring-mmp-accent/20"
-                        {...addressForm.register("addressLine1")}
+                        id="city"
+                        placeholder="Lagos"
+                        className="border-brand-primary-soft focus:border-brand-primary"
+                        {...addressForm.register("city")}
                       />
-                      {addressForm.formState.errors.addressLine1 && (
-                        <p className="text-xs text-red-500">
-                          {addressForm.formState.errors.addressLine1.message}
+                      {addressForm.formState.errors.city && (
+                        <p className="text-sm text-brand-error">
+                          {addressForm.formState.errors.city.message}
                         </p>
                       )}
                     </div>
 
-                    <div className="space-y-1.5 sm:space-y-2">
-                      <Label
-                        htmlFor="addressLine2"
-                        className="text-xs sm:text-sm text-mmp-primary2"
-                      >
-                        Street Address Line 2 (Optional)
+                    {/* State */}
+                    <div className="space-y-2">
+                      <Label htmlFor="state" className="text-brand-dark font-medium">
+                        State <span className="text-brand-error">*</span>
                       </Label>
                       <Input
-                        id="addressLine2"
-                        placeholder="Apt, Suite, etc."
-                        className="h-9 sm:h-10 text-xs sm:text-sm border-mmp-primary/20 focus:border-mmp-accent focus:ring-mmp-accent/20"
-                        {...addressForm.register("addressLine2")}
+                        id="state"
+                        placeholder="Lagos"
+                        className="border-brand-primary-soft focus:border-brand-primary"
+                        {...addressForm.register("state")}
                       />
+                      {addressForm.formState.errors.state && (
+                        <p className="text-sm text-brand-error">
+                          {addressForm.formState.errors.state.message}
+                        </p>
+                      )}
                     </div>
-
-                    <div className="grid grid-cols-2 gap-3 sm:gap-4">
-                      <div className="space-y-1.5 sm:space-y-2">
-                        <Label
-                          htmlFor="city"
-                          className="text-xs sm:text-sm text-mmp-primary2"
-                        >
-                          City
-                        </Label>
-                        <Input
-                          id="city"
-                          placeholder="Lagos"
-                          className="h-9 sm:h-10 text-xs sm:text-sm border-mmp-primary/20 focus:border-mmp-accent focus:ring-mmp-accent/20"
-                          {...addressForm.register("city")}
-                        />
-                        {addressForm.formState.errors.city && (
-                          <p className="text-xs text-red-500">
-                            {addressForm.formState.errors.city.message}
-                          </p>
-                        )}
-                      </div>
-
-                      <div className="space-y-1.5 sm:space-y-2">
-                        <Label
-                          htmlFor="state"
-                          className="text-xs sm:text-sm text-mmp-primary2"
-                        >
-                          State
-                        </Label>
-                        <Input
-                          id="state"
-                          placeholder="Lagos"
-                          className="h-9 sm:h-10 text-xs sm:text-sm border-mmp-primary/20 focus:border-mmp-accent focus:ring-mmp-accent/20"
-                          {...addressForm.register("state")}
-                        />
-                        {addressForm.formState.errors.state && (
-                          <p className="text-xs text-red-500">
-                            {addressForm.formState.errors.state.message}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-3 sm:gap-4">
-                      <div className="space-y-1.5 sm:space-y-2">
-                        <Label
-                          htmlFor="country"
-                          className="text-xs sm:text-sm text-mmp-primary2"
-                        >
-                          Country
-                        </Label>
-                        <Input
-                          id="country"
-                          placeholder="Nigeria"
-                          className="h-9 sm:h-10 text-xs sm:text-sm border-mmp-primary/20 focus:border-mmp-accent focus:ring-mmp-accent/20"
-                          {...addressForm.register("country")}
-                        />
-                        {addressForm.formState.errors.country && (
-                          <p className="text-xs text-red-500">
-                            {addressForm.formState.errors.country.message}
-                          </p>
-                        )}
-                      </div>
-
-                      <div className="space-y-1.5 sm:space-y-2">
-                        <Label
-                          htmlFor="zipCode" // Fixed: changed from "postalCode"
-                          className="text-xs sm:text-sm text-mmp-primary2"
-                        >
-                          ZIP Code
-                        </Label>
-                        <Input
-                          id="zipCode" // Fixed: changed from "postalCode"
-                          placeholder="100001"
-                          className="h-9 sm:h-10 text-xs sm:text-sm border-mmp-primary/20 focus:border-mmp-accent focus:ring-mmp-accent/20"
-                          {...addressForm.register("postalCode")} // Fixed: changed from "postalCode"
-                        />
-                        {addressForm.formState.errors.postalCode && ( // Fixed: changed from "zipCode"
-                          <p className="text-xs text-red-500">
-                            {addressForm.formState.errors.postalCode.message} //
-                            Fixed: changed from "postalCode"
-                          </p>
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-2 pt-1">
-                      <input
-                        type="checkbox"
-                        id="isDefault"
-                        className="w-3.5 h-3.5 sm:w-4 sm:h-4 accent-mmp-accent"
-                        {...addressForm.register("isDefault")}
-                      />
-                      <Label
-                        htmlFor="isDefault"
-                        className="text-xs sm:text-sm cursor-pointer text-mmp-primary2"
-                      >
-                        Set as default address
-                      </Label>
-                    </div>
-
-                    <div className="flex flex-col xs:flex-row gap-2 pt-3">
-                      <Button
-                        type="submit"
-                        disabled={isAdding || isUpdating}
-                        className="flex-1 h-9 sm:h-10 text-xs sm:text-sm bg-mmp-accent hover:bg-mmp-secondary text-white"
-                      >
-                        {isAdding || isUpdating ? (
-                          <>
-                            <Loader2 className="w-3 h-3 sm:w-4 sm:h-4 mr-1.5 animate-spin" />
-                            {editingAddressId ? "Updating..." : "Adding..."}
-                          </>
-                        ) : (
-                          <>
-                            <Check className="w-3 h-3 sm:w-4 sm:h-4 mr-1.5" />
-                            {editingAddressId
-                              ? "Update Address"
-                              : "Save Address"}
-                          </>
-                        )}
-                      </Button>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        onClick={() => {
-                          setIsAddingAddress(false);
-                          setEditingAddressId(null);
-                          addressForm.reset();
-                        }}
-                        className="flex-1 xs:flex-none h-9 sm:h-10 text-xs sm:text-sm border-mmp-primary/30 text-mmp-primary hover:bg-mmp-primary/10"
-                      >
-                        <X className="w-3 h-3 sm:w-4 sm:h-4 mr-1.5" />
-                        Cancel
-                      </Button>
-                    </div>
-                  </form>
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Addresses List */}
-            {addresses && addresses.length > 0 ? (
-              <div className="space-y-3 sm:space-y-4">
-                {addresses.map((address: IAddress) => (
-                  <Card
-                    key={address._id}
-                    className={cn(
-                      "overflow-hidden transition-all border border-mmp-primary/10",
-                      selectedAddressId === address._id &&
-                        "ring-1 ring-mmp-accent",
-                    )}
-                  >
-                    <CardContent className="p-3 sm:p-4">
-                      <div className="flex flex-col xs:flex-row xs:items-start justify-between gap-3">
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-2">
-                            {address.isDefault ? (
-                              <Badge className="bg-mmp-accent text-white text-[10px] sm:text-xs px-2 py-0.5">
-                                <Star className="w-2.5 h-2.5 sm:w-3 sm:h-3 mr-1 fill-current" />
-                                Default
-                              </Badge>
-                            ) : (
-                              <Badge
-                                variant="outline"
-                                className="text-[10px] sm:text-xs px-2 py-0.5 border-mmp-primary/20 text-mmp-primary2"
-                              >
-                                <Home className="w-2.5 h-2.5 sm:w-3 sm:h-3 mr-1" />
-                                Address
-                              </Badge>
-                            )}
-                          </div>
-
-                          <div className="space-y-1">
-                            <p className="text-xs sm:text-sm font-medium text-mmp-primary2">
-                              {address.addressLine1}
-                            </p>
-                            {address.addressLine2 && (
-                              <p className="text-xs sm:text-sm text-mmp-primary2">
-                                {address.addressLine2}
-                              </p>
-                            )}
-                            <p className="text-[10px] sm:text-xs text-mmp-primary2/70">
-                              {address.city}, {address.state}{" "}
-                              {address.postalCode}
-                            </p>
-                            <p className="text-[10px] sm:text-xs text-mmp-primary2/70">
-                              {address.country}
-                            </p>
-                          </div>
-                        </div>
-
-                        <div className="flex items-center gap-1 self-end xs:self-start">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-7 w-7 sm:h-8 sm:w-8 text-mmp-primary hover:bg-mmp-primary/10"
-                            onClick={() => handleEditAddress(address)}
-                          >
-                            <Edit2 className="w-3 h-3 sm:w-4 sm:h-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-7 w-7 sm:h-8 sm:w-8 text-red-500 hover:text-red-600 hover:bg-red-50"
-                            onClick={() => handleDeleteAddress(address._id)}
-                            disabled={isDeleting}
-                          >
-                            <Trash2 className="w-3 h-3 sm:w-4 sm:h-4" />
-                          </Button>
-                          {!address.isDefault && (
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="h-7 sm:h-8 text-[10px] sm:text-xs px-2 border-mmp-accent/30 text-mmp-accent hover:bg-mmp-accent/10"
-                              onClick={() =>
-                                handleSetDefaultAddress(address._id)
-                              }
-                            >
-                              <Star className="w-2.5 h-2.5 sm:w-3 sm:h-3 mr-1" />
-                              Set Default
-                            </Button>
-                          )}
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            ) : (
-              <Card className="border border-mmp-primary/10">
-                <CardContent className="p-8 sm:p-10">
-                  <div className="text-center">
-                    <div className="inline-flex items-center justify-center w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-mmp-primary/10 mb-3 sm:mb-4">
-                      <MapPin className="w-5 h-5 sm:w-6 sm:h-6 text-mmp-secondary" />
-                    </div>
-                    <p className="text-xs sm:text-sm text-mmp-primary2/70 mb-4">
-                      No saved addresses. Add an address to make checkout
-                      faster.
-                    </p>
                   </div>
-                </CardContent>
-              </Card>
-            )}
 
-            {/* Add Address Button */}
-            {!isAddingAddress && !editingAddressId && (
-              <Button
-                onClick={() => setIsAddingAddress(true)}
-                variant="outline"
-                className="w-full h-10 sm:h-11 text-xs sm:text-sm border-mmp-accent/30 text-mmp-accent hover:bg-mmp-accent/10"
-              >
-                <Plus className="w-3 h-3 sm:w-4 sm:h-4 mr-1.5" />
-                Add New Address
-              </Button>
-            )}
-          </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {/* Country */}
+                    <div className="space-y-2">
+                      <Label htmlFor="country" className="text-brand-dark font-medium">
+                        Country <span className="text-brand-error">*</span>
+                      </Label>
+                      <Input
+                        id="country"
+                        placeholder="Nigeria"
+                        className="border-brand-primary-soft focus:border-brand-primary"
+                        {...addressForm.register("country")}
+                      />
+                      {addressForm.formState.errors.country && (
+                        <p className="text-sm text-brand-error">
+                          {addressForm.formState.errors.country.message}
+                        </p>
+                      )}
+                    </div>
+
+                    {/* Postal Code */}
+                    <div className="space-y-2">
+                      <Label htmlFor="postalCode" className="text-brand-dark font-medium">
+                        ZIP / Postal Code
+                      </Label>
+                      <Input
+                        id="postalCode"
+                        placeholder="100001"
+                        className="border-brand-primary-soft focus:border-brand-primary"
+                        {...addressForm.register("postalCode")}
+                      />
+                      {addressForm.formState.errors.postalCode && (
+                        <p className="text-sm text-brand-error">
+                          {addressForm.formState.errors.postalCode.message}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Default Address Checkbox */}
+                  <div className="flex items-center gap-3 pt-2">
+                    <input
+                      type="checkbox"
+                      id="isDefault"
+                      className="w-4 h-4 rounded border-brand-primary-soft text-brand-primary focus:ring-brand-primary-soft"
+                      {...addressForm.register("isDefault")}
+                    />
+                    <Label
+                      htmlFor="isDefault"
+                      className="text-sm text-brand-dark cursor-pointer"
+                    >
+                      Set as default shipping address
+                    </Label>
+                  </div>
+
+                  {/* Form Actions */}
+                  <div className="flex flex-col sm:flex-row gap-3 pt-4">
+                    <Button
+                      type="submit"
+                      disabled={isAdding || isUpdating}
+                      className="flex-1 bg-brand-primary text-white hover:bg-brand-primary-hover"
+                    >
+                      {isAdding || isUpdating ? (
+                        <>
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          {editingAddressId ? "Updating..." : "Adding..."}
+                        </>
+                      ) : (
+                        <>
+                          <Check className="w-4 h-4 mr-2" />
+                          {editingAddressId ? "Update Address" : "Save Address"}
+                        </>
+                      )}
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => {
+                        setIsAddingAddress(false);
+                        setEditingAddressId(null);
+                        addressForm.reset();
+                      }}
+                      className="flex-1 border-brand-primary-soft text-brand-dark hover:bg-brand-primary-soft"
+                    >
+                      <X className="w-4 h-4 mr-2" />
+                      Cancel
+                    </Button>
+                  </div>
+                </form>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Addresses List */}
+          {addresses && addresses.length > 0 ? (
+            <div className="space-y-4">
+              {addresses.map((address: IAddress) => (
+                <Card
+                  key={address._id}
+                  className={cn(
+                    "border-brand-primary-soft shadow-sm hover:shadow-md transition-all",
+                    selectedAddressId === address._id && "ring-2 ring-brand-primary ring-offset-2"
+                  )}
+                >
+                  <CardContent className="p-5">
+                    <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+                      <div className="flex-1 min-w-0">
+                        {/* Badges */}
+                        <div className="flex items-center gap-2 mb-3">
+                          {address.isDefault && (
+                            <Badge className="bg-brand-primary text-white px-2 py-0.5 text-xs">
+                              <Star className="w-3 h-3 mr-1 fill-current" />
+                              Default
+                            </Badge>
+                          )}
+                          <Badge variant="outline" className="border-brand-primary-soft text-brand-muted text-xs">
+                            <Home className="w-3 h-3 mr-1" />
+                            Shipping Address
+                          </Badge>
+                        </div>
+
+                        {/* Address Details */}
+                        <div className="space-y-1.5">
+                          <p className="text-sm font-medium text-brand-dark">
+                            {address.fullName && `${address.fullName} • `}
+                            <span className="text-brand-muted font-normal">{address.phone}</span>
+                          </p>
+                          <p className="text-sm text-brand-dark">{address.addressLine1}</p>
+                          {address.addressLine2 && (
+                            <p className="text-sm text-brand-dark">{address.addressLine2}</p>
+                          )}
+                          <p className="text-sm text-brand-muted">
+                            {address.city}, {address.state} {address.postalCode}
+                          </p>
+                          <p className="text-sm text-brand-muted">{address.country}</p>
+                        </div>
+                      </div>
+
+                      {/* Action Buttons */}
+                      <div className="flex items-center gap-2 self-start">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-brand-primary hover:bg-brand-primary-soft"
+                          onClick={() => handleEditAddress(address)}
+                        >
+                          <Edit2 className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-brand-error hover:bg-brand-error/10"
+                          onClick={() => handleDeleteAddress(address._id)}
+                          disabled={isDeleting}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                        {!address.isDefault && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="h-8 text-xs border-brand-primary-soft text-brand-primary hover:bg-brand-primary-soft"
+                            onClick={() => handleSetDefaultAddress(address._id)}
+                          >
+                            <Star className="w-3 h-3 mr-1" />
+                            Set Default
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          ) : (
+            /* Empty State */
+            <Card className="border-brand-primary-soft">
+              <CardContent className="p-12 text-center">
+                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-brand-primary-soft mb-4">
+                  <MapPin className="w-8 h-8 text-brand-primary" />
+                </div>
+                <p className="text-brand-dark font-medium mb-2">No addresses saved</p>
+                <p className="text-brand-muted text-sm mb-6">
+                  Add a shipping address to make checkout faster and easier
+                </p>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Add Address Button */}
+          {!isAddingAddress && !editingAddressId && (
+            <Button
+              onClick={() => setIsAddingAddress(true)}
+              variant="outline"
+              className="w-full h-11 border-brand-primary-soft text-brand-primary hover:bg-brand-primary-soft"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Add New Address
+            </Button>
+          )}
         </TabsContent>
       </Tabs>
     </div>

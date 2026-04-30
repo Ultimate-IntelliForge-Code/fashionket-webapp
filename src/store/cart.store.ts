@@ -32,6 +32,7 @@ interface CartState {
   addToLocalCart: (payload: {
     productId: string;
     productName: string;
+    productSlug: string;
     productPrice: number;
     productImage?: string;
     quantity: number;
@@ -67,6 +68,7 @@ interface CartState {
 const createLocalCartItem = (
   productId: string,
   productName: string,
+  productSlug: string,
   productPrice: number,
   quantity: number,
   productImage?: string,
@@ -75,12 +77,17 @@ const createLocalCartItem = (
 ): ICartItem => ({
   productId: productId as ObjectId,
   nameSnapshot: productName,
+  slug: productSlug,
   priceSnapshot: productPrice,
   quantity,
   productImage,
   variantOptions,
   _id: _id || ''
 });
+
+const calculateItemSubtotal = (item: ICartItem) => {
+  return item.priceSnapshot * item.quantity;
+};
 
 const initialState = {
   localCart: {
@@ -119,6 +126,7 @@ export const useCartStore = create<CartState>()(
           const newItem = createLocalCartItem(
             payload.productId,
             payload.productName,
+            payload.productSlug,
             payload.productPrice,
             payload.quantity,
             payload.productImage,
@@ -195,50 +203,55 @@ export const useCartStore = create<CartState>()(
         const { localCart, serverCart } = get();
 
         if (isAuthenticated && serverCart) {
-          // Use server cart for authenticated users
-          const items = serverCart.items.map(item => ({
-            _id: item._id ?? '',
-            productId: item.productId.toString(),
-            nameSnapshot: item.nameSnapshot,
-            priceSnapshot: item.priceSnapshot,
-            quantity: item.quantity,
-            subtotal: item.subtotal ?? 0,
-            discount: item.discount,
-            variantOptions: item.variantOptions,
-            productImage: item.productImage,
-          }));
+          const items = serverCart.items.map(item => {
+            const subtotal =
+              item.subtotal ??
+              item.priceSnapshot * item.quantity;
+
+            return {
+              _id: item._id ?? '',
+              productId: item.productId.toString(),
+              nameSnapshot: item.nameSnapshot,
+              slug: item.slug,
+              priceSnapshot: item.priceSnapshot,
+              quantity: item.quantity,
+              subtotal,
+              discount: item.discount,
+              variantOptions: item.variantOptions,
+              productImage: item.productImage,
+            };
+          });
 
           return {
-            itemCount: items.reduce((total, item) => total + item.quantity, 0),
-            subtotal: items.reduce(
-              (total, item) => total + (item.subtotal ?? 0),
-              0
-            ),
-            items,
-          };
-        } else {
-          // Use local cart for unauthenticated users
-          const items = localCart.items.map(item => ({
-            _id: item._id ?? '',
-            productId: item.productId.toString(),
-            nameSnapshot: item.nameSnapshot,
-            priceSnapshot: item.priceSnapshot,
-            quantity: item.quantity,
-            subtotal: item.subtotal ?? 0,
-            discount: item.discount,
-            variantOptions: item.variantOptions,
-            productImage: item.productImage,
-          }));
-
-          return {
-            itemCount: items.reduce((total, item) => total + item.quantity, 0),
-            subtotal: items.reduce(
-              (total, item) => total + (item.subtotal ?? 0),
-              0
-            ),
+            itemCount: items.reduce((t, i) => t + i.quantity, 0),
+            subtotal: items.reduce((t, i) => t + i.subtotal, 0),
             items,
           };
         }
+
+        // 🔥 Local cart (fixed)
+        const items = localCart.items.map(item => {
+          const subtotal = calculateItemSubtotal(item);
+
+          return {
+            _id: item._id ?? '',
+            productId: item.productId.toString(),
+            nameSnapshot: item.nameSnapshot,
+            slug: item.slug,
+            priceSnapshot: item.priceSnapshot,
+            quantity: item.quantity,
+            subtotal,
+            discount: item.discount,
+            variantOptions: item.variantOptions,
+            productImage: item.productImage,
+          };
+        });
+
+        return {
+          itemCount: items.reduce((t, i) => t + i.quantity, 0),
+          subtotal: items.reduce((t, i) => t + i.subtotal, 0),
+          items,
+        };
       },
 
       // Internal state setters

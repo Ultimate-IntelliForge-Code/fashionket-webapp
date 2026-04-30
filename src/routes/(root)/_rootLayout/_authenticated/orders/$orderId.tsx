@@ -14,7 +14,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ErrorState } from '@/components/ui/error-state'
 import { toast } from 'react-toastify'
-import { formatCurrency } from '@/lib/utils'
+import { formatCurrency, cn } from '@/lib/utils'
 import { orderQuery } from '@/api/queries/order.query'
 import { useCancelOrder, useInitPayment } from '@/api/mutations'
 import { OrderStatusBadge } from '@/components/orders/order-status-badge'
@@ -35,13 +35,18 @@ import {
   RefreshCw,
   XCircle,
   CheckCircle2,
+  Clock,
+  Calendar,
+  Receipt,
+  HelpCircle,
+  Shield,
+  AlertCircle,
 } from 'lucide-react'
 import { OrderStatus, PaymentStatus } from '@/types'
 import { PaymentStatusBadge } from '@/components/orders/payment-status-badge'
 import { LoadingState } from '@/components/ui/loading-state'
 import { useOrderQuery } from '@/api/hooks'
 import { ConfirmToast } from '@/components/ui/cofirm-toast'
-import { Spinner } from '@/components/ui/spinner'
 
 export const Route = createFileRoute(
   '/(root)/_rootLayout/_authenticated/orders/$orderId',
@@ -71,10 +76,8 @@ function OrderDetailPage() {
   const { mutateAsync: initPayment, isPending: isInitializingPayment } =
     useInitPayment()
 
-  // Use initial data from loader
   const initialOrder = loaderData.order
 
-  // Fetch fresh data with React Query
   const {
     data: order = initialOrder,
     isLoading,
@@ -82,29 +85,22 @@ function OrderDetailPage() {
     refetch,
   } = useOrderQuery(params.orderId)
 
-  // Cancel order mutation
   const { mutate: cancelOrder, isPending: isCancelling } = useCancelOrder()
 
-  // Handle copy order number
   const handleCopyOrderNumber = React.useCallback(() => {
     if (order) {
-      navigator.clipboard
-        .writeText(order.orderNumber)
-        .then(() => {
-          toast.success('Order number copied to clipboard')
-        })
-        .catch(() => {
-          toast.error('Failed to copy order number')
-        })
+      navigator.clipboard.writeText(order.orderNumber).then(() => {
+        toast.success('Order number copied to clipboard')
+      }).catch(() => {
+        toast.error('Failed to copy order number')
+      })
     }
   }, [order])
 
-  // Handle print order
   const handlePrintOrder = React.useCallback(() => {
     window.print()
   }, [])
 
-  // Handle share order
   const handleShareOrder = React.useCallback(async () => {
     if (!order) return
 
@@ -129,7 +125,6 @@ function OrderDetailPage() {
     }
   }, [order])
 
-  // Handle cancel order
   const handleCancelOrder = React.useCallback(() => {
     return toast.info(
       <ConfirmToast
@@ -149,13 +144,10 @@ function OrderDetailPage() {
           )
         }
       />,
-      {
-        autoClose: false,
-      },
+      { autoClose: false }
     )
   }, [order, cancelOrder, refetch])
 
-  // Handle download invoice
   const handleDownloadInvoice = React.useCallback(() => {
     toast.info('Invoice download started')
   }, [])
@@ -166,35 +158,24 @@ function OrderDetailPage() {
         orderId: order._id,
         callbackUrl: `${window.location.origin}/checkout/payment-status`,
       })
-      // Step 3: Redirect to payment gateway
-      console.log('🌐 Redirecting to payment gateway...')
       window.location.href = paymentData.authorization_url
     } catch (error: any) {
-      console.error('❌ Order creation failed:', error)
-      toast.error(error.message || 'Failed to process order, please try again')
+      console.error('Payment initialization failed:', error)
+      toast.error(error.message || 'Failed to process payment')
     }
-  }, [])
-  // Handle retry loading
+  }, [initPayment, order?._id])
+
   const handleRetry = React.useCallback(() => {
     refetch()
   }, [refetch])
 
-  // Show loading state for subsequent loads
   if (isLoading && !initialOrder) {
-    return (
-      <div className="min-h-screen bg-gray-50">
-        <OrderDetailHeader loading />
-        <div className="container mx-auto px-4 py-8">
-          <OrderDetailLoadingSkeleton />
-        </div>
-      </div>
-    )
+    return <OrderDetailLoadingSkeleton />
   }
 
-  // Show error state for subsequent errors
   if (error && !initialOrder) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-brand-surface">
         <OrderDetailHeader />
         <div className="container mx-auto px-4 py-8">
           <div className="max-w-2xl mx-auto">
@@ -212,7 +193,7 @@ function OrderDetailPage() {
 
   if (!order) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-brand-surface">
         <OrderDetailHeader />
         <div className="container mx-auto px-4 py-8">
           <div className="max-w-2xl mx-auto">
@@ -229,15 +210,13 @@ function OrderDetailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 print:bg-white">
-      {/* Header */}
+    <div className="min-h-screen bg-brand-surface print:bg-white">
       <OrderDetailHeader order={order} />
 
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-10">
         <div className="lg:grid lg:grid-cols-12 lg:gap-8">
           {/* Main Content */}
-          <div className="lg:col-span-8 space-y-8">
-            {/* Order Actions */}
+          <div className="lg:col-span-8 space-y-6">
             <OrderActions
               order={order}
               onCopyOrderNumber={handleCopyOrderNumber}
@@ -245,44 +224,21 @@ function OrderDetailPage() {
               onShareOrder={handleShareOrder}
             />
 
-            {/* Order Timeline */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Order Timeline</CardTitle>
-                <CardDescription>Track your order progress</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <OrderTimeline order={order} />
-              </CardContent>
-            </Card>
+            <OrderTimelineCard order={order} />
 
-            {/* Order Items */}
             <OrderItems order={order} />
 
-            {/* Order Details */}
             <OrderDetails order={order} />
 
-            {/* Order Notes */}
             {order.notes && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>Order Notes</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-gray-700 whitespace-pre-wrap">
-                    {order.notes}
-                  </p>
-                </CardContent>
-              </Card>
+              <OrderNotes notes={order.notes} />
             )}
           </div>
 
           {/* Sidebar */}
-          <div className="lg:col-span-4 space-y-6">
-            {/* Order Summary */}
+          <div className="lg:col-span-4 space-y-6 mt-6 lg:mt-0">
             <OrderSummary order={order} />
 
-            {/* Actions */}
             <OrderActionsPanel
               order={order}
               isCancelling={isCancelling}
@@ -292,10 +248,8 @@ function OrderDetailPage() {
               isLoadingPayment={isInitializingPayment}
             />
 
-            {/* Need Help? */}
             <HelpCard />
 
-            {/* Return Policy */}
             <ReturnPolicyCard />
           </div>
         </div>
@@ -305,17 +259,11 @@ function OrderDetailPage() {
 }
 
 // Header Component
-function OrderDetailHeader({
-  order,
-  loading = false,
-}: {
-  order?: any
-  loading?: boolean
-}) {
+function OrderDetailHeader({ order }: { order?: any }) {
   return (
-  <div className="bg-linear-to-r from-mmp-primary to-mmp-primary2 print:bg-white print:text-black">
-      <div className="container mx-auto px-4 py-8">
-        <div className="flex items-center justify-between">
+    <div className="bg-gradient-to-br from-brand-primary via-brand-primary-hover to-brand-dark print:bg-white">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-10">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <Button
               variant="ghost"
@@ -328,33 +276,31 @@ function OrderDetailHeader({
                 Back to Orders
               </Link>
             </Button>
-            {loading ? (
+            {order ? (
               <>
-                <Skeleton className="h-10 w-48 mb-2 bg-white/20" />
-                <div className="flex items-center gap-3">
-                  <Skeleton className="h-4 w-32 bg-white/20" />
-                  <Skeleton className="h-6 w-20 rounded-full bg-white/20" />
-                </div>
-              </>
-            ) : (
-              <>
-                <h1 className="text-4xl font-bold text-white mb-2 print:text-black">
+                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-2 print:text-brand-dark">
                   Order Details
                 </h1>
-                <div className="flex items-center gap-3 flex-wrap">
-                  <p className="text-white/80 print:text-gray-600">
+                <div className="flex flex-wrap items-center gap-3">
+                  <p className="text-white/80 print:text-brand-muted font-mono text-sm">
                     #{order.orderNumber}
                   </p>
                   <OrderStatusBadge status={order.status} />
                   <PaymentStatusBadge status={order.paymentStatus as PaymentStatus} />
                 </div>
               </>
+            ) : (
+              <>
+                <Skeleton className="h-10 w-48 bg-white/20 mb-2" />
+                <div className="flex items-center gap-3">
+                  <Skeleton className="h-4 w-32 bg-white/20" />
+                  <Skeleton className="h-6 w-20 rounded-full bg-white/20" />
+                </div>
+              </>
             )}
           </div>
-          {loading ? (
-            <Skeleton className="h-12 w-32 bg-white/20 rounded-full" />
-          ) : (
-            <Badge className="bg-white text-mmp-primary text-lg px-4 py-2 print:bg-gray-100 print:text-gray-800">
+          {order && (
+            <Badge className="bg-white/20 text-white text-lg px-4 py-2 rounded-full print:bg-brand-surface print:text-brand-primary">
               {formatCurrency(order.totalAmount)}
             </Badge>
           )}
@@ -376,30 +322,40 @@ function OrderActions({
   onPrintOrder: () => void
   onShareOrder: () => void
 }) {
+  const actionButtons = [
+    { icon: Copy, label: 'Copy Order Number', onClick: onCopyOrderNumber },
+    { icon: Printer, label: 'Print Receipt', onClick: onPrintOrder },
+    { icon: Share2, label: 'Share Order', onClick: onShareOrder },
+    { icon: MessageSquare, label: 'Contact Support', href: '/contact' },
+  ]
+
   return (
-    <Card className="print:hidden">
-      <CardContent className="p-6">
+    <Card className="print:hidden border-brand-primary-soft shadow-sm">
+      <CardContent className="p-4 sm:p-6">
         <div className="flex flex-wrap gap-3">
-          <Button variant="outline" onClick={onCopyOrderNumber}>
-            <Copy className="mr-2 h-4 w-4" />
-            Copy Order Number
-          </Button>
-          <Button variant="outline" onClick={onPrintOrder}>
-            <Printer className="mr-2 h-4 w-4" />
-            Print Receipt
-          </Button>
-          <Button variant="outline" onClick={onShareOrder}>
-            <Share2 className="mr-2 h-4 w-4" />
-            Share Order
-          </Button>
-          <Button variant="outline" asChild>
-            <Link to="/contact">
-              <MessageSquare className="mr-2 h-4 w-4" />
-              Contact Support
-            </Link>
-          </Button>
+          {actionButtons.map(({ icon: Icon, label, onClick, href }) => (
+            <Button
+              key={label}
+              variant="outline"
+              className="border-brand-primary-soft text-brand-dark hover:bg-brand-primary-soft hover:border-brand-primary"
+              onClick={onClick}
+              asChild={!!href}
+            >
+              {href ? (
+                <Link to={href}>
+                  <Icon className="mr-2 h-4 w-4" />
+                  {label}
+                </Link>
+              ) : (
+                <>
+                  <Icon className="mr-2 h-4 w-4" />
+                  {label}
+                </>
+              )}
+            </Button>
+          ))}
           {order.status === OrderStatus.SHIPPED && (
-            <Button variant="outline">
+            <Button variant="outline" className="border-brand-primary-soft text-brand-dark hover:bg-brand-primary-soft">
               <Truck className="mr-2 h-4 w-4" />
               Track Order
             </Button>
@@ -410,34 +366,73 @@ function OrderActions({
   )
 }
 
+// Order Timeline Card Component
+function OrderTimelineCard({ order }: { order: any }) {
+  return (
+    <Card className="border-brand-primary-soft shadow-sm">
+      <CardHeader className="pb-3">
+        <div className="flex items-center justify-between">
+          <div>
+            <CardTitle className="text-brand-dark">Order Timeline</CardTitle>
+            <CardDescription className="text-brand-muted">
+              Track your order progress
+            </CardDescription>
+          </div>
+          <Clock className="h-5 w-5 text-brand-muted" />
+        </div>
+      </CardHeader>
+      <CardContent>
+        <OrderTimeline order={order} />
+      </CardContent>
+    </Card>
+  )
+}
+
 // Order Items Component
 function OrderItems({ order }: { order: any }) {
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Order Items ({order.items.length})</CardTitle>
+    <Card className="border-brand-primary-soft shadow-sm">
+      <CardHeader className="pb-3">
+        <div className="flex items-center justify-between">
+          <div>
+            <CardTitle className="text-brand-dark">
+              Order Items ({order.items.length})
+            </CardTitle>
+            <CardDescription className="text-brand-muted">
+              Products in your order
+            </CardDescription>
+          </div>
+          <Package className="h-5 w-5 text-brand-muted" />
+        </div>
       </CardHeader>
       <CardContent>
-        <div className="space-y-4">
+        <div className="divide-y divide-brand-primary-soft">
           {order.items.map((item: any, index: number) => (
             <div
               key={`${item.productId}-${index}`}
-              className="flex items-center gap-4 p-3 hover:bg-gray-50 rounded-lg"
+              className="flex gap-4 py-4 first:pt-0 last:pb-0"
             >
-              <div className="w-16 h-16 rounded-lg bg-gray-100 overflow-hidden shrink-0">
-                <div className="w-full h-full flex items-center justify-center">
-                  <Package className="h-8 w-8 text-gray-400" />
-                </div>
+              {/* Product Image Placeholder */}
+              <div className="w-20 h-20 rounded-xl bg-brand-surface border border-brand-primary-soft overflow-hidden shrink-0 flex items-center justify-center">
+                {item.imageUrl ? (
+                  <img src={item.imageUrl} alt={item.nameSnapshot} className="w-full h-full object-cover" />
+                ) : (
+                  <Package className="h-8 w-8 text-brand-muted" />
+                )}
               </div>
+              
+              {/* Product Info */}
               <div className="flex-1 min-w-0">
-                <h4 className="font-medium text-gray-900 truncate">
+                <h4 className="font-semibold text-brand-dark truncate">
                   {item.nameSnapshot}
                 </h4>
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-gray-600">
-                    Qty: {item.quantity} × {formatCurrency(item.priceSnapshot)}
-                  </span>
-                  <span className="font-semibold">
+                <div className="flex flex-wrap items-center justify-between gap-2 mt-2">
+                  <div className="flex items-center gap-2 text-sm text-brand-muted">
+                    <span>Qty: {item.quantity}</span>
+                    <span>×</span>
+                    <span>{formatCurrency(item.priceSnapshot)}</span>
+                  </div>
+                  <span className="font-semibold text-brand-primary">
                     {formatCurrency(item.subtotal)}
                   </span>
                 </div>
@@ -453,162 +448,189 @@ function OrderItems({ order }: { order: any }) {
 // Order Details Component
 function OrderDetails({ order }: { order: any }) {
   return (
-    <Tabs defaultValue="shipping" className="w-full">
-      <TabsList className="grid w-full grid-cols-2">
-        <TabsTrigger value="shipping">Shipping Address</TabsTrigger>
-        <TabsTrigger value="payment">Payment Information</TabsTrigger>
-      </TabsList>
+    <Card className="border-brand-primary-soft shadow-sm">
+      <CardHeader className="pb-3">
+        <CardTitle className="text-brand-dark">Order Information</CardTitle>
+        <CardDescription className="text-brand-muted">
+          Shipping and payment details
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <Tabs defaultValue="shipping" className="w-full">
+          <TabsList className="grid w-full grid-cols-2 bg-brand-surface">
+            <TabsTrigger 
+              value="shipping"
+              className="data-[state=active]:bg-brand-primary data-[state=active]:text-white"
+            >
+              <MapPin className="h-4 w-4 mr-2" />
+              Shipping
+            </TabsTrigger>
+            <TabsTrigger 
+              value="payment"
+              className="data-[state=active]:bg-brand-primary data-[state=active]:text-white"
+            >
+              <CreditCard className="h-4 w-4 mr-2" />
+              Payment
+            </TabsTrigger>
+          </TabsList>
 
-      <TabsContent value="shipping">
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <MapPin className="h-5 w-5" />
-              Shipping Address
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              <div className="flex items-center gap-2">
-                <User className="h-4 w-4 text-gray-500" />
-                <span className="font-medium">
-                  {order.addressId.fullName || 'N/A'}
-                </span>
+          <TabsContent value="shipping" className="mt-4">
+            <div className="space-y-3 bg-brand-surface/30 rounded-xl p-4">
+              <div className="flex items-center gap-2 text-brand-dark">
+                <User className="h-4 w-4 text-brand-muted" />
+                <span className="font-medium">{order.addressId.fullName || 'N/A'}</span>
               </div>
-              <div className="flex items-center gap-2">
-                <Phone className="h-4 w-4 text-gray-500" />
+              <div className="flex items-center gap-2 text-brand-dark">
+                <Phone className="h-4 w-4 text-brand-muted" />
                 <span>{order.addressId.phone || 'N/A'}</span>
               </div>
-              <div className="text-gray-600 space-y-1">
+              <Separator className="bg-brand-primary-soft" />
+              <div className="text-brand-muted space-y-1">
                 <p>{order.addressId.addressLine1}</p>
-                {order.addressId.addressLine2 && (
-                  <p>{order.addressId.addressLine2}</p>
-                )}
+                {order.addressId.addressLine2 && <p>{order.addressId.addressLine2}</p>}
                 <p>
-                  {order.addressId.city}, {order.addressId.state}{' '}
-                  {order.addressId.postalCode}
+                  {order.addressId.city}, {order.addressId.state}
+                  {order.addressId.postalCode && ` ${order.addressId.postalCode}`}
                 </p>
                 <p>{order.addressId.country}</p>
               </div>
             </div>
-          </CardContent>
-        </Card>
-      </TabsContent>
+          </TabsContent>
 
-      <TabsContent value="payment">
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <CreditCard className="h-5 w-5" />
-              Payment Information
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
+          <TabsContent value="payment" className="mt-4">
+            <div className="space-y-4 bg-brand-surface/30 rounded-xl p-4">
               <div>
-                <div className="text-sm text-gray-600">Payment Status</div>
-                <div className="font-medium flex items-center gap-2">
+                <p className="text-sm text-brand-muted mb-1">Payment Status</p>
+                <div className="flex items-center gap-2">
                   <PaymentStatusBadge status={order.paymentStatus as PaymentStatus} />
                   {order.paidAt && (
-                    <span className="text-xs text-gray-500">
+                    <span className="text-xs text-brand-muted flex items-center gap-1">
+                      <Calendar className="h-3 w-3" />
                       Paid on {new Date(order.paidAt).toLocaleDateString()}
                     </span>
                   )}
                 </div>
               </div>
 
-              <Separator />
+              <Separator className="bg-brand-primary-soft" />
 
               <div className="space-y-2">
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Subtotal</span>
-                  <span>{formatCurrency(order.subtotalAmount)}</span>
+                <div className="flex justify-between text-sm">
+                  <span className="text-brand-muted">Subtotal</span>
+                  <span className="text-brand-dark">{formatCurrency(order.subtotalAmount)}</span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Shipping</span>
-                  <span>{formatCurrency(order.shippingFee)}</span>
+                <div className="flex justify-between text-sm">
+                  <span className="text-brand-muted">Shipping Fee</span>
+                  <span className="text-brand-dark">{formatCurrency(order.shippingFee)}</span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Tax</span>
-                  <span>{formatCurrency(order.taxAmount || 0)}</span>
+                <div className="flex justify-between text-sm">
+                  <span className="text-brand-muted">Tax</span>
+                  <span className="text-brand-dark">{formatCurrency(order.taxAmount || 0)}</span>
                 </div>
-                <Separator />
-                <div className="flex justify-between text-lg font-bold">
-                  <span>Total</span>
-                  <span className="text-mmp-primary2">
+                <Separator className="bg-brand-primary-soft" />
+                <div className="flex justify-between text-base font-bold">
+                  <span className="text-brand-dark">Total</span>
+                  <span className="text-brand-primary">
                     {formatCurrency(order.totalAmount)}
                   </span>
                 </div>
               </div>
             </div>
-          </CardContent>
-        </Card>
-      </TabsContent>
-    </Tabs>
+          </TabsContent>
+        </Tabs>
+      </CardContent>
+    </Card>
+  )
+}
+
+// Order Notes Component
+function OrderNotes({ notes }: { notes: string }) {
+  return (
+    <Card className="border-brand-primary-soft shadow-sm">
+      <CardHeader className="pb-3">
+        <div className="flex items-center gap-2">
+          <MessageSquare className="h-5 w-5 text-brand-primary" />
+          <CardTitle className="text-brand-dark">Order Notes</CardTitle>
+        </div>
+      </CardHeader>
+      <CardContent>
+        <p className="text-brand-muted whitespace-pre-wrap bg-brand-surface/30 rounded-xl p-4">
+          {notes}
+        </p>
+      </CardContent>
+    </Card>
   )
 }
 
 // Order Summary Component
 function OrderSummary({ order }: { order: any }) {
+  const summaryItems = [
+    { label: 'Order Number', value: order.orderNumber, icon: Receipt, monospace: true },
+    { label: 'Order Date', value: new Date(order.createdAt).toLocaleDateString('en-US', {
+      year: 'numeric', month: 'short', day: 'numeric'
+    }), icon: Calendar },
+  ]
+
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Order Summary</CardTitle>
+    <Card className="border-brand-primary-soft shadow-sm sticky top-24">
+      <CardHeader className="pb-3 bg-gradient-to-r from-brand-primary-soft/20 to-transparent">
+        <CardTitle className="text-brand-dark">Order Summary</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-4 pt-4">
         <div className="space-y-3">
-          <div className="flex justify-between">
-            <span className="text-gray-600">Order Number</span>
-            <span className="font-mono text-sm">{order.orderNumber}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-gray-600">Order Date</span>
-            <span>
-              {new Date(order.createdAt).toLocaleDateString('en-US', {
-                year: 'numeric',
-                month: 'short',
-                day: 'numeric',
-              })}
+          {summaryItems.map(({ label, value, icon: Icon, monospace }) => (
+            <div key={label} className="flex justify-between items-center">
+              <span className="text-sm text-brand-muted flex items-center gap-2">
+                <Icon className="h-4 w-4" />
+                {label}
+              </span>
+              <span className={cn("text-sm text-brand-dark", monospace && "font-mono")}>
+                {value}
+              </span>
+            </div>
+          ))}
+          <div className="flex justify-between items-center">
+            <span className="text-sm text-brand-muted flex items-center gap-2">
+              <Package className="h-4 w-4" />
+              Status
             </span>
-          </div>
-          <div className="flex justify-between items-center gap-2">
-            <span className="text-gray-600">Status</span>
             <div className="flex items-center gap-2">
               <OrderStatusBadge status={order.status} />
               <PaymentStatusBadge status={order.paymentStatus as PaymentStatus} />
             </div>
           </div>
           {order.trackingNumber && (
-            <div className="flex justify-between">
-              <span className="text-gray-600">Tracking</span>
-              <span className="font-mono text-sm">{order.trackingNumber}</span>
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-brand-muted flex items-center gap-2">
+                <Truck className="h-4 w-4" />
+                Tracking
+              </span>
+              <span className="text-sm font-mono text-brand-dark">
+                {order.trackingNumber}
+              </span>
             </div>
           )}
         </div>
 
-        <Separator />
+        <Separator className="bg-brand-primary-soft" />
 
         <div className="space-y-2">
-          <div className="flex justify-between">
-            <span className="text-gray-600">Items</span>
-            <span>{order.items.length}</span>
+          <div className="flex justify-between text-sm">
+            <span className="text-brand-muted">Items ({order.items.length})</span>
+            <span className="text-brand-dark">{formatCurrency(order.subtotalAmount)}</span>
           </div>
-          <div className="flex justify-between">
-            <span className="text-gray-600">Subtotal</span>
-            <span>{formatCurrency(order.subtotalAmount)}</span>
+          <div className="flex justify-between text-sm">
+            <span className="text-brand-muted">Shipping</span>
+            <span className="text-brand-dark">{formatCurrency(order.shippingFee)}</span>
           </div>
-          <div className="flex justify-between">
-            <span className="text-gray-600">Shipping</span>
-            <span>{formatCurrency(order.shippingFee)}</span>
+          <div className="flex justify-between text-sm">
+            <span className="text-brand-muted">Tax</span>
+            <span className="text-brand-dark">{formatCurrency(order.taxAmount || 0)}</span>
           </div>
-          <div className="flex justify-between">
-            <span className="text-gray-600">Tax</span>
-            <span>{formatCurrency(order.taxAmount || 0)}</span>
-          </div>
-          <Separator />
+          <Separator className="bg-brand-primary-soft" />
           <div className="flex justify-between text-lg font-bold">
-            <span>Total</span>
-            <span className="text-mmp-primary2">
+            <span className="text-brand-dark">Total</span>
+            <span className="text-brand-primary">
               {formatCurrency(order.totalAmount)}
             </span>
           </div>
@@ -641,19 +663,23 @@ function OrderActionsPanel({
   ].includes(order.status)
 
   return (
-    <Card className="print:hidden">
-      <CardHeader>
-        <CardTitle>Order Actions</CardTitle>
+    <Card className="border-brand-primary-soft shadow-sm print:hidden">
+      <CardHeader className="pb-3">
+        <CardTitle className="text-brand-dark">Quick Actions</CardTitle>
+        <CardDescription className="text-brand-muted">
+          Manage your order
+        </CardDescription>
       </CardHeader>
       <CardContent className="space-y-3">
         {order.status === OrderStatus.PENDING_PAYMENT && (
           <Button
-            className="w-full bg-green-600 hover:bg-green-700"
+            className="w-full bg-brand-success text-white hover:bg-brand-success/90 shadow-sm"
             onClick={onCompletePayment}
+            disabled={isLoadingPayment}
           >
             {isLoadingPayment ? (
               <>
-                <Spinner />
+                <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
                 Processing...
               </>
             ) : (
@@ -666,23 +692,23 @@ function OrderActionsPanel({
         )}
 
         {order.status === OrderStatus.PROCESSING && (
-          <Button variant="outline" className="w-full">
+          <Button variant="outline" className="w-full border-brand-primary-soft text-brand-dark hover:bg-brand-primary-soft">
             <Truck className="mr-2 h-4 w-4" />
             Track Shipment
           </Button>
         )}
 
         {order.status === OrderStatus.DELIVERED && (
-          <Button variant="outline" className="w-full">
+          <Button variant="outline" className="w-full border-brand-primary-soft text-brand-dark hover:bg-brand-primary-soft">
             <MessageSquare className="mr-2 h-4 w-4" />
-            Leave Review
+            Leave a Review
           </Button>
         )}
 
         {isCancellable && (
           <Button
             variant="outline"
-            className="w-full text-red-600 hover:text-red-700 hover:bg-red-50"
+            className="w-full text-brand-error hover:text-brand-error hover:bg-brand-error/10 border-brand-error/30"
             onClick={onCancelOrder}
             disabled={isCancelling}
           >
@@ -702,7 +728,7 @@ function OrderActionsPanel({
 
         <Button
           variant="outline"
-          className="w-full"
+          className="w-full border-brand-primary-soft text-brand-dark hover:bg-brand-primary-soft"
           onClick={onDownloadInvoice}
         >
           <Download className="mr-2 h-4 w-4" />
@@ -715,68 +741,44 @@ function OrderActionsPanel({
 
 // Help Card Component
 function HelpCard() {
-  const PhoneIcon = ({ className }: { className?: string }) => (
-    <svg
-      className={className}
-      fill="none"
-      viewBox="0 0 24 24"
-      stroke="currentColor"
-    >
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth={2}
-        d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
-      />
-    </svg>
-  )
-
-  const MailIcon = ({ className }: { className?: string }) => (
-    <svg
-      className={className}
-      fill="none"
-      viewBox="0 0 24 24"
-      stroke="currentColor"
-    >
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth={2}
-        d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-      />
-    </svg>
-  )
-
   return (
-    <Card className="print:hidden">
-      <CardHeader>
-        <CardTitle>Need Help?</CardTitle>
-        <CardDescription>We're here to assist you</CardDescription>
+    <Card className="border-brand-primary-soft shadow-sm print:hidden">
+      <CardHeader className="pb-3 bg-gradient-to-r from-brand-primary-soft/10 to-transparent">
+        <div className="flex items-center gap-2">
+          <HelpCircle className="h-5 w-5 text-brand-primary" />
+          <CardTitle className="text-brand-dark">Need Help?</CardTitle>
+        </div>
+        <CardDescription className="text-brand-muted">
+          We're here to assist you
+        </CardDescription>
       </CardHeader>
-      <CardContent>
-        <div className="space-y-3">
-          <Button variant="outline" className="w-full" asChild>
-            <Link to="/contact">
-              <MessageSquare className="mr-2 h-4 w-4" />
-              Chat with Support
-            </Link>
-          </Button>
-          <Button variant="outline" className="w-full" asChild>
-            <a href="tel:0700FASHION">
-              <PhoneIcon className="mr-2 h-4 w-4" />
-              Call Support
-            </a>
-          </Button>
-          <div className="text-sm text-gray-600 pt-3 space-y-1">
-            <p className="flex items-center gap-2">
-              <MailIcon className="h-4 w-4" />
-              <span>support@fashionket.com</span>
-            </p>
-            <p className="flex items-center gap-2">
-              <PhoneIcon className="h-4 w-4" />
-              <span>0700-FASHION</span>
-            </p>
-          </div>
+      <CardContent className="space-y-3">
+        <Button variant="outline" className="w-full border-brand-primary-soft text-brand-dark hover:bg-brand-primary-soft" asChild>
+          <Link to="/contact">
+            <MessageSquare className="mr-2 h-4 w-4" />
+            Chat with Support
+          </Link>
+        </Button>
+        <Button variant="outline" className="w-full border-brand-primary-soft text-brand-dark hover:bg-brand-primary-soft" asChild>
+          <a href="tel:0700FASHION">
+            <Phone className="mr-2 h-4 w-4" />
+            Call Support
+          </a>
+        </Button>
+        <Separator className="bg-brand-primary-soft" />
+        <div className="space-y-2 text-sm">
+          <p className="flex items-center gap-2 text-brand-muted">
+            <MessageSquare className="h-4 w-4" />
+            <span>support@fashionket.com</span>
+          </p>
+          <p className="flex items-center gap-2 text-brand-muted">
+            <Phone className="h-4 w-4" />
+            <span>0700-FASHION (327-466)</span>
+          </p>
+          <p className="flex items-center gap-2 text-brand-muted">
+            <Clock className="h-4 w-4" />
+            <span>24/7 Customer Support</span>
+          </p>
         </div>
       </CardContent>
     </Card>
@@ -785,29 +787,29 @@ function HelpCard() {
 
 // Return Policy Card Component
 function ReturnPolicyCard() {
+  const policies = [
+    'Eligible for returns within 14 days',
+    'Items must be in original condition',
+    'Refunds processed in 5-7 business days',
+    'Contact support for return authorization',
+  ]
+
   return (
-    <Card className="print:hidden">
-      <CardHeader>
-        <CardTitle>Return Policy</CardTitle>
+    <Card className="border-brand-primary-soft shadow-sm print:hidden">
+      <CardHeader className="pb-3">
+        <div className="flex items-center gap-2">
+          <Shield className="h-5 w-5 text-brand-primary" />
+          <CardTitle className="text-brand-dark">Return Policy</CardTitle>
+        </div>
       </CardHeader>
       <CardContent>
-        <div className="space-y-2 text-sm text-gray-600">
-          <p className="flex items-start gap-2">
-            <CheckCircle2 className="h-4 w-4 text-green-500 mt-0.5 shrink-0" />
-            <span>Eligible for returns within 14 days</span>
-          </p>
-          <p className="flex items-start gap-2">
-            <CheckCircle2 className="h-4 w-4 text-green-500 mt-0.5 shrink-0" />
-            <span>Items must be in original condition</span>
-          </p>
-          <p className="flex items-start gap-2">
-            <CheckCircle2 className="h-4 w-4 text-green-500 mt-0.5 shrink-0" />
-            <span>Refunds processed in 5-7 business days</span>
-          </p>
-          <p className="flex items-start gap-2">
-            <CheckCircle2 className="h-4 w-4 text-green-500 mt-0.5 shrink-0" />
-            <span>Contact support for return authorization</span>
-          </p>
+        <div className="space-y-2">
+          {policies.map((policy, index) => (
+            <div key={index} className="flex items-start gap-2 text-sm">
+              <CheckCircle2 className="h-4 w-4 text-brand-success mt-0.5 shrink-0" />
+              <span className="text-brand-muted">{policy}</span>
+            </div>
+          ))}
         </div>
       </CardContent>
     </Card>
@@ -817,90 +819,91 @@ function ReturnPolicyCard() {
 // Loading Skeleton Component
 function OrderDetailLoadingSkeleton() {
   return (
-    <div className="lg:grid lg:grid-cols-12 lg:gap-8">
-      <div className="lg:col-span-8 space-y-8">
-        {/* Actions Skeleton */}
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex flex-wrap gap-3">
-              {[...Array(5)].map((_, i) => (
-                <Skeleton key={i} className="h-9 w-28 rounded-md" />
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Timeline Skeleton */}
-        <Card>
-          <CardHeader>
-            <Skeleton className="h-6 w-32" />
-            <Skeleton className="h-4 w-40 mt-2" />
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {[...Array(4)].map((_, i) => (
-                <div key={i} className="flex items-start gap-3">
-                  <Skeleton className="h-4 w-4 rounded-full mt-1" />
-                  <div className="flex-1">
-                    <Skeleton className="h-5 w-48 mb-1" />
-                    <Skeleton className="h-4 w-32" />
-                  </div>
+    <div className="min-h-screen bg-brand-surface">
+      <OrderDetailHeader />
+      <div className="container mx-auto px-4 py-8">
+        <div className="lg:grid lg:grid-cols-12 lg:gap-8">
+          <div className="lg:col-span-8 space-y-6">
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex flex-wrap gap-3">
+                  {[...Array(5)].map((_, i) => (
+                    <Skeleton key={i} className="h-9 w-28 rounded-md" />
+                  ))}
                 </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+              </CardContent>
+            </Card>
 
-        {/* Items Skeleton */}
-        <Card>
-          <CardHeader>
-            <Skeleton className="h-6 w-40" />
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {[...Array(3)].map((_, i) => (
-                <div key={i} className="flex items-center gap-4 p-3">
-                  <Skeleton className="w-16 h-16 rounded-lg" />
-                  <div className="flex-1 space-y-2">
-                    <Skeleton className="h-5 w-48" />
-                    <div className="flex justify-between">
-                      <Skeleton className="h-4 w-32" />
-                      <Skeleton className="h-4 w-20" />
+            <Card>
+              <CardHeader>
+                <Skeleton className="h-6 w-32" />
+                <Skeleton className="h-4 w-40 mt-2" />
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {[...Array(4)].map((_, i) => (
+                    <div key={i} className="flex items-start gap-3">
+                      <Skeleton className="h-4 w-4 rounded-full mt-1" />
+                      <div className="flex-1">
+                        <Skeleton className="h-5 w-48 mb-1" />
+                        <Skeleton className="h-4 w-32" />
+                      </div>
                     </div>
-                  </div>
+                  ))}
                 </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+              </CardContent>
+            </Card>
 
-      {/* Sidebar Skeleton */}
-      <div className="lg:col-span-4 space-y-6">
-        <Card>
-          <CardHeader>
-            <Skeleton className="h-6 w-32" />
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {[...Array(6)].map((_, i) => (
-              <div key={i} className="flex justify-between">
-                <Skeleton className="h-4 w-20" />
-                <Skeleton className="h-4 w-24" />
-              </div>
-            ))}
-          </CardContent>
-        </Card>
+            <Card>
+              <CardHeader>
+                <Skeleton className="h-6 w-40" />
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {[...Array(3)].map((_, i) => (
+                    <div key={i} className="flex gap-4">
+                      <Skeleton className="w-20 h-20 rounded-xl" />
+                      <div className="flex-1 space-y-2">
+                        <Skeleton className="h-5 w-48" />
+                        <div className="flex justify-between">
+                          <Skeleton className="h-4 w-32" />
+                          <Skeleton className="h-4 w-20" />
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
 
-        <Card>
-          <CardHeader>
-            <Skeleton className="h-6 w-32" />
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {[...Array(4)].map((_, i) => (
-              <Skeleton key={i} className="h-9 w-full rounded-md" />
-            ))}
-          </CardContent>
-        </Card>
+          <div className="lg:col-span-4 space-y-6 mt-6 lg:mt-0">
+            <Card>
+              <CardHeader>
+                <Skeleton className="h-6 w-32" />
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {[...Array(6)].map((_, i) => (
+                  <div key={i} className="flex justify-between">
+                    <Skeleton className="h-4 w-20" />
+                    <Skeleton className="h-4 w-24" />
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <Skeleton className="h-6 w-32" />
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {[...Array(4)].map((_, i) => (
+                  <Skeleton key={i} className="h-9 w-full rounded-md" />
+                ))}
+              </CardContent>
+            </Card>
+          </div>
+        </div>
       </div>
     </div>
   )

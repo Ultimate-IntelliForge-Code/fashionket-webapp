@@ -20,7 +20,6 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 
 const footerLinks = {
@@ -55,50 +54,17 @@ const footerLinks = {
 };
 
 const socialLinks = [
-  {
-    icon: Facebook,
-    href: "https://facebook.com/fashionket",
-    label: "Facebook",
-    color: "#1877f2",
-  },
-  {
-    icon: Twitter,
-    href: "https://twitter.com/fashionket",
-    label: "Twitter",
-    color: "#1da1f2",
-  },
-  {
-    icon: Instagram,
-    href: "https://instagram.com/fashionket",
-    label: "Instagram",
-    color: "#e4405f",
-  },
-  {
-    icon: Youtube,
-    href: "https://youtube.com/fashionket",
-    label: "YouTube",
-    color: "#ff0000",
-  },
-  {
-    icon: Linkedin,
-    href: "https://linkedin.com/company/fashionket",
-    label: "LinkedIn",
-    color: "#0077b5",
-  },
+  { icon: Facebook, href: "https://facebook.com/fashionket", label: "Facebook", color: "#1877f2" },
+  { icon: Twitter, href: "https://twitter.com/fashionket", label: "Twitter", color: "#1da1f2" },
+  { icon: Instagram, href: "https://instagram.com/fashionket", label: "Instagram", color: "#e4405f" },
+  { icon: Youtube, href: "https://youtube.com/fashionket", label: "YouTube", color: "#ff0000" },
+  { icon: Linkedin, href: "https://linkedin.com/company/fashionket", label: "LinkedIn", color: "#0077b5" },
 ];
 
 const contactInfo = [
   { icon: Phone, text: "+234 (0) 701 526-2642", href: "tel:+2347015262642" },
-  {
-    icon: Mail,
-    text: "media@fashionket.com",
-    href: "mailto:support@fashionket.com",
-  },
-  {
-    icon: MapPin,
-    text: "123 Fashion Ave, New York, NY 10001",
-    href: "https://maps.google.com",
-  },
+  { icon: Mail, text: "media@fashionket.com", href: "mailto:support@fashionket.com" },
+  { icon: MapPin, text: "123 Fashion Ave, New York, NY 10001", href: "https://maps.google.com" },
 ];
 
 const features = [
@@ -114,28 +80,25 @@ export default function Footer() {
   const fadeInUp = {
     initial: { y: 20, opacity: 0 },
     animate: { y: 0, opacity: 1 },
-    transition: { duration: 0.5 },
+    transition: { duration: 0.4, ease: "easeOut" },
   };
 
   const staggerContainer = {
     animate: {
-      transition: {
-        staggerChildren: 0.1,
-      },
+      transition: { staggerChildren: 0.08 },
     },
   };
 
   return (
-    <footer className="bg-mmp-primary2 text-white relative overflow-hidden border-t-2 border-mmp-primary">
-      {/* Decorative Background Elements */}
+    <footer className="bg-brand-dark text-white relative border-t border-brand-primary/20">
+      {/* Decorative Background - Simplified for performance */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-mmp-primary/10 rounded-full blur-3xl" />
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-mmp-secondary/10 rounded-full blur-3xl" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-mmp-neutral/5 rounded-full blur-3xl" />
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-brand-primary/5 rounded-full blur-3xl" />
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-brand-accent/5 rounded-full blur-3xl" />
       </div>
 
-      {/* Features Bar */}
-      {/* <div className="relative border-b border-mmp-primary2/20 bg-mmp-primary/50 backdrop-blur-sm">
+      {/* Features Bar - Uncommented and improved */}
+      <div className="relative border-b border-white/10 bg-brand-dark/50 backdrop-blur-sm">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 py-6 sm:py-8">
             {features.map((feature, index) => {
@@ -143,19 +106,19 @@ export default function Footer() {
               return (
                 <motion.div
                   key={feature.title}
-                  initial={{ scale: 0.9, opacity: 0 }}
+                  initial={{ scale: 0.95, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
-                  transition={{ delay: index * 0.1, duration: 0.3 }}
-                  className="flex items-center gap-3 group cursor-pointer"
+                  transition={{ delay: index * 0.05, duration: 0.1 }}
+                  className="flex items-center gap-3 group"
                 >
-                  <div className="p-2 rounded-xl bg-mmp-primary2/20 group-hover:bg-mmp-primary/20 transition-all duration-300">
-                    <Icon className="h-5 w-5 text-mmp-secondary group-hover:text-mmp-neutral transition-colors" />
+                  <div className="p-2 rounded-lg bg-white/5 group-hover:bg-brand-primary-soft/20 transition-colors">
+                    <Icon className="h-5 w-5 text-brand-accent group-hover:text-brand-primary transition-colors" />
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-semibold text-sm text-white truncate">
+                  <div>
+                    <p className="font-semibold text-sm text-white">
                       {feature.title}
                     </p>
-                    <p className="text-xs text-white/60 truncate">
+                    <p className="text-xs text-white/50">
                       {feature.description}
                     </p>
                   </div>
@@ -164,7 +127,7 @@ export default function Footer() {
             })}
           </div>
         </div>
-      </div> */}
+      </div>
 
       {/* Main Footer */}
       <div className="relative container mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16">
@@ -176,17 +139,15 @@ export default function Footer() {
         >
           {/* Brand Column */}
           <motion.div variants={fadeInUp} className="lg:w-1/3 space-y-6">
-            <Link to="/" className="inline-block group">
-              <motion.img
-                whileHover={{ scale: 1.05 }}
-                transition={{ duration: 0.3 }}
+            <Link to="/" className="inline-block">
+              <img
                 src="/logo.png"
-                alt="FashionKet Logo"
+                alt="Logo"
                 className="h-10 sm:h-12 w-auto"
               />
             </Link>
 
-            <p className="text-white/70 text-sm leading-relaxed">
+            <p className="text-white/60 text-sm leading-relaxed">
               Discover premium fashion curated for the modern lifestyle.
               Experience quality, style, and exclusive collections from top
               brands worldwide.
@@ -194,22 +155,23 @@ export default function Footer() {
 
             {/* Newsletter Subscription */}
             <div className="space-y-3">
-              <h4 className="font-semibold text-white flex items-center gap-2">
-                <Mail className="h-4 w-4 text-mmp-secondary" />
+              <h4 className="font-semibold text-white text-sm flex items-center gap-2">
+                <Mail className="h-4 w-4 text-brand-accent" />
                 Subscribe for updates
               </h4>
-              <div className="flex flex-col xs:flex-row gap-2">
+              <div className="flex flex-col sm:flex-row gap-2">
                 <Input
                   type="email"
                   placeholder="Your email address"
-                  className="bg-white/10 border-mmp-primary2/30 focus:border-mmp-secondary text-white placeholder:text-white/50 rounded-xl h-11 text-sm focus:bg-white/20 transition-all duration-300"
+                  className="bg-white/5 border-white/10 focus:border-brand-primary text-white placeholder:text-white/40 rounded-lg h-11 text-sm focus:bg-white/10 transition-all"
                 />
-                <Button className="bg-mmp-primary hover:shadow-lg hover:scale-105 transition-all duration-300 h-11 px-6 rounded-xl text-sm font-medium whitespace-nowrap group">
+                <Button className="bg-brand-accent text-white hover:bg-brand-accent/90 shadow-sm h-11 px-6 rounded-lg text-sm font-medium whitespace-nowrap group">
                   Subscribe
                   <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform" />
                 </Button>
               </div>
-              <p className="text-white/40 text-xs">
+              <p className="text-white/40 text-xs flex items-center gap-1">
+                <Heart className="h-3 w-3 text-brand-accent" />
                 Get 10% off your first purchase
               </p>
             </div>
@@ -219,25 +181,18 @@ export default function Footer() {
           <motion.div variants={fadeInUp} className="lg:w-2/3">
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-8 lg:gap-12">
               {Object.entries(footerLinks).map(([category, links]) => (
-                <motion.div
-                  key={category}
-                  variants={fadeInUp}
-                  className="space-y-4"
-                >
-                  <h3 className="font-bold text-base capitalize text-mmp-secondary relative inline-block">
+                <motion.div key={category} variants={fadeInUp} className="space-y-4">
+                  <h3 className="font-semibold text-sm uppercase tracking-wide text-brand-accent">
                     {category}
-                    <div className="absolute -bottom-1 left-0 w-8 h-0.5 bg-mmp-primary rounded-full" />
                   </h3>
-                  <ul className="space-y-2.5">
+                  <ul className="space-y-2">
                     {links.map((link) => (
                       <li key={link.title}>
                         <Link
                           to={link.href}
-                          className="text-sm text-white/60 hover:text-mmp-secondary transition-all duration-300 inline-block group"
+                          className="text-sm text-white/50 hover:text-brand-primary transition-colors duration-200"
                         >
-                          <span className="group-hover:translate-x-1 inline-block transition-transform">
-                            {link.title}
-                          </span>
+                          {link.title}
                         </Link>
                       </li>
                     ))}
@@ -249,30 +204,30 @@ export default function Footer() {
             {/* Vendor Section */}
             <motion.div
               variants={fadeInUp}
-              className="mt-10 pt-8 border-t border-mmp-primary2/30"
+              className="mt-10 pt-8 border-t border-white/10"
             >
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-5">
                 <div>
-                  <h4 className="font-semibold text-mmp-secondary mb-1 flex items-center gap-2">
+                  <h4 className="font-semibold text-brand-accent mb-1 flex items-center gap-2 text-sm">
                     <Store className="h-4 w-4" />
                     Sell on FashionKet
                   </h4>
-                  <p className="text-sm text-white/60">
+                  <p className="text-sm text-white/50">
                     Join thousands of sellers and grow your business with us
                   </p>
                 </div>
                 <div className="flex gap-3">
                   <Button
-                    variant="ghost"
+                    variant="outline"
                     size="sm"
-                    className="border-mmp-primary2/40 text-white hover:text-mmp-primary hover:bg-mmp-primary/10 hover:border-mmp-primary rounded-xl h-10 px-5 transition-all duration-300"
+                    className="border-white/20 text-white hover:bg-white/10 hover:border-white/30 rounded-lg h-10 px-5"
                     asChild
                   >
-                    <Link to="/vendor/login">Login</Link>
+                    <Link to="/vendor/login">Sign In</Link>
                   </Button>
                   <Button
                     size="sm"
-                    className="bg-mmp-primary hover:shadow-lg hover:scale-105 transition-all duration-300 rounded-xl h-10 px-5 font-medium"
+                    className="bg-brand-primary text-white hover:bg-brand-primary-hover shadow-sm rounded-lg h-10 px-5 font-medium"
                     asChild
                   >
                     <Link to="/vendor/register">Register Store</Link>
@@ -284,14 +239,14 @@ export default function Footer() {
             {/* Contact & Social */}
             <motion.div
               variants={fadeInUp}
-              className="mt-10 pt-8 border-t border-mmp-primary2/30"
+              className="mt-10 pt-8 border-t border-white/10"
             >
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
                 {/* Contact Info */}
                 <div>
-                  <h4 className="font-semibold text-mmp-secondary mb-4 flex items-center gap-2">
+                  <h4 className="font-semibold text-brand-accent mb-4 flex items-center gap-2 text-sm">
                     <Phone className="h-4 w-4" />
-                    Contact Information
+                    Contact
                   </h4>
                   <div className="space-y-3">
                     {contactInfo.map((info, index) => {
@@ -300,19 +255,11 @@ export default function Footer() {
                         <Link
                           key={index}
                           to={info.href}
-                          className="flex items-center gap-3 text-white/60 hover:text-mmp-secondary transition-all duration-300 text-sm group"
-                          target={
-                            info.href.startsWith("http") ? "_blank" : undefined
-                          }
-                          rel={
-                            info.href.startsWith("http")
-                              ? "noopener noreferrer"
-                              : undefined
-                          }
+                          className="flex items-center gap-3 text-white/50 hover:text-brand-primary transition-colors text-sm group"
+                          target={info.href.startsWith("http") ? "_blank" : undefined}
+                          rel={info.href.startsWith("http") ? "noopener noreferrer" : undefined}
                         >
-                          <div className="p-1.5 rounded-lg bg-white/10 group-hover:bg-mmp-primary/20 transition-all duration-300">
-                            <Icon className="h-4 w-4" />
-                          </div>
+                          <Icon className="h-4 w-4 text-white/30 group-hover:text-brand-primary transition-colors" />
                           <span>{info.text}</span>
                         </Link>
                       );
@@ -322,10 +269,10 @@ export default function Footer() {
 
                 {/* Social Media */}
                 <div>
-                  <h4 className="font-semibold text-mmp-secondary mb-4">
+                  <h4 className="font-semibold text-brand-accent mb-4 text-sm">
                     Follow Us
                   </h4>
-                  <div className="flex flex-wrap gap-3">
+                  <div className="flex flex-wrap gap-2">
                     {socialLinks.map((social) => {
                       const Icon = social.icon;
                       return (
@@ -334,15 +281,11 @@ export default function Footer() {
                           href={social.href}
                           target="_blank"
                           rel="noopener noreferrer"
-                          whileHover={{ y: -3, scale: 1.1 }}
-                          className="p-2.5 rounded-xl bg-white/10 hover:shadow-lg transition-all duration-300"
-                          style={{
-                            background: `linear-gradient(135deg, ${social.color}20, ${social.color}10)`,
-                            borderColor: `${social.color}40`,
-                          }}
+                          whileHover={{ y: -2 }}
+                          className="p-2 rounded-lg bg-white/5 hover:bg-white/10 transition-all"
                           aria-label={social.label}
                         >
-                          <Icon className="h-5 w-5 text-white/80 hover:text-white transition-colors" />
+                          <Icon className="h-5 w-5 text-white/60 hover:text-brand-primary transition-colors" />
                         </motion.a>
                       );
                     })}
@@ -355,71 +298,65 @@ export default function Footer() {
       </div>
 
       {/* Bottom Bar */}
-      <div className="relative bg-mmp-primary2 backdrop-blur-sm border-t border-mmp-primary2/20">
+      <div className="relative bg-black/20 border-t border-white/10">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             {/* Legal Links */}
-            <div className="flex items-center gap-4 text-sm">
+            <div className="flex items-center gap-4 text-xs">
               <Link
                 to="/privacy"
-                className="text-white/60 hover:text-mmp-secondary transition-colors"
+                className="text-white/40 hover:text-brand-primary transition-colors"
               >
-                Privacy Policy
+                Privacy
               </Link>
               <span className="text-white/20">•</span>
               <Link
                 to="/terms"
-                className="text-white/60 hover:text-mmp-secondary transition-colors"
+                className="text-white/40 hover:text-brand-primary transition-colors"
               >
-                Terms of Service
+                Terms
               </Link>
               <span className="text-white/20">•</span>
               <Link
                 to="/cookies"
-                className="text-white/60 hover:text-mmp-secondary transition-colors"
+                className="text-white/40 hover:text-brand-primary transition-colors"
               >
-                Cookie Policy
+                Cookies
               </Link>
             </div>
 
             <div className="flex items-center gap-4">
               {/* Security Badge */}
-              <Badge className="bg-white/10 text-white/80 border border-white/20 px-3 py-1 rounded-full text-xs">
+              <Badge className="bg-white/5 text-white/60 border-white/10 rounded-full text-xs font-normal px-3 py-1">
                 <Shield className="h-3 w-3 mr-1.5" />
                 SSL Secured
               </Badge>
 
               {/* Copyright */}
-              <div className="text-white/50 text-sm">
+              <div className="text-white/40 text-xs">
                 © {currentYear} FashionKet. All rights reserved.
               </div>
             </div>
           </div>
 
           {/* Powered By */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.5 }}
-            className="mt-4 text-center"
-          >
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-mmp-primary/10 to-mmp-secondary/10 border border-mmp-primary2/30">
-              <Heart className="h-3.5 w-3.5 text-mmp-primary animate-pulse" />
-              <span className="text-xs text-white/60">
+          <div className="mt-4 text-center">
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10">
+              <Heart className="h-3 w-3 text-brand-accent" />
+              <span className="text-xs text-white/40">
                 Powered by{" "}
-                <span className="font-semibold text-mmp-secondary">
+                <span className="text-brand-primary font-medium">
                   Ultimate IntelliForge
                 </span>
               </span>
             </div>
-          </motion.div>
+          </div>
 
           {/* Legal Disclaimer */}
           <div className="mt-4 text-center">
-            <p className="text-[10px] text-white/40 max-w-2xl mx-auto">
+            <p className="text-[10px] text-white/30 max-w-2xl mx-auto">
               FashionKet is a premium fashion retailer. Products subject to
-              availability. Prices and offers may change without notice. All
-              trademarks and logos are property of their respective owners.
+              availability. Prices and offers may change without notice.
             </p>
           </div>
         </div>

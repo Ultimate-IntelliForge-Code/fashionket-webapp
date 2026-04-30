@@ -10,9 +10,10 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useAdminLogin } from "@/api/mutations";
 import { useAuth } from "@/hooks";
 import { AuthFormWrapper, GoogleAuthButton } from "@/components/auth";
-import { Eye, EyeOff, Building2 } from "lucide-react";
+import { Eye, EyeOff, Building2, AlertCircle, Shield } from "lucide-react";
 import { toast } from "react-toastify";
 import { LoginFormData, loginSchema } from "@/lib";
+import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/(auth)/_auth/admin/login")({
   component: AdminLoginPage,
@@ -45,7 +46,7 @@ function AdminLoginPage() {
         onSuccess: (response) => {
           if (response.success) {
             setAuthAdmin(response.data);
-            toast.success("Welcome back!, Successfully logged in as admin.");
+            toast.success("Welcome back! Successfully logged in as admin.");
             navigate({ to: "/admin" });
           }
         },
@@ -63,19 +64,19 @@ function AdminLoginPage() {
 
   const footer = (
     <div className="text-center space-y-3">
-      <div className="text-sm text-gray-600">
+      <div className="text-sm text-brand-muted">
         <Link
           to="/admin/forgot-password"
-          className="font-medium text-mmp-primary hover:text-mmp-primary2 hover:underline"
+          className="font-medium text-brand-primary hover:text-brand-primary-hover hover:underline transition-colors"
         >
           Forgot your password?
         </Link>
       </div>
-      <div className="text-sm text-gray-600">
+      <div className="text-sm text-brand-muted">
         Don't have an admin account?{" "}
         <Link
           to="/admin/register"
-          className="font-medium text-mmp-primary hover:text-mmp-primary2 hover:underline"
+          className="font-medium text-brand-primary hover:text-brand-primary-hover hover:underline transition-colors"
         >
           Request Access
         </Link>
@@ -87,8 +88,8 @@ function AdminLoginPage() {
     <AuthFormWrapper
       title={
         <div className="flex items-center justify-center gap-2">
-          <Building2 className="h-6 w-6" />
-          <span>Business Portal</span>
+          <Building2 className="h-6 w-6 text-brand-primary" />
+          <span className="text-brand-dark">Business Portal</span>
         </div>
       }
       description="Sign in to manage your FashionKet store"
@@ -96,21 +97,31 @@ function AdminLoginPage() {
       backText="Back to store"
       footer={footer}
     >
-      <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-md">
-        <p className="text-sm text-blue-700">
-          <strong>Note:</strong> This portal is for store administrators only.
-        </p>
+      {/* Security Notice */}
+      <div className="mb-6 p-4 bg-brand-primary-soft/30 border border-brand-primary-soft rounded-xl">
+        <div className="flex items-start gap-3">
+          <Shield className="h-5 w-5 text-brand-primary mt-0.5 flex-shrink-0" />
+          <div className="text-sm">
+            <p className="font-medium text-brand-dark mb-1">Secure Admin Access</p>
+            <p className="text-brand-muted text-xs">
+              This portal is for store administrators only. Unauthorized access is prohibited.
+            </p>
+          </div>
+        </div>
       </div>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+        {/* Root Error */}
         {errors.root && (
-          <div className="p-3 bg-red-50 border border-red-200 rounded-md">
-            <p className="text-sm text-red-600">{errors.root.message}</p>
+          <div className="flex items-start gap-2 p-3 bg-brand-error/10 border border-brand-error/20 rounded-lg">
+            <AlertCircle className="h-4 w-4 text-brand-error mt-0.5 flex-shrink-0" />
+            <p className="text-sm text-brand-error">{errors.root.message}</p>
           </div>
         )}
 
+        {/* Email Field */}
         <div className="space-y-2">
-          <Label htmlFor="email" className="text-gray-700">
+          <Label htmlFor="email" className="text-brand-dark font-medium">
             Admin Email
           </Label>
           <Input
@@ -118,15 +129,19 @@ function AdminLoginPage() {
             type="email"
             placeholder="admin@fashionket.com"
             {...register("email")}
-            className={errors.email ? "border-red-500" : "border-gray-300"}
+            className={cn(
+              "border-brand-primary-soft focus:border-brand-primary focus:ring-brand-primary-soft",
+              errors.email && "border-brand-error focus:border-brand-error"
+            )}
           />
           {errors.email && (
-            <p className="text-sm text-red-500">{errors.email.message}</p>
+            <p className="text-sm text-brand-error">{errors.email.message}</p>
           )}
         </div>
 
+        {/* Password Field */}
         <div className="space-y-2">
-          <Label htmlFor="password" className="text-gray-700">
+          <Label htmlFor="password" className="text-brand-dark font-medium">
             Password
           </Label>
           <div className="relative">
@@ -135,45 +150,46 @@ function AdminLoginPage() {
               type={showPassword ? "text" : "password"}
               placeholder="••••••••"
               {...register("password")}
-              className={
-                errors.password
-                  ? "border-red-500 pr-10"
-                  : "border-gray-300 pr-10"
-              }
+              className={cn(
+                "pr-10 border-brand-primary-soft focus:border-brand-primary focus:ring-brand-primary-soft",
+                errors.password && "border-brand-error focus:border-brand-error"
+              )}
             />
             <button
               type="button"
-              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-brand-muted hover:text-brand-dark transition-colors"
               onClick={() => setShowPassword(!showPassword)}
               aria-label={showPassword ? "Hide password" : "Show password"}
             >
-              {showPassword ? (
-                <EyeOff className="h-4 w-4" />
-              ) : (
-                <Eye className="h-4 w-4" />
-              )}
+              {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
             </button>
           </div>
           {errors.password && (
-            <p className="text-sm text-red-500">{errors.password.message}</p>
+            <p className="text-sm text-brand-error">{errors.password.message}</p>
           )}
         </div>
 
+        {/* Remember Me */}
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
-            <Checkbox id="rememberMe" {...register("rememberMe")} />
+            <Checkbox 
+              id="rememberMe" 
+              {...register("rememberMe")}
+              className="border-brand-primary-soft data-[state=checked]:bg-brand-primary data-[state=checked]:border-brand-primary"
+            />
             <Label
               htmlFor="rememberMe"
-              className="text-sm font-normal text-gray-600 cursor-pointer"
+              className="text-sm font-normal text-brand-muted cursor-pointer"
             >
               Remember me
             </Label>
           </div>
         </div>
 
+        {/* Submit Button */}
         <Button
           type="submit"
-          className="w-full bg-mmp-primary hover:bg-mmp-primary2 shadow-sm"
+          className="w-full bg-brand-primary text-white hover:bg-brand-primary-hover shadow-md hover:shadow-lg transition-all duration-300"
           disabled={isPending}
           size="lg"
         >
@@ -188,12 +204,13 @@ function AdminLoginPage() {
         </Button>
       </form>
 
+      {/* Divider */}
       <div className="relative my-6">
         <div className="absolute inset-0 flex items-center">
-          <div className="w-full border-t border-gray-300"></div>
+          <div className="w-full border-t border-brand-primary-soft"></div>
         </div>
         <div className="relative flex justify-center text-sm">
-          <span className="px-3 bg-white text-gray-500">Or continue with</span>
+          <span className="px-3 bg-white text-brand-muted">Or continue with</span>
         </div>
       </div>
 
