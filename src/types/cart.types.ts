@@ -4,6 +4,7 @@ import type { IProduct, IVariantOptions } from "./product.types";
 export interface ICartItem extends IBaseDocument{
   productId: ObjectId;
   nameSnapshot: string;
+  slug: string;
   priceSnapshot: number;
   productImage?: string;
   discount?: number;

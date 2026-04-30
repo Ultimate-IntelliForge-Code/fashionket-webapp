@@ -2,6 +2,7 @@ import React from 'react';
 import { Navigate, useLocation } from '@tanstack/react-router';
 import { useAuth } from '@/hooks';
 import { UserRole } from '@/types';
+import { Shield, AlertTriangle, Lock, Home, ArrowRight } from 'lucide-react';
 
 interface AuthGuardProps {
   children: React.ReactNode;
@@ -13,11 +14,12 @@ interface AuthGuardProps {
 /**
  * AuthGuard - Route protection component
  * 
- * Improvements:
- * 1. Shows loading ONLY during initial validation (not on every navigation)
+ * Features:
+ * 1. Shows loading only during initial validation
  * 2. Uses isInitialized to prevent re-render loops
- * 3. Blocks rendering until initialization completes
- * 4. Role-based access control from backend cookies
+ * 3. Role-based access control from backend cookies
+ * 4. Premium UI with brand theme tokens
+ * 5. Responsive design for all screen sizes
  */
 export const AuthGuard: React.FC<AuthGuardProps> = ({
   children,
@@ -28,20 +30,38 @@ export const AuthGuard: React.FC<AuthGuardProps> = ({
   const { isAuthenticated, role, isInitialized } = useAuth();
   const location = useLocation();
 
-  // CRITICAL: Block while loading ONLY if not initialized
-  // Once initialized, no more loading screens on navigation
+  // Loading state - shown only during initial auth initialization
   if (!isInitialized) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Verifying authentication...</p>
+      <div className="flex items-center justify-center min-h-screen bg-brand-surface">
+        <div className="text-center max-w-md px-4">
+          {/* Animated loader */}
+          <div className="relative inline-flex items-center justify-center mb-6">
+            <div className="absolute inset-0 rounded-full bg-brand-primary-soft animate-ping" />
+            <div className="relative inline-flex items-center justify-center w-16 h-16 rounded-full bg-brand-primary-soft/50">
+              <div className="w-8 h-8 rounded-full border-4 border-brand-primary border-t-transparent animate-spin" />
+            </div>
+          </div>
+          
+          {/* Loading text */}
+          <h2 className="text-xl sm:text-2xl font-semibold text-brand-dark mb-2">
+            Verifying your session
+          </h2>
+          <p className="text-brand-muted text-sm sm:text-base">
+            Please wait while we secure your access...
+          </p>
+          
+          {/* Skeleton loader for better UX */}
+          <div className="mt-8 space-y-3">
+            <div className="h-2 bg-brand-primary-soft rounded-full animate-pulse" />
+            <div className="h-2 bg-brand-primary-soft rounded-full animate-pulse w-3/4 mx-auto" />
+          </div>
         </div>
       </div>
     );
   }
 
-  // Auth check after initialization
+  // Auth required but user is not authenticated
   if (requireAuth && !isAuthenticated) {
     const loginPath = location.pathname.startsWith('/admin')
       ? '/admin/login'
@@ -52,49 +72,110 @@ export const AuthGuard: React.FC<AuthGuardProps> = ({
     return <Navigate to={redirectTo || loginPath} />;
   }
 
-  // Redirect authenticated users away from auth pages
+  // Auth not required (login/signup pages) but user is authenticated
   if (!requireAuth && isAuthenticated) {
-    const redirectPath =
-      role === UserRole.ADMIN || role === UserRole.SUPER_ADMIN
-        ? '/admin'
-        : role === UserRole.VENDOR
-          ? '/vendor'
-          : '/';
+    const redirectPath = role === UserRole.ADMIN || role === UserRole.SUPER_ADMIN
+      ? '/admin'
+      : role === UserRole.VENDOR
+        ? '/vendor'
+        : '/';
 
     return <Navigate to={redirectTo || redirectPath} />;
   }
 
-  // Role-based access control
+  // Role-based access control - Access denied
   if (allowedRoles.length > 0 && role && !allowedRoles.includes(role)) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center max-w-md">
-          <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <svg
-              className="w-8 h-8 text-red-600"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-              />
-            </svg>
+      <div className="flex items-center justify-center min-h-screen bg-brand-surface p-4">
+        <div className="max-w-md w-full">
+          {/* Main Card */}
+          <div className="bg-white rounded-2xl shadow-xl border border-brand-primary-soft overflow-hidden">
+            {/* Decorative header */}
+            <div className="h-2 bg-gradient-to-r from-brand-error via-brand-warning to-brand-error" />
+            
+            <div className="p-6 sm:p-8 text-center">
+              {/* Access denied icon */}
+              <div className="relative inline-flex items-center justify-center mb-6">
+                <div className="absolute inset-0 rounded-full bg-brand-error/10 animate-pulse" />
+                <div className="relative inline-flex items-center justify-center w-20 h-20 rounded-full bg-brand-error/10">
+                  <Shield className="h-10 w-10 text-brand-error" />
+                </div>
+              </div>
+
+              {/* Title and description */}
+              <h1 className="text-2xl sm:text-3xl font-bold text-brand-dark mb-3">
+                Access Denied
+              </h1>
+              <p className="text-brand-muted text-sm sm:text-base mb-6">
+                You don't have permission to access this page.
+              </p>
+
+              {/* Role requirement badge */}
+              <div className="bg-brand-primary-soft rounded-xl p-4 mb-6">
+                <div className="flex items-center justify-center gap-2 mb-2">
+                  <Lock className="h-4 w-4 text-brand-primary" />
+                  <span className="text-sm font-semibold text-brand-primary">
+                    Required Role
+                  </span>
+                </div>
+                <div className="flex flex-wrap items-center justify-center gap-2">
+                  {allowedRoles.map((allowedRole, index) => (
+                    <React.Fragment key={allowedRole}>
+                      <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-white text-brand-primary border border-brand-primary-soft">
+                        {allowedRole}
+                      </span>
+                      {index < allowedRoles.length - 1 && (
+                        <span className="text-brand-muted">or</span>
+                      )}
+                    </React.Fragment>
+                  ))}
+                </div>
+              </div>
+
+              {/* Information message */}
+              <div className="bg-brand-warning/10 border border-brand-warning/20 rounded-xl p-4 mb-6 text-left">
+                <div className="flex items-start gap-3">
+                  <AlertTriangle className="h-5 w-5 text-brand-warning mt-0.5 flex-shrink-0" />
+                  <div className="text-sm">
+                    <p className="font-semibold text-brand-dark mb-1">
+                      Need access?
+                    </p>
+                    <p className="text-brand-muted">
+                      If you believe this is a mistake, please contact your 
+                      administrator or customer support for assistance.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Action buttons */}
+              <div className="space-y-3">
+                <a
+                  href="/"
+                  className="inline-flex items-center justify-center w-full px-6 py-3 bg-brand-primary text-white rounded-xl hover:bg-brand-primary-hover transition-all duration-200 shadow-sm hover:shadow-md group"
+                >
+                  <Home className="h-4 w-4 mr-2 group-hover:scale-110 transition-transform" />
+                  <span>Go to Homepage</span>
+                  <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                </a>
+                
+                <button
+                  onClick={() => window.history.back()}
+                  className="inline-flex items-center justify-center w-full px-6 py-3 bg-white text-brand-dark border border-brand-primary-soft rounded-xl hover:bg-brand-primary-soft transition-all duration-200"
+                >
+                  Go Back
+                </button>
+              </div>
+            </div>
           </div>
-          <h2 className="text-2xl font-bold mb-2">Access Denied</h2>
-          <p className="text-muted-foreground mb-6">
-            You don't have permission to access this page. Required role:{' '}
-            {allowedRoles.join(' or ')}
+
+          {/* Footer note */}
+          <p className="text-center text-xs text-brand-muted mt-6">
+            If you're having trouble accessing your account, please{' '}
+            <a href="/support" className="text-brand-primary hover:underline">
+              contact support
+            </a>
           </p>
-          <a
-            href="/"
-            className="inline-block px-6 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
-          >
-            Go to Home
-          </a>
         </div>
       </div>
     );

@@ -2,89 +2,117 @@ import { formatCurrency } from "@/lib/utils";
 import { Card, CardContent } from "../ui/card";
 import { OrderStatusBadge } from "./order-status-badge";
 import { PaymentStatusBadge } from "./payment-status-badge";
-import { CheckCircle, Clock, Eye, Package, Truck } from "lucide-react";
+import { Calendar, Package, Eye, Truck, CheckCircle, Clock } from "lucide-react";
 import { Button } from "../ui/button";
 import { Link } from "@tanstack/react-router";
 import { OrderStatus } from "@/types";
 
 export function OrderCard({ order }: { order: any }) {
+  const orderDate = new Date(order.createdAt);
+  // const isDelivered = order.status === OrderStatus.DELIVERED;
+  const isShipped = order.status === OrderStatus.SHIPPED;
+  const isPendingPayment = order.status === OrderStatus.PENDING_PAYMENT;
+  
   return (
-    <Card className="hover:shadow-md transition-shadow duration-200 border-gray-200">
-      <CardContent className="p-3 sm:p-4 md:p-6">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-4">
+    <Card className="group bg-white border-brand-primary-soft hover:border-brand-primary/30 hover:shadow-lg transition-all duration-300 overflow-hidden">
+      <CardContent className="p-5 sm:p-6">
+        <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
           {/* Order Info */}
-          <div className="flex-1">
-            <div className="flex items-center flex-wrap gap-2 mb-1 sm:mb-2">
-              <h3 className="text-sm sm:text-base font-bold text-gray-900">
-                Order #{order.orderNumber}
+          <div className="flex-1 space-y-3">
+            {/* Header */}
+            <div className="flex flex-wrap items-center gap-2">
+              <h3 className="text-base font-bold text-brand-dark">
+                Order #{order.orderNumber?.slice(-8) || order._id.slice(-8)}
               </h3>
               <OrderStatusBadge status={order.status} />
+              {!order.paymentStatus?.isPaid && order.status !== OrderStatus.CANCELLED && (
+                <PaymentStatusBadge status={order.paymentStatus?.status || "PENDING"} />
+              )}
             </div>
-
-            <div className="space-y-0.5 sm:space-y-1 text-xs sm:text-sm text-gray-600">
-              <div className="flex items-center gap-1.5 sm:gap-2">
-                <Clock className="h-3 w-3 sm:h-3.5 sm:w-3.5 shrink-0" />
+            
+            {/* Details Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
+              <div className="flex items-center gap-2 text-brand-muted">
+                <Calendar className="h-3.5 w-3.5" />
                 <span>
-                  Placed on{" "}
-                  {new Date(order.createdAt).toLocaleDateString("en-US", {
+                  Placed on {orderDate.toLocaleDateString("en-US", {
                     year: "numeric",
                     month: "short",
                     day: "numeric",
                   })}
                 </span>
               </div>
-
-              <div className="flex items-center gap-1.5 sm:gap-2">
-                <Package className="h-3 w-3 sm:h-3.5 sm:w-3.5 shrink-0" />
+              
+              <div className="flex items-center gap-2 text-brand-muted">
+                <Package className="h-3.5 w-3.5" />
                 <span>
-                  {order.itemCount} {order.itemCount === 1 ? "item" : "items"} •
-                  Total: {formatCurrency(order.totalAmount)}
+                  {order.itemCount} {order.itemCount === 1 ? "item" : "items"}
                 </span>
               </div>
-
-              <div className="flex items-center gap-2">
-                <PaymentStatusBadge status={order.paymentStatus} />
+            </div>
+            
+            {/* Payment Info */}
+            {order.paidAt && (
+              <div className="flex items-center gap-2 text-sm text-brand-success">
+                <CheckCircle className="h-3.5 w-3.5" />
+                <span>
+                  Paid on {new Date(order.paidAt).toLocaleDateString("en-US", {
+                    year: "numeric",
+                    month: "short",
+                    day: "numeric",
+                  })}
+                </span>
               </div>
-
-              {order.paidAt && (
-                <div className="flex items-center gap-1.5 sm:gap-2 text-green-600">
-                  <CheckCircle className="h-3 w-3 sm:h-3.5 sm:w-3.5 shrink-0" />
-                  <span>
-                    Paid on{" "}
-                    {new Date(order.paidAt).toLocaleDateString("en-US", {
-                      year: "numeric",
-                      month: "short",
-                      day: "numeric",
-                    })}
-                  </span>
-                </div>
+            )}
+          </div>
+          
+          {/* Price & Actions */}
+          <div className="flex flex-row md:flex-col items-center md:items-end justify-between md:justify-center gap-3">
+            <div className="text-right">
+              <p className="text-xl font-bold text-brand-primary">
+                {formatCurrency(order.totalAmount)}
+              </p>
+              {order.totalDiscount > 0 && (
+                <p className="text-xs text-brand-success">
+                  Saved {formatCurrency(order.totalDiscount)}
+                </p>
               )}
             </div>
-          </div>
-
-          {/* Actions */}
-          <div className="flex items-center gap-2 mt-2 md:mt-0">
-            <Button
-              variant="outline"
-              size="sm"
-              asChild
-              className="h-8 sm:h-9 text-xs sm:text-sm"
-            >
-              <Link to="/orders/$orderId" params={{ orderId: order._id }}>
-                <Eye className="mr-1.5 h-3 w-3 sm:h-4 sm:w-4" />
-                View Details
-              </Link>
-            </Button>
-            {order.status === OrderStatus.SHIPPED && (
+            
+            <div className="flex items-center gap-2">
               <Button
                 variant="outline"
                 size="sm"
-                className="h-8 sm:h-9 text-xs sm:text-sm"
+                asChild
+                className="h-9 px-3 border-brand-primary-soft hover:border-brand-primary hover:bg-brand-primary-soft"
               >
-                <Truck className="mr-1.5 h-3 w-3 sm:h-4 sm:w-4" />
-                Track
+                <Link to="/orders/$orderId" params={{ orderId: order._id }}>
+                  <Eye className="mr-1.5 h-3.5 w-3.5" />
+                  View
+                </Link>
               </Button>
-            )}
+              
+              {isShipped && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-9 px-3 border-brand-primary-soft hover:border-brand-primary hover:bg-brand-primary-soft"
+                >
+                  <Truck className="mr-1.5 h-3.5 w-3.5" />
+                  Track
+                </Button>
+              )}
+              
+              {isPendingPayment && (
+                <Button
+                  size="sm"
+                  className="h-9 px-4 bg-brand-primary text-white hover:bg-brand-primary-hover"
+                >
+                  <Clock className="mr-1.5 h-3.5 w-3.5" />
+                  Pay Now
+                </Button>
+              )}
+            </div>
           </div>
         </div>
       </CardContent>

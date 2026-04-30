@@ -7,8 +7,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useRequestPasswordReset } from '@/api/mutations';
 import { AuthFormWrapper } from '@/components/auth';
-import { CheckCircle } from 'lucide-react';
+import { AlertCircle, Mail } from 'lucide-react';
 import { ForgotPasswordFormData, forgotPasswordSchema } from '@/lib';
+import { cn } from '@/lib/utils';
 
 export const Route = createFileRoute('/(auth)/_auth/(root)/forgot-password')({
   component: ForgotPasswordPage,
@@ -16,6 +17,7 @@ export const Route = createFileRoute('/(auth)/_auth/(root)/forgot-password')({
 
 function ForgotPasswordPage() {
   const [isSubmitted, setIsSubmitted] = React.useState(false);
+  const [submittedEmail, setSubmittedEmail] = React.useState('');
   const { mutate: requestReset, isPending } = useRequestPasswordReset('user');
 
   const {
@@ -28,27 +30,27 @@ function ForgotPasswordPage() {
   });
 
   const onSubmit = async (data: ForgotPasswordFormData) => {
-    try {
-      await requestReset(data, {
-        onSuccess: () => {
-          setIsSubmitted(true);
-        },
-      });
-    } catch (error: any) {
-      setError('root', {
-        type: 'manual',
-        message: error.message || 'Failed to send reset email. Please try again.',
-      });
-    }
+    requestReset(data, {
+      onSuccess: () => {
+        setSubmittedEmail(data.email);
+        setIsSubmitted(true);
+      },
+      onError: (error: any) => {
+        setError('root', {
+          type: 'manual',
+          message: error.message || 'Failed to send reset email. Please try again.',
+        });
+      },
+    });
   };
 
   const footer = (
-    <div className="text-center space-y-2">
-      <div className="text-sm text-gray-600">
+    <div className="text-center">
+      <div className="text-sm text-brand-muted">
         Remember your password?{' '}
         <Link
           to="/login"
-          className="font-medium text-mmp-primary hover:text-mmp-primary2 hover:underline"
+          className="font-medium text-brand-primary hover:text-brand-primary-hover transition-colors"
         >
           Sign in
         </Link>
@@ -56,63 +58,108 @@ function ForgotPasswordPage() {
     </div>
   );
 
+  if (isSubmitted) {
+    return (
+      <AuthFormWrapper
+        title="Check your email"
+        description="We've sent you a password reset link"
+        footer={footer}
+      >
+        <div className="text-center space-y-5">
+          <div className="flex justify-center">
+            <div className="relative">
+              <div className="absolute inset-0 rounded-full bg-brand-success/20 animate-ping" />
+              <div className="relative inline-flex items-center justify-center w-16 h-16 rounded-full bg-brand-success/10">
+                <Mail className="h-8 w-8 text-brand-success" />
+              </div>
+            </div>
+          </div>
+          
+          <div className="space-y-2">
+            <h3 className="text-lg font-semibold text-brand-dark">
+              Reset link sent!
+            </h3>
+            <p className="text-sm text-brand-muted">
+              We've sent a password reset link to{' '}
+              <span className="font-medium text-brand-dark">{submittedEmail}</span>
+            </p>
+            <p className="text-xs text-brand-muted mt-3">
+              Didn't receive the email? Check your spam folder or{' '}
+              <button
+                type="button"
+                onClick={() => setIsSubmitted(false)}
+                className="text-brand-primary hover:underline font-medium"
+              >
+                try again
+              </button>
+            </p>
+          </div>
+
+          <Button
+            asChild
+            className="w-full bg-brand-primary text-white hover:bg-brand-primary-hover shadow-sm h-11"
+          >
+            <Link to="/login">Back to Sign In</Link>
+          </Button>
+        </div>
+      </AuthFormWrapper>
+    );
+  }
+
   return (
     <AuthFormWrapper
       title="Reset your password"
       description="Enter your email address and we'll send you a link to reset your password."
       footer={footer}
     >
-      {isSubmitted ? (
-        <div className="text-center space-y-4">
-          <div className="flex justify-center">
-            <CheckCircle className="h-12 w-12 text-green-500" />
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+        {/* Root Error */}
+        {errors.root && (
+          <div className="flex items-start gap-2 p-3 bg-brand-error/10 border border-brand-error/20 rounded-lg">
+            <AlertCircle className="h-4 w-4 text-brand-error mt-0.5 flex-shrink-0" />
+            <p className="text-sm text-brand-error">{errors.root.message}</p>
           </div>
-          <div className="space-y-2">
-            <h3 className="text-lg font-semibold text-gray-900">
-              Check your email
-            </h3>
-            <p className="text-sm text-gray-600">
-              We've sent a password reset link to your email address. Please check your inbox and follow the instructions.
-            </p>
-          </div>
-          <Button
-            asChild
-            className="w-full bg-mmp-primary hover:bg-mmp-primary2"
-          >
-            <Link to="/login">Back to Sign In</Link>
-          </Button>
-        </div>
-      ) : (
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          {errors.root && (
-            <div className="p-3 bg-red-50 border border-red-200 rounded-md">
-              <p className="text-sm text-red-600">{errors.root.message}</p>
-            </div>
-          )}
+        )}
 
-          <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
-            <Input
-              id="email"
-              type="email"
-              placeholder="you@example.com"
-              {...register('email')}
-              className={errors.email ? 'border-red-500' : ''}
-            />
-            {errors.email && (
-              <p className="text-sm text-red-500">{errors.email.message}</p>
+        {/* Email Field */}
+        <div className="space-y-2">
+          <Label htmlFor="email" className="text-brand-dark font-medium">
+            Email Address
+          </Label>
+          <Input
+            id="email"
+            type="email"
+            placeholder="you@example.com"
+            {...register('email')}
+            className={cn(
+              "border-brand-primary-soft focus:border-brand-primary focus:ring-brand-primary-soft",
+              errors.email && "border-brand-error"
             )}
-          </div>
+          />
+          {errors.email && (
+            <p className="text-sm text-brand-error flex items-center gap-1">
+              <AlertCircle className="h-3 w-3" />
+              {errors.email.message}
+            </p>
+          )}
+        </div>
 
-          <Button
-            type="submit"
-            className="w-full bg-mmp-primary hover:bg-mmp-primary2"
-            disabled={isPending}
-          >
-            {isPending ? 'Sending...' : 'Send Reset Link'}
-          </Button>
-        </form>
-      )}
+        {/* Submit Button */}
+        <Button
+          type="submit"
+          className="w-full bg-brand-primary text-white hover:bg-brand-primary-hover shadow-sm h-11"
+          disabled={isPending}
+        >
+          {isPending ? (
+            <div className="flex items-center gap-2">
+              <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+              Sending...
+            </div>
+          ) : (
+            'Send Reset Link'
+          )}
+        </Button>
+      </form>
     </AuthFormWrapper>
   );
 }

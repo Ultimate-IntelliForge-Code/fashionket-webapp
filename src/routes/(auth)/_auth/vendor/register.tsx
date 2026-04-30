@@ -6,18 +6,17 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { useAuth } from '@/hooks'
-import { Eye, EyeOff, Loader2, Shield } from 'lucide-react'
+import { Eye, EyeOff, Loader2, Store, Mail, Phone, MapPin, Key } from 'lucide-react'
 import { Link } from '@tanstack/react-router'
 import { useVendorSignup } from '@/api/mutations'
 import { toast } from 'react-toastify'
 import { AuthFormWrapper } from '@/components/auth'
 import React from 'react'
-import { VendorSignupFormData, vendorSignupSchema } from '@/lib'
+import { cn, VendorSignupFormData, vendorSignupSchema } from '@/lib'
 
 export const Route = createFileRoute('/(auth)/_auth/vendor/register')({
   component: VendorSignup,
 })
-
 
 function VendorSignup() {
   const [showPassword, setShowPassword] = React.useState(false)
@@ -32,6 +31,7 @@ function VendorSignup() {
     handleSubmit,
     formState: { errors },
     setError,
+    watch,
   } = useForm<VendorSignupFormData>({
     resolver: zodResolver(vendorSignupSchema as any),
     defaultValues: {
@@ -41,24 +41,26 @@ function VendorSignup() {
     },
   })
 
+  const watchedPassword = watch('password')
+
   if (isAuthenticated && isVendor) {
     return <Navigate to="/vendor" />
   }
 
   const onSubmit = async (data: VendorSignupFormData) => {
     try {
-      signup(data, {
+      await signup(data, {
         onSuccess: (response) => {
-          console.log(response)
           if (response.success) {
             setAuthVendor(response.data)
-            toast.success(response.message || 'Login successfully')
+            toast.success(response.message || 'Registration successful!')
             navigate({ to: '/vendor' })
           }
         },
         onError: (error: any) => {
           console.error(error)
           toast.error(error.message || 'Registration failed. Please try again.')
+          setError('root', { message: error.message || 'Registration failed' })
         },
       })
     } catch (error: any) {
@@ -68,24 +70,22 @@ function VendorSignup() {
     }
   }
 
-  const showPasswordHandler = () => setShowPassword((p) => !p)
-  const showConfirmPasswordHandler = () => setShowConfirmPassword((p) => !p)
   const footer = (
     <div className="text-center space-y-3">
-      <div className="text-sm text-gray-600">
-        Already have an store account?{' '}
+      <div className="text-sm text-brand-muted">
+        Already have a store account?{' '}
         <Link
           to="/vendor/login"
-          className="font-medium text-mmp-primary hover:text-mmp-primary2 hover:underline"
+          className="font-medium text-brand-primary hover:text-brand-primary-hover hover:underline transition-colors"
         >
-          Sign in
+          Sign in to your store
         </Link>
       </div>
-      <div className="text-sm text-gray-600 pt-2 border-t border-gray-200">
+      <div className="text-sm text-brand-muted pt-3 border-t border-brand-primary-soft">
         Are you a customer?{' '}
         <Link
           to="/signup"
-          className="font-medium text-mmp-secondary hover:text-mmp-accent hover:underline"
+          className="font-medium text-brand-accent hover:text-brand-accent/80 hover:underline transition-colors"
         >
           Customer Sign Up
         </Link>
@@ -97,254 +97,301 @@ function VendorSignup() {
     <AuthFormWrapper
       title={
         <div className="flex items-center justify-center gap-2">
+          <Store className="h-6 w-6 text-brand-primary" />
           <span>Store Registration</span>
         </div>
       }
-      description="Request access to manage your store on FashionKet"
+      description="Create your store account to start selling on FashionKet"
       backLink="/"
       backText="Back to home"
       footer={footer}
     >
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+        {/* Root Error */}
         {errors.root && (
-          <div className="p-3 rounded-md bg-red-50 border border-red-200">
-            <p className="text-sm text-red-600">{errors.root.message}</p>
+          <div className="p-4 rounded-xl bg-brand-error/10 border border-brand-error/20">
+            <p className="text-sm text-brand-error">{errors.root.message}</p>
           </div>
         )}
 
-        {/* Store Information */}
+        {/* Store Information Section */}
         <div className="space-y-4">
-          <h3 className="font-semibold text-mmp-primary2">Store Information</h3>
+          <div className="flex items-center gap-2 pb-2 border-b border-brand-primary-soft">
+            <Store className="h-5 w-5 text-brand-primary" />
+            <h3 className="font-semibold text-brand-dark">Store Information</h3>
+          </div>
 
           <div className="space-y-2">
-            <Label htmlFor="businessName">Store Name *</Label>
+            <Label htmlFor="businessName" className="text-brand-dark font-medium">
+              Store Name <span className="text-brand-error">*</span>
+            </Label>
             <Input
               id="businessName"
               placeholder="Your Store Name"
+              className="h-11 border-brand-primary-soft focus:border-brand-primary focus:ring-brand-primary-soft"
               {...register('businessName')}
               disabled={isPending}
             />
             {errors.businessName && (
-              <p className="text-sm text-red-600">
-                {errors.businessName.message}
-              </p>
+              <p className="text-sm text-brand-error">{errors.businessName.message}</p>
             )}
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="description">Store Description</Label>
+            <Label htmlFor="description" className="text-brand-dark font-medium">
+              Store Description
+            </Label>
             <Textarea
               id="description"
-              placeholder="Tell us about your store"
+              placeholder="Tell customers about your store..."
               rows={3}
+              className="border-brand-primary-soft focus:border-brand-primary focus:ring-brand-primary-soft"
               {...register('description')}
               disabled={isPending}
             />
+            {errors.description && (
+              <p className="text-sm text-brand-error">{errors.description.message}</p>
+            )}
           </div>
         </div>
 
-        {/* Contact Information */}
+        {/* Contact Information Section */}
         <div className="space-y-4">
-          <h3 className="font-semibold text-mmp-primary2">
-            Contact Information
-          </h3>
+          <div className="flex items-center gap-2 pb-2 border-b border-brand-primary-soft">
+            <Mail className="h-5 w-5 text-brand-primary" />
+            <h3 className="font-semibold text-brand-dark">Contact Information</h3>
+          </div>
 
           <div className="space-y-2">
-            <Label htmlFor="fullName">Full Name</Label>
+            <Label htmlFor="fullName" className="text-brand-dark font-medium">
+              Full Name <span className="text-brand-error">*</span>
+            </Label>
             <Input
               id="fullName"
               placeholder="John Doe"
+              className="h-11 border-brand-primary-soft focus:border-brand-primary focus:ring-brand-primary-soft"
               {...register('fullName')}
-              className={errors.fullName ? 'border-red-500' : ''}
             />
             {errors.fullName && (
-              <p className="text-sm text-red-500">{errors.fullName.message}</p>
+              <p className="text-sm text-brand-error">{errors.fullName.message}</p>
             )}
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="email">Email *</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="store@example.com"
-                {...register('email')}
-                disabled={isPending}
-              />
+              <Label htmlFor="email" className="text-brand-dark font-medium">
+                Email Address <span className="text-brand-error">*</span>
+              </Label>
+              <div className="relative">
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-brand-muted" />
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="store@example.com"
+                  className="pl-9 h-11 border-brand-primary-soft focus:border-brand-primary focus:ring-brand-primary-soft"
+                  {...register('email')}
+                  disabled={isPending}
+                />
+              </div>
               {errors.email && (
-                <p className="text-sm text-red-600">{errors.email.message}</p>
+                <p className="text-sm text-brand-error">{errors.email.message}</p>
               )}
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="phone">Phone *</Label>
-              <Input
-                id="phone"
-                type="tel"
-                placeholder="+234 800 000 0000"
-                {...register('phone')}
-                disabled={isPending}
-              />
+              <Label htmlFor="phone" className="text-brand-dark font-medium">
+                Phone Number <span className="text-brand-error">*</span>
+              </Label>
+              <div className="relative">
+                <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-brand-muted" />
+                <Input
+                  id="phone"
+                  type="tel"
+                  placeholder="+234 800 000 0000"
+                  className="pl-9 h-11 border-brand-primary-soft focus:border-brand-primary focus:ring-brand-primary-soft"
+                  {...register('phone')}
+                  disabled={isPending}
+                />
+              </div>
               {errors.phone && (
-                <p className="text-sm text-red-600">{errors.phone.message}</p>
+                <p className="text-sm text-brand-error">{errors.phone.message}</p>
               )}
             </div>
           </div>
         </div>
 
-        {/* Location */}
+        {/* Location Section */}
         <div className="space-y-4">
-          <h3 className="font-semibold text-mmp-primary2">Store Location</h3>
+          <div className="flex items-center gap-2 pb-2 border-b border-brand-primary-soft">
+            <MapPin className="h-5 w-5 text-brand-primary" />
+            <h3 className="font-semibold text-brand-dark">Store Location</h3>
+          </div>
 
           <div className="space-y-2">
-            <Label htmlFor="street">Street Address *</Label>
+            <Label htmlFor="street" className="text-brand-dark font-medium">
+              Street Address <span className="text-brand-error">*</span>
+            </Label>
             <Input
               id="street"
               placeholder="123 Store Street"
+              className="h-11 border-brand-primary-soft focus:border-brand-primary focus:ring-brand-primary-soft"
               {...register('location.street')}
               disabled={isPending}
             />
             {errors.location?.street && (
-              <p className="text-sm text-red-600">
-                {errors.location.street.message}
-              </p>
+              <p className="text-sm text-brand-error">{errors.location.street.message}</p>
             )}
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="city">City *</Label>
+              <Label htmlFor="city" className="text-brand-dark font-medium">
+                City <span className="text-brand-error">*</span>
+              </Label>
               <Input
                 id="city"
                 placeholder="Lagos"
+                className="h-11 border-brand-primary-soft focus:border-brand-primary focus:ring-brand-primary-soft"
                 {...register('location.city')}
                 disabled={isPending}
               />
               {errors.location?.city && (
-                <p className="text-sm text-red-600">
-                  {errors.location.city.message}
-                </p>
+                <p className="text-sm text-brand-error">{errors.location.city.message}</p>
               )}
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="state">State *</Label>
+              <Label htmlFor="state" className="text-brand-dark font-medium">
+                State <span className="text-brand-error">*</span>
+              </Label>
               <Input
                 id="state"
                 placeholder="Lagos"
+                className="h-11 border-brand-primary-soft focus:border-brand-primary focus:ring-brand-primary-soft"
                 {...register('location.state')}
                 disabled={isPending}
               />
               {errors.location?.state && (
-                <p className="text-sm text-red-600">
-                  {errors.location.state.message}
-                </p>
+                <p className="text-sm text-brand-error">{errors.location.state.message}</p>
               )}
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="country">Country *</Label>
+              <Label htmlFor="country" className="text-brand-dark font-medium">
+                Country <span className="text-brand-error">*</span>
+              </Label>
               <Input
                 id="country"
+                className="h-11 border-brand-primary-soft bg-brand-surface text-brand-muted"
                 {...register('location.country')}
-                disabled={isPending}
+                disabled
               />
-              {errors.location?.country && (
-                <p className="text-sm text-red-600">
-                  {errors.location.country.message}
-                </p>
-              )}
             </div>
           </div>
         </div>
 
-        {/* Security */}
+        {/* Security Section */}
         <div className="space-y-4">
-          <h3 className="font-semibold text-mmp-primary2">Security</h3>
+          <div className="flex items-center gap-2 pb-2 border-b border-brand-primary-soft">
+            <Key className="h-5 w-5 text-brand-primary" />
+            <h3 className="font-semibold text-brand-dark">Security</h3>
+          </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Password */}
             <div className="space-y-2">
-              <Label htmlFor="password">Password *</Label>
-
+              <Label htmlFor="password" className="text-brand-dark font-medium">
+                Password <span className="text-brand-error">*</span>
+              </Label>
               <div className="relative">
                 <Input
                   id="password"
                   type={showPassword ? 'text' : 'password'}
                   placeholder="••••••••"
+                  className="pr-10 h-11 border-brand-primary-soft focus:border-brand-primary focus:ring-brand-primary-soft"
                   {...register('password')}
                   disabled={isPending}
-                  className="pr-10"
                 />
-
                 <button
                   type="button"
-                  onClick={showPasswordHandler}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition"
-                  aria-label={showPassword ? 'Hide password' : 'Show password'}
-                  disabled={isPending}
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-brand-muted hover:text-brand-dark transition-colors"
                 >
-                  {showPassword ? <Eye size={18} /> : <EyeOff size={18} />}
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               </div>
-
               {errors.password && (
-                <p className="text-sm text-red-600">
-                  {errors.password.message}
-                </p>
+                <p className="text-sm text-brand-error">{errors.password.message}</p>
               )}
             </div>
 
-            {/* Confirm Password */}
             <div className="space-y-2">
-              <Label htmlFor="confirmPassword">Confirm Password *</Label>
-
+              <Label htmlFor="confirmPassword" className="text-brand-dark font-medium">
+                Confirm Password <span className="text-brand-error">*</span>
+              </Label>
               <div className="relative">
                 <Input
                   id="confirmPassword"
                   type={showConfirmPassword ? 'text' : 'password'}
                   placeholder="••••••••"
+                  className="pr-10 h-11 border-brand-primary-soft focus:border-brand-primary focus:ring-brand-primary-soft"
                   {...register('confirmPassword')}
                   disabled={isPending}
-                  className="pr-10"
                 />
-
                 <button
                   type="button"
-                  onClick={showConfirmPasswordHandler}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition"
-                  aria-label={
-                    showConfirmPassword
-                      ? 'Hide confirm password'
-                      : 'Show confirm password'
-                  }
-                  disabled={isPending}
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-brand-muted hover:text-brand-dark transition-colors"
                 >
-                  {showConfirmPassword ? (
-                    <Eye size={18} />
-                  ) : (
-                    <EyeOff size={18} />
-                  )}
+                  {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               </div>
-
               {errors.confirmPassword && (
-                <p className="text-sm text-red-600">
-                  {errors.confirmPassword.message}
-                </p>
+                <p className="text-sm text-brand-error">{errors.confirmPassword.message}</p>
               )}
             </div>
           </div>
+
+          {/* Password Requirements */}
+          {watchedPassword && (
+            <div className="p-4 rounded-xl bg-brand-primary-soft/30 border border-brand-primary-soft">
+              <p className="text-sm font-medium text-brand-dark mb-3">Password Requirements:</p>
+              <div className="grid grid-cols-2 gap-2 text-xs">
+                {[
+                  { check: watchedPassword.length >= 8, text: 'Minimum 8 characters' },
+                  { check: /[a-z]/.test(watchedPassword), text: 'Lowercase letter' },
+                  { check: /[A-Z]/.test(watchedPassword), text: 'Uppercase letter' },
+                  { check: /\d/.test(watchedPassword), text: 'Number' },
+                  { check: /[@$!%*?&]/.test(watchedPassword), text: 'Special character' },
+                ].map((req, idx) => (
+                  <div key={idx} className="flex items-center gap-2">
+                    <div className={cn(
+                      "w-1.5 h-1.5 rounded-full",
+                      req.check ? "bg-brand-success" : "bg-brand-muted"
+                    )} />
+                    <span className={req.check ? "text-brand-dark" : "text-brand-muted"}>
+                      {req.text}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
+        {/* Submit Button */}
         <Button
           type="submit"
-          className="w-full bg-mmp-primary hover:bg-mmp-primary2"
+          className="w-full h-11 bg-brand-primary text-white hover:bg-brand-primary-hover shadow-sm transition-all duration-200"
           disabled={isPending}
         >
-          {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-          Create Account
+          {isPending ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Creating Store Account...
+            </>
+          ) : (
+            'Create Store Account'
+          )}
         </Button>
       </form>
     </AuthFormWrapper>

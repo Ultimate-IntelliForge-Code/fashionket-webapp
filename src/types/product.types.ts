@@ -13,6 +13,7 @@ export interface IVariantOptions {
  */
 export interface IProduct extends IBaseDocument, ITimestamps {
   name: string;
+  slug: string;
   description?: string;
   categoryId: ObjectId;
   brand?: string;

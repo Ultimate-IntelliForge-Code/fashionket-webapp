@@ -5,18 +5,12 @@ import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Slider } from '@/components/ui/slider';
 import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from '@/components/ui/sheet';
-import {
   Filter,
   X,
   ChevronDown,
   ChevronUp,
   Search,
+  SlidersHorizontal,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { IProductQueryFilters } from '@/types';
@@ -47,7 +41,6 @@ export const ProductFilters: React.FC<ProductFiltersProps> = ({
     filters.maxPrice || maxPrice,
   ]);
   const [searchTerm, setSearchTerm] = React.useState(filters.search || '');
-  const [mobileOpen, setMobileOpen] = React.useState(false);
   const [expandedSections, setExpandedSections] = React.useState({
     search: true,
     price: true,
@@ -55,27 +48,19 @@ export const ProductFilters: React.FC<ProductFiltersProps> = ({
     tags: true,
   });
 
-  // Debounced search
-  const searchTimeoutRef = React.useRef<NodeJS.Timeout>(null);
+  const searchTimeoutRef = React.useRef<NodeJS.Timeout | undefined>(undefined);
 
   React.useEffect(() => {
     setSearchTerm(filters.search || '');
   }, [filters.search]);
 
   React.useEffect(() => {
-    setPriceRange([
-      filters.minPrice || 0,
-      filters.maxPrice || maxPrice,
-    ]);
+    setPriceRange([filters.minPrice || 0, filters.maxPrice || maxPrice]);
   }, [filters.minPrice, filters.maxPrice, maxPrice]);
 
   const handleSearchChange = (value: string) => {
     setSearchTerm(value);
-
-    if (searchTimeoutRef.current) {
-      clearTimeout(searchTimeoutRef.current);
-    }
-
+    if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
     searchTimeoutRef.current = setTimeout(() => {
       onFilterChange({ search: value || undefined });
     }, 500);
@@ -93,10 +78,7 @@ export const ProductFilters: React.FC<ProductFiltersProps> = ({
   };
 
   const toggleSection = (section: keyof typeof expandedSections) => {
-    setExpandedSections(prev => ({
-      ...prev,
-      [section]: !prev[section],
-    }));
+    setExpandedSections(prev => ({ ...prev, [section]: !prev[section] }));
   };
 
   const clearFilters = () => {
@@ -109,59 +91,53 @@ export const ProductFilters: React.FC<ProductFiltersProps> = ({
       maxPrice: undefined,
       tags: undefined,
     });
-    if (isMobile && onClose) {
-      onClose();
-    }
+    if (isMobile && onClose) onClose();
   };
 
-  const hasActiveFilters = 
-    filters.search ||
-    filters.brand ||
-    filters.minPrice !== undefined ||
-    filters.maxPrice !== undefined ||
-    filters.tags;
+  const hasActiveFilters = !!(filters.search || filters.brand || 
+    filters.minPrice !== undefined || filters.maxPrice !== undefined || filters.tags);
 
   const FilterSection: React.FC<{
     title: string;
     section: keyof typeof expandedSections;
     children: React.ReactNode;
   }> = ({ title, section, children }) => (
-    <div className="border-b border-gray-200 last:border-0">
+    <div className="border-b border-brand-primary-soft last:border-0">
       <button
         type="button"
-        className="flex w-full items-center justify-between py-3 sm:py-4 text-left active:bg-gray-50 transition-colors rounded-lg px-1"
+        className="flex w-full items-center justify-between py-4 text-left hover:bg-brand-primary-soft/20 transition-colors rounded-lg px-2"
         onClick={() => toggleSection(section)}
       >
-        <span className="font-semibold text-gray-900 text-sm sm:text-base">{title}</span>
+        <span className="font-semibold text-brand-dark text-sm">{title}</span>
         {expandedSections[section] ? (
-          <ChevronUp className="h-4 w-4 sm:h-5 sm:w-5 text-gray-500" />
+          <ChevronUp className="h-4 w-4 text-brand-muted" />
         ) : (
-          <ChevronDown className="h-4 w-4 sm:h-5 sm:w-5 text-gray-500" />
+          <ChevronDown className="h-4 w-4 text-brand-muted" />
         )}
       </button>
-      {expandedSections[section] && <div className="pt-1 pb-3 sm:pb-4">{children}</div>}
+      {expandedSections[section] && <div className="pt-1 pb-4 px-1">{children}</div>}
     </div>
   );
 
   const filterContent = (
-    <div className="space-y-1">
-      {/* Search */}
-      <FilterSection title="Search" section="search">
+    <div className="space-y-2">
+      {/* Search Section */}
+      <FilterSection title="Search Products" section="search">
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-brand-muted" />
           <Input
             type="text"
-            placeholder="Search products..."
+            placeholder="Search by name, description..."
             value={searchTerm}
             onChange={(e) => handleSearchChange(e.target.value)}
-            className="w-full pl-9 h-9 sm:h-10 text-sm"
+            className="w-full pl-9 h-10 text-sm border-brand-primary-soft focus:border-brand-primary focus:ring-brand-primary-soft"
           />
         </div>
       </FilterSection>
 
-      {/* Price Range */}
+      {/* Price Range Section */}
       <FilterSection title="Price Range" section="price">
-        <div className="space-y-4">
+        <div className="space-y-5">
           <Slider
             min={0}
             max={maxPrice}
@@ -169,100 +145,82 @@ export const ProductFilters: React.FC<ProductFiltersProps> = ({
             value={[priceRange[0], priceRange[1]]}
             onValueChange={handlePriceChange}
             onValueCommit={handlePriceCommit}
-            className="py-4"
+            className="py-2"
           />
-          <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-3">
             <div className="flex-1">
-              <Label htmlFor="min-price" className="text-xs text-gray-600">
-                Min
-              </Label>
+              <Label className="text-xs text-brand-muted mb-1 block">Min Price</Label>
               <Input
-                id="min-price"
                 type="number"
                 min={0}
                 max={maxPrice}
                 value={priceRange[0]}
                 onChange={(e) => {
                   const value = Number(e.target.value);
-                  if (value <= priceRange[1]) {
-                    setPriceRange([value, priceRange[1]]);
-                  }
+                  if (value <= priceRange[1]) setPriceRange([value, priceRange[1]]);
                 }}
                 onBlur={handlePriceCommit}
-                className="mt-1 h-8 sm:h-9 text-sm"
+                className="h-9 text-sm border-brand-primary-soft"
               />
             </div>
-            <span className="text-gray-400 pt-5">-</span>
+            <span className="text-brand-muted pt-5">to</span>
             <div className="flex-1">
-              <Label htmlFor="max-price" className="text-xs text-gray-600">
-                Max
-              </Label>
+              <Label className="text-xs text-brand-muted mb-1 block">Max Price</Label>
               <Input
-                id="max-price"
                 type="number"
                 min={0}
                 max={maxPrice}
                 value={priceRange[1]}
                 onChange={(e) => {
                   const value = Number(e.target.value);
-                  if (value >= priceRange[0]) {
-                    setPriceRange([priceRange[0], value]);
-                  }
+                  if (value >= priceRange[0]) setPriceRange([priceRange[0], value]);
                 }}
                 onBlur={handlePriceCommit}
-                className="mt-1 h-8 sm:h-9 text-sm"
+                className="h-9 text-sm border-brand-primary-soft"
               />
             </div>
           </div>
-          <div className="flex items-center justify-between text-xs text-gray-600">
-            <span>
-              {priceRange[0].toLocaleString('en-NG', {
-                style: 'currency',
-                currency: 'NGN',
-                maximumFractionDigits: 0,
-              })}
+          <div className="flex items-center justify-between text-sm font-medium">
+            <span className="text-brand-primary">
+              {new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN', maximumFractionDigits: 0 }).format(priceRange[0])}
             </span>
-            <span>
-              {priceRange[1].toLocaleString('en-NG', {
-                style: 'currency',
-                currency: 'NGN',
-                maximumFractionDigits: 0,
-              })}
+            <span className="text-brand-muted">—</span>
+            <span className="text-brand-primary">
+              {new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN', maximumFractionDigits: 0 }).format(priceRange[1])}
             </span>
           </div>
         </div>
       </FilterSection>
 
-      {/* Brands */}
+      {/* Brands Section */}
       {brands.length > 0 && (
         <FilterSection title="Brands" section="brand">
-          <div className="space-y-2 max-h-48 sm:max-h-64 overflow-y-auto pr-2">
+          <div className="space-y-2 max-h-64 overflow-y-auto pr-2 custom-scrollbar">
             {brands.map((brand) => (
-              <div key={brand} className="flex items-center py-0.5">
+              <label
+                key={brand}
+                className="flex items-center gap-3 py-1.5 cursor-pointer group hover:bg-brand-primary-soft/20 rounded-lg px-2 transition-colors"
+              >
                 <Checkbox
-                  id={`brand-${brand}`}
                   checked={filters.brand === brand}
                   onCheckedChange={(checked) =>
                     onFilterChange({ brand: checked ? brand : undefined })
                   }
-                  className="h-4 w-4 sm:h-4 sm:w-4"
+                  className="h-4 w-4 border-brand-primary-soft data-[state=checked]:bg-brand-primary data-[state=checked]:border-brand-primary"
                 />
-                <Label
-                  htmlFor={`brand-${brand}`}
-                  className="ml-2 sm:ml-3 cursor-pointer text-xs sm:text-sm text-gray-700 hover:text-gray-900 flex-1 truncate"
-                >
+                <span className="text-sm text-brand-dark group-hover:text-brand-primary transition-colors flex-1">
                   {brand}
-                </Label>
-              </div>
+                </span>
+              </label>
             ))}
           </div>
         </FilterSection>
       )}
 
-      {/* Tags */}
+      {/* Tags Section */}
       {tags.length > 0 && (
         <FilterSection title="Tags" section="tags">
-          <div className="flex flex-wrap gap-1.5 sm:gap-2">
+          <div className="flex flex-wrap gap-2">
             {tags.map((tag) => (
               <Button
                 key={tag}
@@ -270,10 +228,10 @@ export const ProductFilters: React.FC<ProductFiltersProps> = ({
                 variant={filters.tags === tag ? 'default' : 'outline'}
                 size="sm"
                 className={cn(
-                  'rounded-full h-7 sm:h-8 text-xs sm:text-sm px-2.5 sm:px-3',
+                  'rounded-full h-8 px-3 text-xs transition-all duration-200',
                   filters.tags === tag
-                    ? 'bg-mmp-primary text-white hover:bg-mmp-primary2'
-                    : ''
+                    ? 'bg-brand-primary text-white hover:bg-brand-primary-hover border-brand-primary'
+                    : 'border-brand-primary-soft text-brand-dark hover:border-brand-primary hover:text-brand-primary'
                 )}
                 onClick={() =>
                   onFilterChange({ tags: filters.tags === tag ? undefined : tag })
@@ -287,15 +245,15 @@ export const ProductFilters: React.FC<ProductFiltersProps> = ({
       )}
 
       {/* Action Buttons */}
-      <div className="pt-4 pb-2 flex gap-2">
+      <div className="pt-6 pb-2 flex gap-3">
         {hasActiveFilters && (
           <Button
             type="button"
             variant="outline"
             onClick={clearFilters}
-            className="flex-1 h-9 sm:h-10 text-xs sm:text-sm"
+            className="flex-1 h-10 border-brand-primary-soft text-brand-dark hover:bg-brand-primary-soft hover:border-brand-primary"
           >
-            <X className="mr-1.5 h-3.5 w-3.5" />
+            <X className="mr-2 h-4 w-4" />
             Clear All
           </Button>
         )}
@@ -303,8 +261,9 @@ export const ProductFilters: React.FC<ProductFiltersProps> = ({
           <Button
             type="button"
             onClick={onClose}
-            className="flex-1 h-9 sm:h-10 text-xs sm:text-sm bg-mmp-primary hover:bg-mmp-primary2"
+            className="flex-1 h-10 bg-brand-primary text-white hover:bg-brand-primary-hover"
           >
+            <SlidersHorizontal className="mr-2 h-4 w-4" />
             Apply Filters
           </Button>
         )}
@@ -312,64 +271,33 @@ export const ProductFilters: React.FC<ProductFiltersProps> = ({
     </div>
   );
 
-  return (
-    <>
-      {/* Desktop Filters */}
-      <div className={cn('hidden lg:block', className)}>
-        <div className="sticky top-24">
-          <div className="mb-4 flex items-center justify-between">
-            <h3 className="text-lg font-semibold text-gray-900">Filters</h3>
+  // Desktop View
+  if (!isMobile) {
+    return (
+      <div className={cn('bg-white rounded-xl border border-brand-primary-soft shadow-sm', className)}>
+        <div className="p-5 border-b border-brand-primary-soft">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Filter className="h-5 w-5 text-brand-primary" />
+              <h3 className="font-semibold text-brand-dark">Filters</h3>
+            </div>
             {hasActiveFilters && (
               <Button
-                type="button"
                 variant="ghost"
                 size="sm"
                 onClick={clearFilters}
-                className="text-xs h-8 px-2"
+                className="text-xs text-brand-primary hover:text-brand-primary-hover h-7 px-2"
               >
                 Clear all
               </Button>
             )}
           </div>
-          {filterContent}
         </div>
+        <div className="p-5">{filterContent}</div>
       </div>
+    );
+  }
 
-      {/* Mobile Filters */}
-      <div className="lg:hidden">
-        <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
-          <SheetTrigger asChild>
-            <Button variant="outline" className="w-full relative h-9 sm:h-10 text-xs sm:text-sm">
-              <Filter className="mr-2 h-3.5 w-3.5 sm:h-4 sm:w-4" />
-              Filters & Sort
-              {hasActiveFilters && (
-                <span className="absolute -top-1 -right-1 h-4 w-4 sm:h-5 sm:w-5 rounded-full bg-mmp-primary text-[10px] sm:text-xs font-bold text-white flex items-center justify-center">
-                  {Object.keys(filters).filter(k => 
-                    filters[k as keyof IProductQueryFilters] && 
-                    !['categorySlug', 'page', 'limit', 'sortBy', 'sortOrder'].includes(k)
-                  ).length}
-                </span>
-              )}
-            </Button>
-          </SheetTrigger>
-          <SheetContent side="left" className="w-[85vw] max-w-sm p-0 overflow-y-auto">
-            <SheetHeader className="sticky top-0 bg-white border-b border-gray-200 px-4 py-3">
-              <div className="flex items-center justify-between">
-                <SheetTitle className="text-lg">Filters</SheetTitle>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setMobileOpen(false)}
-                  className="h-8 w-8 p-0 rounded-full"
-                >
-                  <X className="h-4 w-4" />
-                </Button>
-              </div>
-            </SheetHeader>
-            <div className="p-4 pb-8">{filterContent}</div>
-          </SheetContent>
-        </Sheet>
-      </div>
-    </>
-  );
+  // Mobile View (rendered within sheet)
+  return <div className="divide-y divide-brand-primary-soft">{filterContent}</div>;
 };

@@ -5,11 +5,13 @@ import { Badge } from "@/components/ui/badge";
 import { CompactPagination, Pagination } from "@/components/ui/pagination";
 import { ErrorState } from "@/components/ui/error-state";
 import {
-  Package,
   Clock,
   RefreshCw,
-  Truck as TruckIcon,
+  Truck,
   CheckCircle2,
+  XCircle,
+  ShoppingBag,
+  TrendingUp,
 } from "lucide-react";
 import { OrderStatus } from "@/types";
 import { ordersQuery, orderStatsQuery } from "@/api/queries/order.query";
@@ -22,7 +24,6 @@ import { OrdersList } from "@/components/orders/order-list";
 import { OrdersSidebar } from "@/components/orders/order-sidebar";
 import { cn } from "@/lib/utils";
 import { IOrderQueryFilters, orderSearchSchema } from "@/lib";
-
 
 export const Route = createFileRoute(
   "/(root)/_rootLayout/_authenticated/orders/",
@@ -37,7 +38,6 @@ export const Route = createFileRoute(
     const queryClient = context.queryClient;
 
     try {
-      // Fetch initial data in loader (best practice)
       const [orders, stats] = await Promise.all([
         queryClient.fetchQuery(
           ordersQuery({
@@ -59,9 +59,15 @@ export const Route = createFileRoute(
       throw error;
     }
   },
-  pendingComponent: () => <LoadingState message="Loading your orders..." />,
+  pendingComponent: () => (
+    <LoadingState message="Loading your orders..." />
+  ),
   errorComponent: ({ error }) => (
-    <ErrorState title="Failed to load orders" error={error} retryText="Retry" />
+    <ErrorState 
+      title="Failed to load orders" 
+      error={error} 
+      retryText="Try Again" 
+    />
   ),
 });
 
@@ -69,14 +75,10 @@ function OrdersPage() {
   const loaderData = Route.useLoaderData();
   const navigate = useNavigate({ from: Route.fullPath });
 
-  // Use initial data from loader
   const initialOrders = loaderData.initialOrders;
   const initialStats = loaderData.initialStats;
-
-  // Get search params
   const search = Route.useSearch();
 
-  // Fetch fresh data with React Query (for real-time updates)
   const {
     data: ordersData = initialOrders,
     isLoading: ordersLoading,
@@ -93,7 +95,6 @@ function OrdersPage() {
     error: statsError,
   } = useOrderStatsQuery();
 
-  // Handle search param updates
   const updateSearchParams = React.useCallback(
     (updates: Partial<IOrderQueryFilters>) => {
       navigate({
@@ -106,26 +107,24 @@ function OrdersPage() {
     [navigate],
   );
 
-  // Handle status filter change
   const handleStatusFilter = React.useCallback(
     (status: OrderStatus | "all") => {
       updateSearchParams({
         status: status === "all" ? undefined : status,
-        page: 1, // Reset to first page when changing filters
+        page: 1,
       });
     },
     [updateSearchParams],
   );
 
-  // Handle page change
   const handlePageChange = React.useCallback(
     (page: number) => {
       updateSearchParams({ page });
+      window.scrollTo({ top: 0, behavior: "smooth" });
     },
     [updateSearchParams],
   );
 
-  // Handle retry
   const handleRetry = React.useCallback(() => {
     window.location.reload();
   }, []);
@@ -133,79 +132,101 @@ function OrdersPage() {
   const orders = ordersData?.data || [];
   const paginationMeta = ordersData?.pagination;
 
-  // Status filters
+  // Status filters with icons and colors
   const statusFilters = React.useMemo(() => {
-    const filters = [
+    const filters: Array<{
+      value: OrderStatus | "all";
+      label: string;
+      icon: React.ElementType;
+      color: string;
+      count?: number;
+    }> = [
       {
-        value: "all" as const,
+        value: "all",
         label: "All Orders",
-        icon: Package,
+        icon: ShoppingBag,
+        color: "brand-primary",
         count: stats?.total,
       },
       {
         value: OrderStatus.PENDING_PAYMENT,
         label: "Pending Payment",
         icon: Clock,
+        color: "brand-warning",
         count: stats?.byStatus?.PENDING_PAYMENT?.count,
       },
       {
         value: OrderStatus.PENDING,
         label: "Pending",
         icon: Clock,
+        color: "brand-warning",
         count: stats?.byStatus?.PENDING?.count,
       },
       {
         value: OrderStatus.PROCESSING,
         label: "Processing",
         icon: RefreshCw,
+        color: "brand-primary",
         count: stats?.byStatus?.PROCESSING?.count,
       },
       {
         value: OrderStatus.SHIPPED,
         label: "Shipped",
-        icon: TruckIcon,
+        icon: Truck,
+        color: "brand-info",
         count: stats?.byStatus?.SHIPPED?.count,
       },
       {
         value: OrderStatus.DELIVERED,
         label: "Delivered",
         icon: CheckCircle2,
+        color: "brand-success",
         count: stats?.byStatus?.DELIVERED?.count,
       },
       {
         value: OrderStatus.CANCELLED,
         label: "Cancelled",
-        icon: Clock,
+        icon: XCircle,
+        color: "brand-error",
         count: stats?.byStatus?.CANCELLED?.count,
       },
     ];
 
-    return filters.filter(
-      (filter) => filter.count !== undefined || filter.value === "all",
-    );
+    return filters;
   }, [stats]);
 
-  // Show loading state for subsequent loads
+  const getStatusColorClass = (color: string) => {
+    const colorMap: Record<string, string> = {
+      "brand-primary": "bg-brand-primary text-white",
+      "brand-warning": "bg-brand-warning text-white",
+      "brand-success": "bg-brand-success text-white",
+      "brand-error": "bg-brand-error text-white",
+      "brand-info": "bg-brand-info text-white",
+    };
+    return colorMap[color] || "bg-brand-primary text-white";
+  };
+
+  // Show loading state for initial load
   if ((ordersLoading || statsLoading) && !orders.length) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-brand-surface">
         <OrdersHeader loading />
-        <div className="container mx-auto px-4 py-8">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-10">
           <OrdersLoadingSkeleton />
         </div>
       </div>
     );
   }
 
-  // Show error state for subsequent errors
+  // Show error state for initial errors
   if ((ordersError || statsError) && !orders.length) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-brand-surface">
         <OrdersHeader />
-        <div className="container mx-auto px-4 py-8">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="max-w-2xl mx-auto">
             <ErrorState
-              title="Failed to load orders"
+              title="Unable to Load Orders"
               error={ordersError || statsError}
               onRetry={handleRetry}
               fullScreen={false}
@@ -217,101 +238,116 @@ function OrdersPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header - Mobile Optimized */}
+    <div className="min-h-screen bg-brand-surface">
+      {/* Header */}
       <OrdersHeader stats={stats} />
 
-      <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 md:py-8">
-        <div className="lg:grid lg:grid-cols-12 lg:gap-6 xl:gap-8">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-10">
+        <div className="lg:grid lg:grid-cols-12 lg:gap-8 xl:gap-10">
           {/* Main Content */}
-          <div className="lg:col-span-9">
-            {/* Stats Overview - Responsive Grid */}
+          <div className="lg:col-span-9 space-y-6 sm:space-y-8">
+            {/* Stats Overview */}
             <OrdersStats stats={stats} />
 
-            {/* Filters Section */}
-            <div className="mb-4 sm:mb-6">
-              <div className="flex items-center justify-between mb-3 sm:mb-4">
-                <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900">
-                  Order History
-                </h2>
-                <span className="text-xs sm:text-sm text-gray-600">
-                  {paginationMeta?.total || 0} orders
-                </span>
-              </div>
-
-              {/* Status Filters - Horizontal Scroll on Mobile */}
-              <div className="overflow-x-auto pb-2 -mx-3 sm:mx-0">
-                <div className="flex gap-1.5 sm:gap-2 min-w-max px-3 sm:px-0">
-                  {statusFilters.map((filter) => (
-                    <Button
-                      key={filter.value}
-                      variant={
-                        search.status === filter.value ||
-                        (filter.value === "all" && !search.status)
-                          ? "default"
-                          : "outline"
-                      }
-                      size="sm"
-                      onClick={() => handleStatusFilter(filter.value)}
-                      className={cn(
-                        "h-8 sm:h-9 text-xs sm:text-sm whitespace-nowrap",
-                        search.status === filter.value ||
-                          (filter.value === "all" && !search.status)
-                          ? "bg-mmp-primary hover:bg-mmp-primary2"
-                          : "",
-                      )}
-                      disabled={filter.count === 0 && filter.value !== "all"}
-                    >
-                      <filter.icon className="mr-1.5 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4" />
-                      {filter.label}
-                      {filter.count !== undefined && filter.count > 0 && (
-                        <Badge
-                          variant="secondary"
-                          className="ml-1.5 sm:ml-2 bg-white/20 text-white text-[8px] sm:text-xs px-1 sm:px-1.5"
-                        >
-                          {filter.count}
-                        </Badge>
-                      )}
-                    </Button>
-                  ))}
+            {/* Orders Section */}
+            <div className="space-y-4 sm:space-y-5">
+              {/* Section Header */}
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <div>
+                  <h2 className="text-xl sm:text-2xl font-bold text-brand-dark">
+                    Order History
+                  </h2>
+                  <p className="text-sm text-brand-muted mt-1">
+                    Track and manage all your orders in one place
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <TrendingUp className="h-4 w-4 text-brand-muted" />
+                  <span className="text-sm text-brand-muted">
+                    {paginationMeta?.total || 0} total orders
+                  </span>
                 </div>
               </div>
+
+              {/* Status Filters */}
+              <div className="overflow-x-auto pb-2 -mx-4 sm:mx-0">
+                <div className="flex gap-2 min-w-max px-4 sm:px-0">
+                  {statusFilters.map((filter) => {
+                    const Icon = filter.icon;
+                    const isActive = search.status === filter.value || 
+                                   (filter.value === "all" && !search.status);
+                    const isDisabled = filter.count === 0 && filter.value !== "all";
+                    
+                    return (
+                      <Button
+                        key={filter.value}
+                        variant={isActive ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => handleStatusFilter(filter.value)}
+                        disabled={isDisabled}
+                        className={cn(
+                          "h-9 sm:h-10 px-3 sm:px-4 rounded-lg transition-all duration-200",
+                          isActive && getStatusColorClass(filter.color),
+                          !isActive && "border-brand-primary-soft text-brand-dark hover:bg-brand-primary-soft",
+                          isDisabled && "opacity-50 cursor-not-allowed"
+                        )}
+                      >
+                        <Icon className="mr-2 h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                        <span className="text-xs sm:text-sm whitespace-nowrap">
+                          {filter.label}
+                        </span>
+                        {filter.count !== undefined && filter.count > 0 && (
+                          <Badge
+                            variant={isActive ? "secondary" : "outline"}
+                            className={cn(
+                              "ml-2 text-xs font-medium",
+                              isActive && "bg-white/20 text-white border-white/30",
+                              !isActive && "border-brand-primary-soft text-brand-muted"
+                            )}
+                          >
+                            {filter.count}
+                          </Badge>
+                        )}
+                      </Button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Orders List */}
+              <OrdersList
+                orders={ordersData?.data}
+                searchStatus={search.status}
+                statusFilters={statusFilters}
+              />
+
+              {/* Pagination */}
+              {paginationMeta && paginationMeta.totalPages > 1 && (
+                <div className="pt-4">
+                  {/* Desktop Pagination */}
+                  <div className="hidden sm:block">
+                    <Pagination
+                      meta={paginationMeta}
+                      onPageChange={handlePageChange}
+                      showInfo
+                      className="bg-white rounded-xl border border-brand-primary-soft shadow-sm p-4"
+                    />
+                  </div>
+                  {/* Mobile Pagination */}
+                  <div className="sm:hidden">
+                    <CompactPagination
+                      meta={paginationMeta}
+                      onPageChange={handlePageChange}
+                      className="bg-white rounded-xl border border-brand-primary-soft shadow-sm p-3"
+                    />
+                  </div>
+                </div>
+              )}
             </div>
-
-            {/* Orders List */}
-
-            <OrdersList
-              orders={ordersData.data}
-              searchStatus={search.status}
-              statusFilters={statusFilters}
-            />
-
-            {/* Pagination */}
-            {paginationMeta && paginationMeta.totalPages > 1 && (
-              <div className="mt-6 sm:mt-8">
-                {/* Desktop Pagination */}
-                <div className="hidden sm:block">
-                  <Pagination
-                    meta={paginationMeta}
-                    onPageChange={handlePageChange}
-                    showInfo
-                    className="bg-white rounded-lg border border-gray-200 p-4"
-                  />
-                </div>
-                {/* Mobile Pagination */}
-                <div className="sm:hidden">
-                  <CompactPagination
-                    meta={paginationMeta}
-                    onPageChange={handlePageChange}
-                    className="bg-white rounded-lg border border-gray-200 p-3"
-                  />
-                </div>
-              </div>
-            )}
           </div>
 
           {/* Sidebar */}
-          <div className="lg:col-span-3 mt-6 sm:mt-8 lg:mt-0">
+          <div className="lg:col-span-3 mt-8 lg:mt-0">
             <OrdersSidebar />
           </div>
         </div>

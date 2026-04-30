@@ -1,5 +1,5 @@
-import React from "react";
-import { Link, useRouter } from "@tanstack/react-router";
+import { useState } from "react";
+import { Link, useRouterState } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import {
   Home,
@@ -8,10 +8,14 @@ import {
   Wallet,
   Settings,
   LogOut,
-  X,
   ChevronRight,
   BadgeCheck,
-  XIcon,
+  X,
+  TrendingUp,
+  Truck,
+  Star,
+  CreditCard,
+  LayoutDashboard,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks";
@@ -21,48 +25,202 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { Separator } from "@/components/ui/separator";
 
 interface VendorSideBarProps {
   isMobileOpen?: boolean;
   onMobileClose?: () => void;
 }
 
+// Navigation items with enhanced metadata
 const vendorNavItems = [
   {
     title: "Dashboard",
     href: "/vendor",
-    icon: Home,
+    icon: LayoutDashboard,
+    description: "Overview & statistics",
   },
   {
     title: "Products",
     href: "/vendor/products",
     icon: Package,
+    description: "Manage your inventory",
+    // badge: "New",
   },
   {
     title: "Orders",
     href: "/vendor/orders",
     icon: ShoppingCart,
+    description: "Track and fulfill orders",
+    // badge: "12",
   },
   {
     title: "Wallet",
     href: "/vendor/wallet",
-    icon: Wallet,
+    icon: CreditCard,
+    description: "Earnings & transactions",
   },
   {
     title: "Settings",
     href: "/vendor/settings",
     icon: Settings,
+    description: "Store preferences",
   },
 ];
+
+// Individual navigation item component
+const NavItem = ({ 
+  item, 
+  isActive, 
+  onClick 
+}: { 
+  item: typeof vendorNavItems[0]; 
+  isActive: boolean;
+  onClick: () => void;
+}) => {
+  const [isHovered, setIsHovered] = useState(false);
+  const Icon = item.icon;
+
+  return (
+    <TooltipProvider delayDuration={200}>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Link
+            to={item.href}
+            onClick={onClick}
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
+            className={cn(
+              "group relative flex items-center justify-between px-4 py-3 rounded-lg transition-all duration-200",
+              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2",
+              isActive
+                ? "bg-brand-primary-soft text-brand-primary shadow-sm"
+                : "text-brand-dark hover:bg-brand-primary-soft/50 hover:text-brand-primary",
+              isHovered && !isActive && "translate-x-0.5"
+            )}
+            aria-current={isActive ? "page" : undefined}
+          >
+            <div className="flex items-center gap-3 min-w-0 flex-1">
+              {/* Icon with container */}
+              <div className={cn(
+                "relative transition-transform duration-200",
+                isHovered && !isActive && "scale-110"
+              )}>
+                <Icon className={cn(
+                  "h-5 w-5 transition-colors duration-200",
+                  isActive ? "text-brand-primary" : "text-brand-muted",
+                  isHovered && !isActive && "text-brand-primary"
+                )} />
+                
+                {/* Badge for notifications */}
+                {/* {item.badge && (
+                  <span className={cn(
+                    "absolute -top-2 -right-2 flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold text-white",
+                    isActive ? "bg-brand-primary" : "bg-brand-accent"
+                  )}>
+                    {item.badge}
+                  </span>
+                )} */}
+              </div>
+              
+              <div className="flex-1 min-w-0">
+                <span className={cn(
+                  "text-sm transition-all duration-200 block",
+                  isActive ? "font-semibold text-brand-primary" : "font-medium"
+                )}>
+                  {item.title}
+                </span>
+                {isActive && (
+                  <span className="text-xs text-brand-muted block mt-0.5">
+                    {item.description}
+                  </span>
+                )}
+              </div>
+            </div>
+
+            {/* Active indicator chevron */}
+            {isActive && (
+              <ChevronRight className="h-4 w-4 text-brand-primary" />
+            )}
+          </Link>
+        </TooltipTrigger>
+        
+        {/* Tooltip for collapsed/hover state */}
+        <TooltipContent side="right" className="hidden lg:block bg-brand-dark text-white border-0 shadow-lg px-3 py-2">
+          <p className="font-semibold text-sm">{item.title}</p>
+          <p className="text-xs text-white/70 mt-0.5">{item.description}</p>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  );
+};
+
+// Vendor information section component
+const VendorInfo = ({ 
+  vendor, 
+  onLogout, 
+  isMobile = false 
+}: { 
+  vendor: any; 
+  onLogout: () => void;
+  isMobile?: boolean;
+}) => {
+  return (
+    <div className="flex items-center justify-between gap-3">
+      <div className="flex items-center gap-3 flex-1 min-w-0 group cursor-pointer">
+        <div className="relative shrink-0">
+          <div className="h-12 w-12 rounded-full bg-brand-primary-soft flex items-center justify-center ring-2 ring-brand-primary/20 group-hover:ring-brand-primary/40 transition-all duration-200">
+            <img
+              src={vendor?.logoUrl || "/logo512.png"}
+              alt={`${vendor?.businessName || 'Store'} logo`}
+              className="h-10 w-10 rounded-full object-cover"
+            />
+          </div>
+          <BadgeCheck className="absolute -bottom-1 -right-1 h-4 w-4 text-brand-primary bg-white rounded-full" />
+        </div>
+        
+        <div className="flex-1 min-w-0">
+          <p className="font-semibold text-brand-dark truncate text-sm group-hover:text-brand-primary transition-colors">
+            {vendor?.businessName || "Your Store"}
+          </p>
+          <div className="flex items-center gap-1 mt-0.5">
+            <TrendingUp className="h-3 w-3 text-brand-success" />
+            <p className="text-xs text-brand-muted truncate">
+              ID: {vendor?.auth_id?.toString().slice(-8) || "VEN-1234"}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="text-brand-error hover:bg-brand-error/10 hover:scale-105 transition-all duration-200 rounded-lg h-9 w-9 shrink-0"
+              onClick={onLogout}
+              aria-label="Logout"
+            >
+              <LogOut className="h-4 w-4" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent side={isMobile ? "top" : "right"} className="bg-brand-dark text-white border-0">
+            <p>Sign out</p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+    </div>
+  );
+};
 
 export const VendorSideBar: React.FC<VendorSideBarProps> = ({
   isMobileOpen = false,
   onMobileClose,
 }) => {
-  const router = useRouter();
+  const router = useRouterState();
   const { vendor, logout } = useAuth();
-  const currentPath = router.state.location.pathname;
-  const [isHovered, setIsHovered] = React.useState<string | null>(null);
+  const currentPath = router.location.pathname;
 
   const handleLogout = async () => {
     try {
@@ -77,68 +235,13 @@ export const VendorSideBar: React.FC<VendorSideBarProps> = ({
     if (onMobileClose) onMobileClose();
   };
 
-  const NavItem = ({ item }: { item: (typeof vendorNavItems)[0] }) => {
-    const isActive =
-      currentPath === item.href ||
-      (item.href !== "/vendor" && currentPath.startsWith(item.href));
-
-    const isItemHovered = isHovered === item.href;
-
-    return (
-      <TooltipProvider delayDuration={300}>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Link
-              to={item.href}
-              onClick={handleNavClick}
-              onMouseEnter={() => setIsHovered(item.href)}
-              onMouseLeave={() => setIsHovered(null)}
-              className={cn(
-                "group relative flex items-center justify-between px-4 py-3 rounded-lg transition-all duration-300",
-                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mmp-primary focus-visible:ring-offset-2 focus-visible:ring-offset-mmp-primary2",
-                isActive
-                  ? "bg-mmp-secondary text-white shadow-md rounded-l-none border-l-4 border-white"
-                  : "text-mmp-secondary/70 hover:bg-mmp-primary2/20 hover:text-mmp-secondary",
-                isItemHovered && !isActive && "translate-x-1",
-              )}
-            >
-              <div className="flex items-center gap-3 min-w-0 flex-1">
-                <div className="relative">
-                  <item.icon
-                    className={cn(
-                      "h-5 w-5 transition-all duration-300",
-                      isActive ? "text-mmp-primary" : "text-mmp-secondary",
-                      isItemHovered &&
-                        !isActive &&
-                        "scale-110 text-mmp-secondary",
-                    )}
-                  />
-                </div>
-                <span
-                  className={cn(
-                    "font-medium transition-all duration-300",
-                    isActive && "font-semibold",
-                  )}
-                >
-                  {item.title}
-                </span>
-              </div>
-
-              {/* Active Indicator */}
-              {isActive && (
-                <ChevronRight className="h-4 w-4 text-mmp-primary animate-pulse" />
-              )}
-            </Link>
-          </TooltipTrigger>
-          <TooltipContent
-            side="right"
-            className="hidden lg:block bg-mmp-primary text-white border-mmp-secondary2"
-          >
-            <p>{item.title}</p>
-          </TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
-    );
+  // Check if a nav item is active - handles nested routes properly
+  const isNavActive = (href: string) => {
+    if (href === "/vendor") {
+      return currentPath === "/vendor";
+    }
+    // For nested routes like /vendor/products, /vendor/orders, etc.
+    return currentPath.startsWith(href);
   };
 
   return (
@@ -146,7 +249,7 @@ export const VendorSideBar: React.FC<VendorSideBarProps> = ({
       {/* Mobile Sidebar Overlay */}
       {isMobileOpen && (
         <div
-          className="lg:hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-40 animate-in fade-in duration-300"
+          className="lg:hidden fixed inset-0 bg-brand-dark/50 backdrop-blur-sm z-40 animate-in fade-in duration-200"
           onClick={onMobileClose}
           aria-hidden="true"
         />
@@ -155,84 +258,64 @@ export const VendorSideBar: React.FC<VendorSideBarProps> = ({
       {/* Mobile Sidebar */}
       <div
         className={cn(
-          "lg:hidden fixed inset-y-0 left-0 z-50 w-80 transform transition-all duration-300 ease-out",
+          "lg:hidden fixed inset-y-0 left-0 z-50 w-80 transform transition-transform duration-300 ease-out",
           isMobileOpen ? "translate-x-0" : "-translate-x-full",
-          "shadow-2xl",
+          "shadow-2xl"
         )}
+        role="dialog"
+        aria-label="Mobile vendor menu"
       >
-        <div className="flex h-full flex-col bg-mmp-primary2 min-h-0 overflow-hidden relative">
+        <div className="flex h-full flex-col bg-white">
           {/* Mobile Header */}
-          <div className="flex items-center justify-between px-6 py-5 border-b border-mmp-secondary/20 bg-mmp-primary2/95">
-            <div className="flex flex-col items-start gap-3">
-              <div className="">
-                <img
-                  src="/logo.png"
-                  alt="FashionKet Logo"
-                  className="h-auto w-[240px] rounded-lg"
-                />
-              </div>
+          <div className="flex items-center justify-between px-5 py-6 border-b border-brand-primary-soft bg-brand-surface">
+            <div className="space-y-2">
+              <img
+                src="/logo.png"
+                alt="Logo"
+                className="h-8 w-auto"
+              />
               <div>
-                <span className="text-xl text-mmp-secondary font-bold ">
+                <h2 className="text-lg font-bold text-brand-dark">
                   Store Dashboard
-                </span>
+                </h2>
+                <p className="text-xs text-brand-muted mt-0.5">
+                  Manage your business
+                </p>
               </div>
             </div>
             <Button
               variant="ghost"
               size="icon"
               onClick={onMobileClose}
-              className="text-white bg-mmp-secondary/10 hover:scale-110 transition-all absolute top-8 right-2 rounded-full"
+              className="text-brand-dark hover:bg-brand-primary-soft hover:scale-105 transition-all duration-200 rounded-full h-10 w-10 shrink-0"
               aria-label="Close menu"
             >
-              <XIcon className="h-10 w-10 font-bold" />
+              <X className="h-5 w-5" />
             </Button>
           </div>
 
           {/* Mobile Navigation */}
-          <div className="flex-1 overflow-y-auto px-4 py-6 scrollbar-thin scrollbar-thumb-mmp-primary/20 scrollbar-track-transparent">
-            <nav className="space-y-2">
+          <div className="flex-1 overflow-y-auto px-4 py-6">
+            <nav className="space-y-1" aria-label="Vendor navigation">
               {vendorNavItems.map((item) => (
-                <NavItem key={item.href} item={item} />
+                <NavItem
+                  key={item.href}
+                  item={item}
+                  isActive={isNavActive(item.href)}
+                  onClick={handleNavClick}
+                />
               ))}
             </nav>
           </div>
 
           {/* Mobile Footer */}
-          <div className="flex-shrink-0 border-t border-mmp-secondary p-6 bg-mmp-primary2/95">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3 mb-4 group">
-                <div className="relative">
-                  <div className="h-12 w-12 rounded-full bg-mmp-primary/10 flex items-center justify-center ring-2 ring-mmp-primary group-hover:ring-mmp-primary/40 transition-all">
-                    <img
-                      src={vendor?.logoUrl || "/logo.png"}
-                      alt="Store logo"
-                      className="h-10 w-10 rounded-full object-cover"
-                    />
-                  </div>
-                  <BadgeCheck className="absolute -bottom-1 -right-1 h-5 w-5 text-mmp-primary fill-white" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-mmp-secondary truncate flex items-center gap-1">
-                    {vendor?.businessName || "Store Name"}
-                  </p>
-                  <p className="text-xs text-mmp-secondary/60 truncate">
-                    ID: {vendor?.auth_id?.toString().slice(-8) || "VEN-1234"}
-                  </p>
-                </div>
-              </div>
-
-              <Button
-                variant="ghost"
-                className="justify-start text-red-600 hover:bg-red-600/10 hover:scale-105 transition-all rounded-full h-10 w-10 p-0"
-                onClick={handleLogout}
-              >
-                <LogOut className="h-5 w-5 transition-transform group-hover:rotate-12" />
-              </Button>
-            </div>
-
-            {/* Version Info */}
-            <div className="mt-4 text-center">
-              <span className="text-[10px] text-mmp-secondary/40">
+          <div className="flex-shrink-0 border-t border-brand-primary-soft p-5 bg-brand-surface">
+            <VendorInfo vendor={vendor} onLogout={handleLogout} isMobile />
+            
+            <Separator className="my-4 bg-brand-primary-soft" />
+            
+            <div className="text-center">
+              <span className="text-[10px] font-mono text-brand-muted">
                 v2.0.0 • Store Portal
               </span>
             </div>
@@ -241,90 +324,60 @@ export const VendorSideBar: React.FC<VendorSideBarProps> = ({
       </div>
 
       {/* Desktop Sidebar */}
-      <div className="hidden lg:flex lg:w-72 lg:flex-col lg:fixed lg:inset-y-0">
-        <div className="flex flex-col flex-1 min-h-0 bg-mmp-primary2 shadow-xl overflow-hidden">
-          <div className="flex-1 flex flex-col pt-8 pb-6 overflow-y-auto scrollbar-thin scrollbar-thumb-mmp-primary/20 scrollbar-track-transparent">
-            {/* Logo Section */}
-            <div className="flex flex-col items-start gap-3 px-6 mb-10 group">
-              <div className="flex items-center gap-2">
+      <aside 
+        className="hidden lg:flex lg:w-72 lg:flex-col lg:fixed lg:inset-y-0 lg:left-0 z-30" 
+        aria-label="Vendor dashboard sidebar"
+      >
+        <div className="flex flex-col flex-1 min-h-0 bg-white border-r border-brand-primary-soft shadow-lg">
+          {/* Logo Section */}
+          <div className="flex-1 flex flex-col pt-8 pb-6 overflow-hidden">
+            <div className="px-6 mb-8">
+              <div className="space-y-3">
                 <img
                   src="/logo.png"
-                  alt="FashionKet Logo"
-                  className="h-auto w-[280px] rounded-lg"
+                  alt="Logo"
+                  className="h-10 w-auto"
                 />
-              </div>
-              <div className="flex flex-col">
-                <span className="text-xl font-semibold text-mmp-secondary">
-                  Store Portal
-                </span>
-                <span className="text-xs text-mmp-secondary/60">
-                  Vendor Dashboard
-                </span>
+                <div>
+                  <h1 className="text-xl font-bold text-brand-dark">
+                    Store Portal
+                  </h1>
+                  <p className="text-xs text-brand-muted mt-0.5">
+                    Vendor Dashboard
+                  </p>
+                </div>
               </div>
             </div>
 
+            <Separator className="mx-6 w-auto bg-brand-primary-soft" />
+
             {/* Navigation */}
-            <nav className="mt-2 flex-1 px-4 space-y-2">
+            <nav className="mt-6 px-4 space-y-1" aria-label="Vendor navigation">
               {vendorNavItems.map((item) => (
-                <NavItem key={item.href} item={item} />
+                <NavItem
+                  key={item.href}
+                  item={item}
+                  isActive={isNavActive(item.href)}
+                  onClick={handleNavClick}
+                />
               ))}
             </nav>
           </div>
 
           {/* Profile Section */}
-          <div className="flex-shrink-0 border-t border-mmp-secondary p-6 bg-mmp-primary2/95">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3 group">
-                <div className="relative">
-                  <div className="h-12 w-12 rounded-full bg-mmp-primary/10 flex items-center justify-center ring-2 ring-mmp-primary group-hover:ring-mmp-primary/40 transition-all">
-                    <img
-                      src={vendor?.logoUrl || "/logo.png"}
-                      alt="Store logo"
-                      className="h-10 w-10 rounded-full object-cover"
-                    />
-                  </div>
-                  <BadgeCheck className="absolute -bottom-1 -right-1 h-5 w-5 text-mmp-primary fill-white" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-mmp-secondary truncate">
-                    {vendor?.businessName || "Store Name"}
-                  </p>
-                  <p className="text-xs text-mmp-secondary/60 truncate">
-                    ID: {vendor?.auth_id?.toString().slice(-8) || "VEN-1234"}
-                  </p>
-                </div>
-              </div>
-
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      className="text-red-600 hover:text-mmp-neutral hover:bg-red-600/10 hover:scale-105 transition-all rounded-full h-10 w-10 p-0"
-                      onClick={handleLogout}
-                    >
-                      <LogOut className="h-5 w-5" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent
-                    side="top"
-                    className="bg-mmp-primary text-white"
-                  >
-                    <p>Logout</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-            </div>
-
-            {/* Version Info */}
-            <div className="mt-4 pt-4 text-center border-t border-mmp-secondary/10">
-              <span className="text-[10px] text-mmp-secondary/40">
+          <div className="flex-shrink-0 border-t border-brand-primary-soft p-6 bg-brand-surface">
+            <VendorInfo vendor={vendor} onLogout={handleLogout} />
+            
+            <Separator className="my-4 bg-brand-primary-soft" />
+            
+            <div className="text-center">
+              <span className="text-[10px] font-mono text-brand-muted">
                 v2.0.0 • Store Portal
               </span>
             </div>
           </div>
         </div>
-      </div>
+      </aside>
     </>
   );
 };

@@ -9,11 +9,13 @@ import {
   CheckCircle,
   XCircle,
   AlertCircle,
+  CreditCard,
 } from 'lucide-react'
 
 interface OrderStatusBadgeProps {
   status: OrderStatus
   className?: string
+  showIcon?: boolean
 }
 
 const statusConfig: Record<
@@ -27,55 +29,56 @@ const statusConfig: Record<
   PENDING: {
     label: 'Pending',
     icon: Clock,
-    className: 'bg-amber-100 text-amber-800 hover:bg-amber-100',
+    className: 'bg-brand-warning/10 text-brand-warning border-brand-warning/20',
   },
   PENDING_PAYMENT: {
-    label: 'Pending',
-    icon: Clock,
-    className: 'bg-amber-100 text-amber-800 hover:bg-amber-100',
+    label: 'Awaiting Payment',
+    icon: CreditCard,
+    className: 'bg-brand-warning/10 text-brand-warning border-brand-warning/20',
   },
   PROCESSING: {
     label: 'Processing',
     icon: RefreshCw,
-    className: 'bg-blue-100 text-blue-800 hover:bg-blue-100',
+    className: 'bg-brand-primary/10 text-brand-primary border-brand-primary/20',
   },
   SHIPPED: {
     label: 'Shipped',
     icon: Truck,
-    className: 'bg-purple-100 text-purple-800 hover:bg-purple-100',
+    className: 'bg-brand-info/10 text-brand-info border-brand-info/20',
   },
   DELIVERED: {
     label: 'Delivered',
     icon: CheckCircle,
-    className: 'bg-green-100 text-green-800 hover:bg-green-100',
+    className: 'bg-brand-success/10 text-brand-success border-brand-success/20',
   },
   CANCELLED: {
     label: 'Cancelled',
     icon: XCircle,
-    className: 'bg-red-100 text-red-800 hover:bg-red-100',
+    className: 'bg-brand-error/10 text-brand-error border-brand-error/20',
   },
   REFUNDED: {
     label: 'Refunded',
     icon: AlertCircle,
-    className: 'bg-gray-100 text-gray-800 hover:bg-gray-100',
+    className: 'bg-brand-muted/10 text-brand-muted border-brand-muted/20',
   },
   PAID: {
     label: 'Paid',
-    icon: XCircle,
-    className: 'bg-green-100 text-green-800 hover:bg-green-100',
+    icon: CheckCircle,
+    className: 'bg-brand-success/10 text-brand-success border-brand-success/20',
   },
 }
 
 export const OrderStatusBadge: React.FC<OrderStatusBadgeProps> = ({
   status,
   className,
+  showIcon = true,
 }) => {
-  const config = statusConfig[status] || statusConfig.PENDING_PAYMENT
+  const config = statusConfig[status] || statusConfig.PENDING
   const Icon = config.icon
 
   return (
-    <Badge className={cn(config.className, className)}>
-      <Icon className="mr-1 h-3 w-3" />
+    <Badge className={cn(config.className, "font-medium", className)}>
+      {showIcon && <Icon className="mr-1.5 h-3.5 w-3.5" />}
       {config.label}
     </Badge>
   )

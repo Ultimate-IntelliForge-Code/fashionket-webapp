@@ -64,6 +64,7 @@ export const useCart = () => {
     async (
       productId: string,
       productName: string,
+      productSlug: string,
       productPrice: number,
       productImage?: string,
       quantity: number = 1,
@@ -80,6 +81,7 @@ export const useCart = () => {
                 productId: productId as ObjectId,
                 quantity,
                 nameSnapshot: productName,
+                slug:productSlug,
                 priceSnapshot: productPrice,
                 variantOptions
               }
@@ -106,6 +108,7 @@ export const useCart = () => {
           addToLocalCart({
             productId,
             productName,
+            productSlug,
             productPrice,
             quantity,
             productImage,
@@ -199,7 +202,7 @@ export const useCart = () => {
    * Remove item from cart
    */
   const removeFromCart = useCallback(
-    async (productId: string, itemId?: string, productName?: string) => {
+    async (productId: string, itemId?: string) => {
       if (isAuthenticated) {
         // Authenticated user - remove from server
         try {
@@ -209,7 +212,7 @@ export const useCart = () => {
           // Refetch to get updated cart
           await refetchServerCart();
 
-          toast.success(`${productName || 'Item'} removed from your cart`);
+          toast.success(`Item removed from your cart`);
           return { success: true };
         } catch (error) {
           const errorMessage =
@@ -227,7 +230,7 @@ export const useCart = () => {
         try {
           removeFromLocalCart(productId);
 
-          toast.success(`${productName || 'Item'} removed from your cart`);
+          toast.success(`Item removed from your cart`);
           return { success: true };
         } catch (error) {
           const errorMessage =

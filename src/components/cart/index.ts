@@ -11,7 +11,6 @@
 
 export { AddToCartButton } from './add-to-cart-button';
 export { CartBadge } from './cart-badge';
-export { CartDrawer } from './cart-drawer';
 export { CartItem } from './cart-item';
 export { CartSummary } from './cart-summary';
 export { CartIcon } from './cart-icon';

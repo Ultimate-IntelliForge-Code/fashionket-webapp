@@ -7,7 +7,8 @@ import {
   Package, 
   Truck, 
   Home,
-  XCircle
+  XCircle,
+  Clock
 } from 'lucide-react';
 
 interface OrderTimelineProps {
@@ -21,58 +22,43 @@ export const OrderTimeline: React.FC<OrderTimelineProps> = ({ order }) => {
       label: 'Order Placed',
       date: order.createdAt,
       icon: Package,
-      completed: true,
-      active: false,
+      condition: true,
     },
     {
       id: 'payment',
-      label: 'Payment',
+      label: 'Payment Confirmed',
       date: order.paidAt,
       icon: CreditCard,
-      completed: !!order.paidAt,
-      active: !order.paidAt && !order.cancelledAt,
+      condition: !!order.paidAt,
     },
     {
       id: 'processing',
       label: 'Processing',
-      date: order.createdAt, // Updated when processing starts
-      icon: Package,
-      completed: [OrderStatus.PROCESSING, OrderStatus.SHIPPED, OrderStatus.DELIVERED].includes(order.status),
-      active: order.status === OrderStatus.PROCESSING,
+      date: order.createdAt,
+      icon: Clock,
+      condition: [OrderStatus.PROCESSING, OrderStatus.SHIPPED, OrderStatus.DELIVERED].includes(order.status),
     },
     {
       id: 'shipped',
       label: 'Shipped',
       date: order.shippedAt,
       icon: Truck,
-      completed: [OrderStatus.SHIPPED, OrderStatus.SHIPPED].includes(order.status),
-      active: order.status === OrderStatus.SHIPPED,
+      condition: [OrderStatus.SHIPPED, OrderStatus.DELIVERED].includes(order.status),
     },
     {
       id: 'delivered',
       label: 'Delivered',
       date: order.deliveredAt,
       icon: Home,
-      completed: order.status === OrderStatus.DELIVERED,
-      active: order.status === OrderStatus.DELIVERED,
+      condition: order.status === OrderStatus.DELIVERED,
     },
-    {
-      id: 'cancelled',
-      label: 'Cancelled',
-      date: order.cancelledAt,
-      icon: XCircle,
-      completed: order.status === OrderStatus.CANCELLED,
-      active: order.status === OrderStatus.CANCELLED,
-    },
-  ].filter(step => step.completed || step.active || step.id === 'order_placed');
+  ];
 
-  const getStepStatus = (step: typeof timelineSteps[0]) => {
-    if (step.completed) return 'completed';
-    if (step.active) return 'active';
-    return 'pending';
-  };
+  const cancelled = order.status === OrderStatus.CANCELLED;
+  const activeSteps = timelineSteps.filter(step => step.condition);
+  const currentStepIndex = activeSteps.length - 1;
 
-  const formatDate = (date: string | Date | null) => {
+  const formatDate = (date: string | Date | null | undefined) => {
     if (!date) return null;
     return new Date(date).toLocaleDateString('en-NG', {
       day: 'numeric',
@@ -81,64 +67,84 @@ export const OrderTimeline: React.FC<OrderTimelineProps> = ({ order }) => {
     });
   };
 
-  return (
-    <div className="relative">
-      {/* Timeline Line */}
-      <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-gray-200" />
+  if (cancelled) {
+    return (
+      <div className="text-center py-8">
+        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-brand-error/10 mb-4">
+          <XCircle className="h-8 w-8 text-brand-error" />
+        </div>
+        <h3 className="text-lg font-semibold text-brand-dark mb-2">Order Cancelled</h3>
+        <p className="text-sm text-brand-muted">
+          This order was cancelled on {formatDate(order.cancelledAt)}
+        </p>
+        {order.cancellationReason && (
+          <p className="text-sm text-brand-muted mt-2">
+            Reason: {order.cancellationReason}
+          </p>
+        )}
+      </div>
+    );
+  }
 
-      {/* Timeline Steps */}
-      <div className="relative space-y-8">
-        {timelineSteps.map((step) => {
-          const status = getStepStatus(step);
+  return (
+    <div className="relative py-4">
+      {/* Timeline Line */}
+      <div className="absolute left-6 top-0 bottom-0 w-0.5 bg-brand-primary-soft" />
+      
+      <div className="relative space-y-6">
+        {activeSteps.map((step, index) => {
           const Icon = step.icon;
+          const isCompleted = true;
+          const isCurrent = index === currentStepIndex;
+          const date = formatDate(step.date);
           
           return (
             <div key={step.id} className="relative flex items-start gap-4">
-              {/* Icon */}
+              {/* Icon Circle */}
               <div className={cn(
-                'relative z-10 flex h-8 w-8 items-center justify-center rounded-full border-2',
-                status === 'completed' && 'bg-green-100 border-green-500',
-                status === 'active' && 'bg-blue-100 border-blue-500 animate-pulse',
-                status === 'pending' && 'bg-gray-100 border-gray-300',
+                "relative z-10 flex h-12 w-12 items-center justify-center rounded-full transition-all duration-300",
+                isCompleted && "bg-brand-success/10 ring-2 ring-brand-success/20",
+                isCurrent && "bg-brand-primary/10 ring-2 ring-brand-primary/30 animate-pulse"
               )}>
                 <Icon className={cn(
-                  'h-4 w-4',
-                  status === 'completed' && 'text-green-600',
-                  status === 'active' && 'text-blue-600',
-                  status === 'pending' && 'text-gray-400',
+                  "h-5 w-5 transition-colors",
+                  isCompleted && "text-brand-success",
+                  isCurrent && "text-brand-primary"
                 )} />
-                {status === 'completed' && (
-                  <CheckCircle className="absolute -right-1 -top-1 h-4 w-4 text-green-600" />
+                {isCompleted && index < activeSteps.length - 1 && (
+                  <CheckCircle className="absolute -right-1 -top-1 h-4 w-4 text-brand-success bg-white rounded-full" />
                 )}
               </div>
-
+              
               {/* Content */}
               <div className="flex-1 pt-1">
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
                   <h4 className={cn(
-                    'font-medium',
-                    status === 'completed' && 'text-green-700',
-                    status === 'active' && 'text-blue-700 font-semibold',
-                    status === 'pending' && 'text-gray-600',
+                    "font-semibold",
+                    isCurrent ? "text-brand-primary" : "text-brand-dark"
                   )}>
                     {step.label}
                   </h4>
-                  {step.date && (
-                    <span className="text-sm text-gray-500">
-                      {formatDate(step.date)}
+                  {date && (
+                    <span className="text-xs text-brand-muted">
+                      {date}
                     </span>
                   )}
                 </div>
                 
                 {step.id === 'shipped' && order.trackingNumber && (
-                  <p className="mt-1 text-sm text-gray-600">
-                    Tracking: <span className="font-mono">{order.trackingNumber}</span>
+                  <p className="mt-2 text-sm text-brand-muted">
+                    Tracking Number: <span className="font-mono text-brand-primary">{order.trackingNumber}</span>
                   </p>
                 )}
                 
-                {step.id === 'cancelled' && order.cancellationReason && (
-                  <p className="mt-1 text-sm text-gray-600">
-                    Reason: {order.cancellationReason}
+                {isCurrent && (
+                  <p className="mt-2 text-sm text-brand-muted">
+                    {step.id === 'order_placed' && "Your order has been received and is being processed."}
+                    {step.id === 'payment' && "Payment has been confirmed. We're preparing your order."}
+                    {step.id === 'processing' && "Your order is being prepared for shipping."}
+                    {step.id === 'shipped' && "Your order is on its way to you!"}
+                    {step.id === 'delivered' && "Your order has been delivered. Enjoy!"}
                   </p>
                 )}
               </div>

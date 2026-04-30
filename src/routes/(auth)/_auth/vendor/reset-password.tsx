@@ -7,11 +7,11 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useResetPassword } from '@/api/mutations';
 import { AuthFormWrapper } from '@/components/auth';
-import { Eye, EyeOff, CheckCircle, Shield } from 'lucide-react';
+import { Eye, EyeOff, CheckCircle, Shield, Key, ArrowLeft } from 'lucide-react';
 import { toast } from 'react-toastify';
 import { ResetPasswordFormData, resetPasswordSchema } from '@/lib';
+import { cn } from '@/lib/utils';
 import z from 'zod';
-
 
 export const Route = createFileRoute('/(auth)/_auth/vendor/reset-password')({
   component: VendorResetPasswordPage,
@@ -47,30 +47,29 @@ function VendorResetPasswordPage() {
       await resetPassword(data, {
         onSuccess: () => {
           setIsSubmitted(true);
-          toast.success('Password reset successful');
+          toast.success('Password reset successful!');
         },
         onError: (error: any) => {
-          toast.error(error.message || 'Reset failed');
+          toast.error(error.message || 'Reset failed. Please try again.');
+          setError('root', { message: error.message });
         },
       });
     } catch (error: any) {
       setError('root', {
-        type: 'manual',
         message: error.message || 'Failed to reset password. Please try again.',
       });
     }
   };
 
   const footer = (
-    <div className="text-center space-y-2">
-      <div className="text-sm text-gray-600">
-        <Link
-          to="/admin/login"
-          className="font-medium text-mmp-primary hover:text-mmp-primary2 hover:underline"
-        >
-          Back to Admin Login
-        </Link>
-      </div>
+    <div className="text-center">
+      <Link
+        to="/vendor/login"
+        className="inline-flex items-center gap-2 text-sm text-brand-primary hover:text-brand-primary-hover transition-colors"
+      >
+        <ArrowLeft className="h-4 w-4" />
+        Back to Store Login
+      </Link>
     </div>
   );
 
@@ -79,194 +78,219 @@ function VendorResetPasswordPage() {
       <AuthFormWrapper
         title={
           <div className="flex items-center justify-center gap-2">
-            <Shield className="h-6 w-6" />
+            <Shield className="h-6 w-6 text-brand-success" />
             <span>Password Updated</span>
           </div>
         }
-        description="Your admin password has been successfully reset"
+        description="Your store password has been successfully reset"
         footer={footer}
       >
         <div className="text-center space-y-6">
           <div className="flex justify-center">
-            <div className="p-4 bg-green-50 rounded-full">
-              <CheckCircle className="h-16 w-16 text-green-500" />
+            <div className="p-4 rounded-full bg-brand-success/10">
+              <CheckCircle className="h-16 w-16 text-brand-success" />
             </div>
           </div>
+          
           <div className="space-y-3">
-            <h3 className="text-xl font-semibold text-gray-900">
+            <h3 className="text-xl font-semibold text-brand-dark">
               Security Update Complete
             </h3>
-            <p className="text-sm text-gray-600">
-              Your admin password has been successfully reset. For security reasons, you'll need to sign in again with your new password.
+            <p className="text-sm text-brand-muted">
+              Your store password has been successfully reset. For security reasons, 
+              you'll need to sign in again with your new password.
             </p>
-            <div className="p-3 bg-blue-50 border border-blue-200 rounded-md">
-              <p className="text-sm text-blue-700">
-                <strong>Security Tip:</strong> Consider using a password manager to securely store and generate strong passwords.
+            <div className="p-4 rounded-xl bg-brand-primary-soft/30 border border-brand-primary-soft">
+              <p className="text-sm text-brand-dark">
+                <strong className="text-brand-primary">Security Tip:</strong> Consider using a password manager 
+                to securely store and generate strong passwords.
               </p>
             </div>
           </div>
-          <div className="space-y-2">
-            <Button
-              asChild
-              className="w-full bg-mmp-primary hover:bg-mmp-primary2"
-            >
-              <Link to="/admin/login">Sign In with New Password</Link>
-            </Button>
-          </div>
+          
+          <Button
+            asChild
+            className="w-full h-11 bg-brand-primary text-white hover:bg-brand-primary-hover shadow-sm"
+          >
+            <Link to="/vendor/login">Sign In with New Password</Link>
+          </Button>
         </div>
       </AuthFormWrapper>
     );
+  }
+
+  const getStrengthColor = () => {
+    if (!newPassword) return 'bg-brand-muted'
+    let strength = 0
+    if (newPassword.length >= 8) strength++
+    if (/[a-z]/.test(newPassword)) strength++
+    if (/[A-Z]/.test(newPassword)) strength++
+    if (/\d/.test(newPassword)) strength++
+    if (/[@$!%*?&]/.test(newPassword)) strength++
+    
+    if (strength <= 2) return 'bg-brand-error'
+    if (strength <= 4) return 'bg-brand-warning'
+    return 'bg-brand-success'
   }
 
   return (
     <AuthFormWrapper
       title={
         <div className="flex items-center justify-center gap-2">
-          <Shield className="h-6 w-6" />
+          <Key className="h-6 w-6 text-brand-primary" />
           <span>Set New Password</span>
         </div>
       }
-      description="Create a new secure password for your admin account"
+      description="Create a new secure password for your store account"
       footer={footer}
     >
-      <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-md">
-        <p className="text-sm text-blue-700">
-          <strong>Security Requirements:</strong> Business passwords must meet higher security standards.
+      <div className="mb-6 p-4 rounded-xl bg-brand-primary-soft/30 border border-brand-primary-soft">
+        <p className="text-sm text-brand-dark">
+          <strong className="text-brand-primary">Security Requirements:</strong> Store passwords must meet higher security standards.
         </p>
       </div>
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
         {errors.root && (
-          <div className="p-3 bg-red-50 border border-red-200 rounded-md">
-            <p className="text-sm text-red-600">{errors.root.message}</p>
+          <div className="p-4 rounded-xl bg-brand-error/10 border border-brand-error/20">
+            <p className="text-sm text-brand-error">{errors.root.message}</p>
           </div>
         )}
 
+        {/* Reset Token */}
         <div className="space-y-2">
-          <Label htmlFor="token" className="text-gray-700">
-            Reset Token
+          <Label htmlFor="token" className="text-brand-dark font-medium">
+            Reset Token <span className="text-brand-error">*</span>
           </Label>
           <Input
             id="token"
             type="text"
             placeholder="Paste the token from your email"
+            className={cn(
+              "h-11 border-brand-primary-soft focus:border-brand-primary focus:ring-brand-primary-soft",
+              errors.token && "border-brand-error"
+            )}
             {...register('token')}
-            className={errors.token ? 'border-red-500' : 'border-gray-300'}
           />
           {errors.token && (
-            <p className="text-sm text-red-500">{errors.token.message}</p>
+            <p className="text-sm text-brand-error">{errors.token.message}</p>
           )}
-          <p className="text-xs text-gray-500 mt-1">
-            Found in the password reset email
+          <p className="text-xs text-brand-muted">
+            Found in the password reset email we sent you
           </p>
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
+        {/* Password Fields */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
-            <Label htmlFor="newPassword" className="text-gray-700">
-              New Password *
+            <Label htmlFor="newPassword" className="text-brand-dark font-medium">
+              New Password <span className="text-brand-error">*</span>
             </Label>
             <div className="relative">
               <Input
                 id="newPassword"
                 type={showNewPassword ? 'text' : 'password'}
                 placeholder="••••••••"
+                className="pr-10 h-11 border-brand-primary-soft focus:border-brand-primary focus:ring-brand-primary-soft"
                 {...register('newPassword')}
-                className={
-                  errors.newPassword
-                    ? 'border-red-500 pr-10'
-                    : 'border-gray-300 pr-10'
-                }
               />
               <button
                 type="button"
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
                 onClick={() => setShowNewPassword(!showNewPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-brand-muted hover:text-brand-dark transition-colors"
               >
-                {showNewPassword ? (
-                  <EyeOff className="h-4 w-4" />
-                ) : (
-                  <Eye className="h-4 w-4" />
-                )}
+                {showNewPassword ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
             </div>
             {errors.newPassword && (
-              <p className="text-sm text-red-500">{errors.newPassword.message}</p>
+              <p className="text-sm text-brand-error">{errors.newPassword.message}</p>
             )}
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="confirmPassword" className="text-gray-700">
-              Confirm Password *
+            <Label htmlFor="confirmPassword" className="text-brand-dark font-medium">
+              Confirm Password <span className="text-brand-error">*</span>
             </Label>
             <div className="relative">
               <Input
                 id="confirmPassword"
                 type={showConfirmPassword ? 'text' : 'password'}
                 placeholder="••••••••"
+                className="pr-10 h-11 border-brand-primary-soft focus:border-brand-primary focus:ring-brand-primary-soft"
                 {...register('confirmPassword')}
-                className={
-                  errors.confirmPassword
-                    ? 'border-red-500 pr-10'
-                    : 'border-gray-300 pr-10'
-                }
               />
               <button
                 type="button"
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
                 onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-brand-muted hover:text-brand-dark transition-colors"
               >
-                {showConfirmPassword ? (
-                  <EyeOff className="h-4 w-4" />
-                ) : (
-                  <Eye className="h-4 w-4" />
-                )}
+                {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
             </div>
             {errors.confirmPassword && (
-              <p className="text-sm text-red-500">{errors.confirmPassword.message}</p>
+              <p className="text-sm text-brand-error">{errors.confirmPassword.message}</p>
             )}
           </div>
         </div>
 
+        {/* Password Strength Indicator */}
         {newPassword && (
-          <div className="text-xs text-gray-500 p-3 bg-gray-50 border border-gray-200 rounded-md">
-            <p className="font-medium mb-2 text-gray-700">Business Password Requirements:</p>
-            <ul className="space-y-1">
-              <li className="flex items-center">
-                <span className={`h-1.5 w-1.5 rounded-full mr-2 ${newPassword.length >= 8 ? 'bg-green-500' : 'bg-gray-300'}`} />
-                Minimum 8 characters
-              </li>
-              <li className="flex items-center">
-                <span className={`h-1.5 w-1.5 rounded-full mr-2 ${/(?=.*[a-z])/.test(newPassword) ? 'bg-green-500' : 'bg-gray-300'}`} />
-                One lowercase letter
-              </li>
-              <li className="flex items-center">
-                <span className={`h-1.5 w-1.5 rounded-full mr-2 ${/(?=.*[A-Z])/.test(newPassword) ? 'bg-green-500' : 'bg-gray-300'}`} />
-                One uppercase letter
-              </li>
-              <li className="flex items-center">
-                <span className={`h-1.5 w-1.5 rounded-full mr-2 ${/(?=.*\d)/.test(newPassword) ? 'bg-green-500' : 'bg-gray-300'}`} />
-                One number
-              </li>
-              <li className="flex items-center">
-                <span className={`h-1.5 w-1.5 rounded-full mr-2 ${/(?=.*[@$!%*?&])/.test(newPassword) ? 'bg-green-500' : 'bg-gray-300'}`} />
-                One special character (@$!%*?&)
-              </li>
-            </ul>
+          <div className="space-y-3 p-4 rounded-xl bg-brand-surface border border-brand-primary-soft">
+            <div className="space-y-2">
+              <div className="flex justify-between text-xs">
+                <span className="text-brand-dark font-medium">Password Strength</span>
+                <span className="text-brand-muted">
+                  {newPassword.length}/8+ characters
+                </span>
+              </div>
+              <div className="h-1.5 w-full bg-brand-primary-soft rounded-full overflow-hidden">
+                <div 
+                  className={cn("h-full transition-all duration-300 rounded-full", getStrengthColor())}
+                  style={{ width: `${Math.min((newPassword.length / 12) * 100, 100)}%` }}
+                />
+              </div>
+            </div>
+            
+            <div>
+              <p className="text-xs font-medium text-brand-dark mb-2">Password Requirements:</p>
+              <div className="grid grid-cols-2 gap-2 text-xs">
+                {[
+                  { check: newPassword.length >= 8, text: 'Minimum 8 characters' },
+                  { check: /[a-z]/.test(newPassword), text: 'Lowercase letter' },
+                  { check: /[A-Z]/.test(newPassword), text: 'Uppercase letter' },
+                  { check: /\d/.test(newPassword), text: 'Number' },
+                  { check: /[@$!%*?&]/.test(newPassword), text: 'Special character' },
+                ].map((req, idx) => (
+                  <div key={idx} className="flex items-center gap-2">
+                    <div className={cn(
+                      "w-1.5 h-1.5 rounded-full",
+                      req.check ? "bg-brand-success" : "bg-brand-muted"
+                    )} />
+                    <span className={req.check ? "text-brand-dark" : "text-brand-muted"}>
+                      {req.text}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         )}
 
-        <div className="p-3 bg-amber-50 border border-amber-200 rounded-md">
-          <p className="text-sm text-amber-700">
-            <strong>Important:</strong> After resetting your password, you'll be logged out of all other sessions for security.
-          </p>
+        {/* Security Notice */}
+        <div className="p-4 rounded-xl bg-brand-warning/10 border border-brand-warning/20">
+          <div className="flex items-start gap-3">
+            <Shield className="h-5 w-5 text-brand-warning mt-0.5 flex-shrink-0" />
+            <p className="text-sm text-brand-dark">
+              <strong className="text-brand-warning">Important:</strong> After resetting your password, 
+              you'll be logged out of all other sessions for security.
+            </p>
+          </div>
         </div>
 
         <Button
           type="submit"
-          className="w-full bg-mmp-primary hover:bg-mmp-primary2 shadow-sm"
+          className="w-full h-11 bg-brand-primary text-white hover:bg-brand-primary-hover shadow-sm transition-all duration-200"
           disabled={isPending}
-          size="lg"
         >
           {isPending ? (
             <>
@@ -274,10 +298,10 @@ function VendorResetPasswordPage() {
               Updating Password...
             </>
           ) : (
-            'Reset Admin Password'
+            'Reset Store Password'
           )}
         </Button>
       </form>
     </AuthFormWrapper>
-  )
+  );
 }

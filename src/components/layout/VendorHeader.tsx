@@ -1,8 +1,21 @@
-import React from "react";
+import React, { useMemo, useCallback, useEffect, useState } from "react";
 import { useRouter } from "@tanstack/react-router";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Bell, Menu, Shield, Home, Package, ShoppingCart, Wallet, Settings, ChevronRight} from "lucide-react";
+import {
+  Bell,
+  Menu,
+  Shield,
+  Home,
+  Package,
+  ShoppingCart,
+  Wallet,
+  Settings,
+  TrendingUp,
+  Users,
+  Star,
+  Loader2,
+} from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,253 +25,557 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface VendorHeaderProps {
   onMobileOpen?: () => void;
 }
 
-// Map routes to page titles and icons
-const pageConfig: Record<string, { title: string; icon: React.ElementType; description?: string; gradient?: string }> = {
-  '/vendor': {
-    title: 'Dashboard',
+// Type definitions
+interface PageConfig {
+  title: string;
+  icon: React.ElementType;
+  description?: string;
+  showLiveBadge?: boolean;
+  gradient?: string;
+}
+
+// Map routes to page configurations
+const pageConfig: Record<string, PageConfig> = {
+  "/vendor/dashboard": {
+    title: "Dashboard",
     icon: Home,
-    description: 'Overview of your store performance',
-    gradient: 'from-mmp-primary to-mmp-primary',
+    description: "Overview of your store performance",
+    showLiveBadge: true,
+    gradient: "from-brand-primary to-brand-primary",
   },
-  '/vendor/products': {
-    title: 'Products',
+  "/vendor": {
+    title: "Dashboard",
+    icon: Home,
+    description: "Overview of your store performance",
+    showLiveBadge: true,
+    gradient: "from-brand-primary to-brand-primary",
+  },
+  "/vendor/products": {
+    title: "Products",
     icon: Package,
-    description: 'Manage your product catalog',
-    gradient: 'from-mmp-primary to-mmp-secondary',
+    description: "Manage your product catalog",
+    gradient: "from-brand-primary to-brand-accent",
   },
-  '/vendor/products/new': {
-    title: 'Add New Product',
+  "/vendor/products/new": {
+    title: "Add New Product",
     icon: Package,
-    description: 'Create a new product listing',
-    gradient: 'from-mmp-primary to-mmp-neutral',
+    description: "Create a new product listing",
+    gradient: "from-brand-primary to-brand-muted",
   },
-  '/vendor/orders': {
-    title: 'Orders',
+  "/vendor/orders": {
+    title: "Orders",
     icon: ShoppingCart,
-    description: 'Track and manage customer orders',
-    gradient: 'from-mmp-secondary to-mmp-primary2',
+    description: "Track and manage customer orders",
+    gradient: "from-brand-accent to-brand-primary",
   },
-  '/vendor/wallet': {
-    title: 'Wallet',
+  "/vendor/wallet": {
+    title: "Wallet",
     icon: Wallet,
-    description: 'Manage your earnings and transactions',
-    gradient: 'from-mmp-primary to-mmp-secondary',
+    description: "Manage your earnings and transactions",
+    gradient: "from-brand-primary to-brand-accent",
   },
-  '/vendor/settings': {
-    title: 'Settings',
+  "/vendor/settings": {
+    title: "Settings",
     icon: Settings,
-    description: 'Configure your store preferences',
-    gradient: 'from-mmp-primary2 to-mmp-secondary',
+    description: "Configure your store preferences",
+    gradient: "from-brand-muted to-brand-accent",
   },
+};
+
+// Dynamic route patterns with regex matching
+const dynamicRouteConfigs = [
+  {
+    pattern: /^\/vendor\/products\/edit\/\d+$/,
+    getConfig: (): PageConfig => ({
+      title: "Edit Product",
+      icon: Package,
+      description: "Update product details",
+      gradient: "from-brand-primary to-brand-muted",
+    }),
+  },
+  {
+    pattern: /^\/vendor\/products\/\d+$/,
+    getConfig: (): PageConfig => ({
+      title: "Product Details",
+      icon: Package,
+      description: "View product information",
+      gradient: "from-brand-primary to-brand-accent",
+    }),
+  },
+  {
+    pattern: /^\/vendor\/orders\/\d+$/,
+    getConfig: (): PageConfig => ({
+      title: "Order Details",
+      icon: ShoppingCart,
+      description: "View order information",
+      gradient: "from-brand-accent to-brand-primary",
+    }),
+  },
+  {
+    pattern: /^\/vendor\/wallet\/transactions$/,
+    getConfig: (): PageConfig => ({
+      title: "Transactions",
+      icon: Wallet,
+      description: "View all wallet transactions",
+      gradient: "from-brand-primary to-brand-accent",
+    }),
+  },
+  {
+    pattern: /^\/vendor\/products\/category\/[\w-]+$/,
+    getConfig: (): PageConfig => ({
+      title: "Category Products",
+      icon: Package,
+      description: "Browse products by category",
+      gradient: "from-brand-primary to-brand-muted",
+    }),
+  },
+];
+
+// Mock notifications data (would come from API in production)
+interface Notification {
+  id: string;
+  title: string;
+  message: string;
+  time: string;
+  isNew: boolean;
+  type: "order" | "payment" | "inventory" | "system";
+  actionUrl?: string;
+}
+
+const mockNotifications: Notification[] = [
+  {
+    id: "1",
+    title: "New Order Received",
+    message: "Order #ORD-78945 has been placed",
+    time: "2 minutes ago",
+    isNew: true,
+    type: "order",
+    actionUrl: "/vendor/orders/78945",
+  },
+  {
+    id: "2",
+    title: "Payment Received",
+    message: "₦45,000 added to your wallet",
+    time: "1 hour ago",
+    isNew: true,
+    type: "payment",
+    actionUrl: "/vendor/wallet",
+  },
+  {
+    id: "3",
+    title: "Product Out of Stock",
+    message: "Update inventory for Premium T-Shirt",
+    time: "3 hours ago",
+    isNew: false,
+    type: "inventory",
+    actionUrl: "/vendor/products/edit/123",
+  },
+];
+
+// Helper function to format relative time
+const formatRelativeTime = (timeString: string): string => {
+  const minutes = parseInt(timeString);
+  if (!isNaN(minutes)) {
+    if (minutes < 60) return `${minutes} minutes ago`;
+    if (minutes < 1440) return `${Math.floor(minutes / 60)} hours ago`;
+    return `${Math.floor(minutes / 1440)} days ago`;
+  }
+  return timeString;
 };
 
 export const VendorHeader: React.FC<VendorHeaderProps> = ({ onMobileOpen }) => {
   const router = useRouter();
-  const [isSearchFocused, setIsSearchFocused] = React.useState<boolean>(false);
-  const [isMobileSearchOpen, setIsMobileSearchOpen] = React.useState<boolean>(false);
-  const [currentPage, setCurrentPage] = React.useState(() => {
-    const path = router.state.location.pathname;
-    return pageConfig[path] || { title: 'Store Dashboard', icon: Shield, gradient: 'from-mmp-primary to-mmp-primary' };
-  });
+  const [notifications, setNotifications] =
+    useState<Notification[]>(mockNotifications);
+  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
-  // Update current page when route changes
-  React.useEffect(() => {
-    const unsubscribe = router.subscribe('onLoad', () => {
-      const path = router.state.location.pathname;
-      
-      // Check exact match first, then check for dynamic routes
-      let config = pageConfig[path];
-      
-      // Handle dynamic routes like /vendor/products/edit/123
-      if (!config) {
-        if (path.startsWith('/vendor/products/')) {
-          if (path.includes('/edit/')) {
-            config = {
-              title: 'Edit Product',
-              icon: Package,
-              description: 'Update product details',
-              gradient: 'from-mmp-primary to-mmp-neutral',
-            };
-          } else {
-            config = {
-              title: 'Product Details',
-              icon: Package,
-              description: 'View product information',
-              gradient: 'from-mmp-primary to-mmp-secondary',
-            };
-          }
-        } else if (path.startsWith('/vendor/orders/')) {
-          config = {
-            title: 'Order Details',
-            icon: ShoppingCart,
-            description: 'View order information',
-            gradient: 'from-mmp-secondary to-mmp-primary2',
-          };
-        }
+  // Safe pathname access with fallback
+  const currentPath = useMemo(() => {
+    try {
+      return router?.state?.location?.pathname || "/vendor";
+    } catch (error) {
+      console.error("Error accessing router path:", error);
+      return "/vendor";
+    }
+  }, [router?.state?.location?.pathname]);
+
+  // Memoized page detection based on current route
+  const currentPageConfig = useMemo((): PageConfig => {
+    // Add debug logging in development
+    if (process.env.NODE_ENV === "development") {
+      console.log("Current path:", currentPath);
+    }
+
+    // Check exact match first
+    if (pageConfig[currentPath]) {
+      return pageConfig[currentPath];
+    }
+
+    // Check dynamic routes with regex patterns
+    for (const dynamicConfig of dynamicRouteConfigs) {
+      if (dynamicConfig.pattern.test(currentPath)) {
+        return dynamicConfig.getConfig();
+      }
+    }
+
+    // Handle vendor sub-routes with prefix matching
+    if (currentPath.startsWith("/vendor/")) {
+      const subPath = currentPath.replace("/vendor/", "");
+      const firstSegment = subPath.split("/")[0];
+
+      const subRouteMap: Record<string, PageConfig> = {
+        analytics: {
+          title: "Analytics",
+          icon: TrendingUp,
+          description: "View your store analytics",
+          gradient: "from-brand-primary to-brand-accent",
+          showLiveBadge: true,
+        },
+        reviews: {
+          title: "Reviews",
+          icon: Star,
+          description: "Manage customer reviews",
+          gradient: "from-brand-primary to-brand-muted",
+        },
+        customers: {
+          title: "Customers",
+          icon: Users,
+          description: "Manage your customers",
+          gradient: "from-brand-accent to-brand-primary",
+        },
+      };
+
+      if (subRouteMap[firstSegment]) {
+        return subRouteMap[firstSegment];
+      }
+    }
+
+    // Default fallback for vendor routes
+    if (currentPath.startsWith("/vendor")) {
+      return {
+        title: "Vendor Dashboard",
+        icon: Shield,
+        description: "Manage your store",
+        gradient: "from-brand-primary to-brand-primary",
+        showLiveBadge: true,
+      };
+    }
+
+    // Ultimate fallback
+    return {
+      title: "Dashboard",
+      icon: Home,
+      description: "Welcome to your dashboard",
+      gradient: "from-brand-primary to-brand-primary",
+      showLiveBadge: false,
+    };
+  }, [currentPath]);
+  // Memoized unread count
+  const unreadCount = useMemo(() => {
+    return notifications.filter((n) => n.isNew).length;
+  }, [notifications]);
+
+  // Simulate loading new notifications
+  useEffect(() => {
+    const fetchNotifications = async () => {
+      setIsLoading(true);
+      // Simulate API call
+      await new Promise((resolve) => setTimeout(resolve, 500));
+      // In production, fetch from API here
+      setIsLoading(false);
+    };
+
+    if (isNotificationsOpen) {
+      fetchNotifications();
+    }
+  }, [isNotificationsOpen]);
+
+  // Handle mark all as read
+  const handleMarkAllRead = useCallback(() => {
+    setNotifications((prev) => prev.map((n) => ({ ...n, isNew: false })));
+  }, []);
+
+  // Handle notification click
+  const handleNotificationClick = useCallback(
+    (notification: Notification) => {
+      if (notification.isNew) {
+        setNotifications((prev) =>
+          prev.map((n) =>
+            n.id === notification.id ? { ...n, isNew: false } : n,
+          ),
+        );
       }
 
-      setCurrentPage(config || { title: 'Store Dashboard', icon: Shield, gradient: 'from-mmp-primary to-mmp-primary' });
-    });
+      if (notification.actionUrl) {
+        router.navigate({ to: notification.actionUrl });
+        setIsNotificationsOpen(false);
+      }
+    },
+    [router],
+  );
 
-    return () => unsubscribe();
-  }, [router]);
+  // Get icon color based on notification type
+  const getNotificationIcon = (type: Notification["type"]) => {
+    switch (type) {
+      case "order":
+        return <ShoppingCart className="h-3 w-3 text-brand-primary" />;
+      case "payment":
+        return <Wallet className="h-3 w-3 text-brand-success" />;
+      case "inventory":
+        return <Package className="h-3 w-3 text-brand-warning" />;
+      default:
+        return <Bell className="h-3 w-3 text-brand-muted" />;
+    }
+  };
 
-  const PageIcon = currentPage.icon;
-  const gradientClass = currentPage.gradient || 'from-mmp-primary to-mmp-primary';
+  const PageIcon = currentPageConfig.icon;
+  const gradientClass =
+    currentPageConfig.gradient || "from-brand-primary to-brand-primary";
 
   return (
-    <motion.header
-      initial={{ y: -100 }}
-      animate={{ y: 0 }}
-      transition={{ duration: 0.4, type: "spring", stiffness: 100 }}
-      className="sticky top-0 z-30 w-full bg-white/95 backdrop-blur-md shadow-lg border-b border-mmp-primary2/20"
-    >
+    <header className="sticky top-0 z-40 w-full bg-white/95 backdrop-blur-md shadow-lg border-b border-brand-primary-soft">
       <div className="mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex h-16 sm:h-20 items-center justify-between">
+        <div className="flex h-16 sm:h-20 items-center justify-between gap-4">
           {/* Left Section */}
-          <div className="flex items-center gap-3 lg:gap-4">
+          <div className="flex items-center gap-3 lg:gap-4 min-w-0">
             {/* Mobile Menu Button */}
             <Button
               variant="ghost"
               size="icon"
               onClick={onMobileOpen}
-              className="lg:hidden text-black hover:bg-mmp-primary2/20 transition-all duration-300 rounded-xl h-10 w-10"
+              className="lg:hidden text-brand-dark hover:bg-brand-primary-soft transition-all duration-200 rounded-lg h-10 w-10 shrink-0"
               aria-label="Open menu"
             >
               <Menu className="h-5 w-5" />
             </Button>
 
-            {/* Page Title with Icon */}
-            <div className="hidden md:flex items-center gap-3">
-              <div>
-                <div className="flex items-center gap-2">
-                  <h1 className="font-bold text-lg text-black">
-                    {currentPage.title}
-                  </h1>
-                  {currentPage.title === 'Dashboard' && (
-                    <Badge variant="outline" className="text-[10px] h-5 border-mmp-primary/30 text-mmp-primary bg-mmp-primary/10 font-medium">
-                      <span className="relative flex h-1.5 w-1.5 mr-1">
-                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-mmp-primary opacity-75"></span>
-                        <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-mmp-primary"></span>
+            {/* Page Title Section - Desktop */}
+            <div className="hidden md:flex items-center gap-3 min-w-0">
+              {/* Animated Icon Container */}
+              <motion.div
+                key={`${currentPath}-icon`}
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ duration: 0.2 }}
+                className={`h-10 w-10 rounded-lg bg-gradient-to-br ${gradientClass} flex items-center justify-center shadow-sm shrink-0`}
+              >
+                <PageIcon className="h-5 w-5 text-white" />
+              </motion.div>
+
+              <div className="min-w-0">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <motion.h1
+                    key={`${currentPath}-title`}
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    className="font-bold text-xl text-brand-dark truncate"
+                  >
+                    {currentPageConfig.title}
+                  </motion.h1>
+
+                  {currentPageConfig.showLiveBadge && (
+                    <Badge
+                      variant="outline"
+                      className="text-[10px] h-5 border-brand-success/30 text-brand-success bg-brand-success/10 font-medium shrink-0"
+                    >
+                      <span className="relative flex h-1.5 w-1.5 mr-1.5">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-success opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-brand-success"></span>
                       </span>
                       Live
                     </Badge>
                   )}
                 </div>
-                {currentPage.description && (
+
+                {currentPageConfig.description && (
                   <motion.p
-                    initial={{ opacity: 0, x: -10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    className="text-xs text-black/60"
+                    key={`${currentPath}-desc`}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.1 }}
+                    className="text-xs text-brand-muted mt-0.5"
                   >
-                    {currentPage.description}
+                    {currentPageConfig.description}
                   </motion.p>
                 )}
               </div>
             </div>
 
             {/* Mobile Page Title */}
-            <div className="md:hidden flex items-center gap-2">
-              <span className="font-semibold text-xl text-black truncate max-w-[150px]">
-                {currentPage.title}
-              </span>
+            <div className="md:hidden flex items-center gap-2 min-w-0">
+              <motion.div
+                key={`${currentPath}-mobile`}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="flex items-center gap-2"
+              >
+                <div
+                  className={`h-8 w-8 rounded-lg bg-gradient-to-br ${gradientClass} flex items-center justify-center shrink-0`}
+                >
+                  <PageIcon className="h-4 w-4 text-white" />
+                </div>
+                <h1 className="font-bold text-lg text-brand-dark truncate">
+                  {currentPageConfig.title}
+                </h1>
+              </motion.div>
             </div>
           </div>
 
           {/* Right Section */}
-          <div className="flex items-center gap-2 lg:gap-3">
-            {/* Notifications */}
-            <DropdownMenu>
+          <div className="flex items-center gap-2 lg:gap-3 shrink-0">
+            {/* Notifications Dropdown */}
+            <DropdownMenu
+              open={isNotificationsOpen}
+              onOpenChange={setIsNotificationsOpen}
+            >
               <DropdownMenuTrigger asChild>
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="relative text-black hover:bg-mmp-primary2/20 transition-all duration-300 rounded-xl h-10 w-10"
-                  aria-label="Notifications"
+                  className="relative text-brand-dark hover:bg-brand-primary-soft transition-all duration-200 rounded-lg h-10 w-10"
+                  aria-label={`Notifications ${unreadCount > 0 ? `(${unreadCount} unread)` : ""}`}
                 >
                   <Bell className="h-5 w-5" />
-                  <motion.span
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-gradient-to-r from-mmp-primary to-mmp-neutral text-[10px] text-white flex items-center justify-center border-2 border-white font-bold shadow-sm"
-                  >
-                    3
-                  </motion.span>
+
+                  <AnimatePresence>
+                    {unreadCount > 0 && (
+                      <motion.span
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        exit={{ scale: 0 }}
+                        className="absolute -top-1 -right-1 min-w-[1.25rem] h-5 px-1 rounded-full bg-gradient-to-r from-brand-primary to-brand-accent text-[10px] text-white flex items-center justify-center border-2 border-white font-bold shadow-sm"
+                      >
+                        {unreadCount > 9 ? "9+" : unreadCount}
+                      </motion.span>
+                    )}
+                  </AnimatePresence>
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-80 mt-2 bg-white border-mmp-primary2/20 shadow-xl rounded-xl p-0">
-                <DropdownMenuLabel className="flex items-center justify-between p-4 border-b border-mmp-primary2/20">
-                  <span className="text-base font-bold text-black">Notifications</span>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-auto p-0 text-xs text-mmp-primary hover:text-mmp-primary/80 font-medium"
-                  >
-                    Mark all read
-                  </Button>
+
+              <DropdownMenuContent
+                align="end"
+                className="w-80 mt-2 bg-white border-brand-primary-soft shadow-xl rounded-xl p-0 overflow-hidden"
+              >
+                <DropdownMenuLabel className="flex items-center justify-between p-4 border-b border-brand-primary-soft">
+                  <span className="text-base font-bold text-brand-dark">
+                    Notifications
+                  </span>
+                  {unreadCount > 0 && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={handleMarkAllRead}
+                      className="h-auto p-0 text-xs text-brand-primary hover:text-brand-primary-hover font-medium"
+                    >
+                      Mark all read
+                    </Button>
+                  )}
                 </DropdownMenuLabel>
-                <div className="max-h-80 overflow-y-auto">
-                  {[1, 2, 3].map((i, idx) => (
-                    <DropdownMenuItem key={idx} className="cursor-pointer p-3 hover:bg-mmp-primary2/5 transition-all duration-300 border-b border-mmp-primary2/10 last:border-0">
-                      <div className="space-y-1.5 w-full">
-                        <div className="flex items-center justify-between">
-                          <p className="font-semibold text-sm text-black">
-                            {idx === 0 ? 'New Order Received' : idx === 1 ? 'Payment Received' : 'Product Out of Stock'}
-                          </p>
-                          {idx < 2 && (
-                            <Badge className="text-[8px] h-4 bg-mmp-primary/10 text-mmp-primary border-mmp-primary/20">
-                              New
-                            </Badge>
-                          )}
-                        </div>
-                        <p className="text-xs text-black/70">
-                          {idx === 0 ? 'Order #ORD-78945 has been placed' : idx === 1 ? '₦45,000 added to wallet' : 'Update inventory for Product #123'}
-                        </p>
-                        <p className="text-[10px] text-black/40">
-                          {idx === 0 ? '2 minutes ago' : idx === 1 ? '1 hour ago' : '3 hours ago'}
-                        </p>
+
+                <ScrollArea className="max-h-80">
+                  {isLoading ? (
+                    <div className="py-12 text-center">
+                      <Loader2 className="h-8 w-8 text-brand-primary animate-spin mx-auto mb-3" />
+                      <p className="text-sm text-brand-muted">
+                        Loading notifications...
+                      </p>
+                    </div>
+                  ) : notifications.length > 0 ? (
+                    <div className="divide-y divide-brand-primary-soft">
+                      {notifications.map((notification) => (
+                        <DropdownMenuItem
+                          key={notification.id}
+                          className="cursor-pointer p-4 hover:bg-brand-primary-soft transition-colors duration-200 focus:bg-brand-primary-soft"
+                          onClick={() => handleNotificationClick(notification)}
+                        >
+                          <div className="space-y-1.5 w-full">
+                            <div className="flex items-start justify-between gap-2">
+                              <p className="font-semibold text-sm text-brand-dark">
+                                {notification.title}
+                              </p>
+                              {notification.isNew && (
+                                <Badge className="text-[8px] h-4 bg-brand-primary-soft text-brand-primary border-brand-primary-soft">
+                                  New
+                                </Badge>
+                              )}
+                            </div>
+                            <p className="text-xs text-brand-muted leading-relaxed">
+                              {notification.message}
+                            </p>
+                            <div className="flex items-center gap-2">
+                              <p className="text-[10px] text-brand-muted/60">
+                                {formatRelativeTime(notification.time)}
+                              </p>
+                              <div className="flex items-center gap-1">
+                                {getNotificationIcon(notification.type)}
+                                <span className="text-[10px] capitalize text-brand-muted">
+                                  {notification.type}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        </DropdownMenuItem>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="py-12 text-center">
+                      <div className="h-12 w-12 rounded-full bg-brand-primary-soft flex items-center justify-center mx-auto mb-3">
+                        <Bell className="h-6 w-6 text-brand-muted" />
                       </div>
+                      <p className="text-sm text-brand-muted">
+                        No notifications
+                      </p>
+                      <p className="text-xs text-brand-muted/60 mt-1">
+                        You're all caught up!
+                      </p>
+                    </div>
+                  )}
+                </ScrollArea>
+
+                {/* {notifications.length > 0 && (
+                  <>
+                    <DropdownMenuSeparator className="bg-brand-primary-soft" />
+                    <DropdownMenuItem 
+                      className="justify-center cursor-pointer text-brand-primary hover:text-brand-primary-hover font-medium text-sm py-3"
+                      onClick={() => {
+                        router.navigate({ to: '/vendor/notifications' });
+                        setIsNotificationsOpen(false);
+                      }}
+                    >
+                      View all notifications
                     </DropdownMenuItem>
-                  ))}
-                </div>
-                <DropdownMenuSeparator className="bg-mmp-primary2/20" />
-                <DropdownMenuItem className="justify-center cursor-pointer text-mmp-primary hover:text-mmp-primary/80 font-medium text-sm p-3">
-                  View all notifications
-                </DropdownMenuItem>
+                  </>
+                )} */}
               </DropdownMenuContent>
             </DropdownMenu>
+
+            {/* Quick Stats Indicator */}
+            <div className="hidden lg:flex items-center gap-2 pl-2 border-l border-brand-primary-soft">
+              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-brand-primary-soft/50 transition-all hover:bg-brand-primary-soft">
+                <Users className="h-3.5 w-3.5 text-brand-primary" />
+                <span className="text-xs font-medium text-brand-dark">
+                  1,234
+                </span>
+                <span className="text-[10px] text-brand-muted">visitors</span>
+              </div>
+              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-brand-success/5 transition-all hover:bg-brand-success/10">
+                <Star className="h-3.5 w-3.5 text-brand-accent" />
+                <span className="text-xs font-medium text-brand-dark">4.8</span>
+                <span className="text-[10px] text-brand-muted">rating</span>
+              </div>
+            </div>
           </div>
         </div>
-
-        {/* Breadcrumb Navigation */}
-        {/* <AnimatePresence>
-          {currentPage.title !== 'Dashboard' && (
-            <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              className="hidden lg:flex items-center gap-2 text-xs text-black/60 mt-1 pb-2 border-t border-mmp-primary2/10 pt-3"
-            >
-              <span className="text-black font-medium hover:text-mmp-primary transition-colors cursor-pointer">
-                Vendor
-              </span>
-              <ChevronRight className="h-3 w-3 text-black/40" />
-              <span className="text-black/80 font-medium">{currentPage.title}</span>
-              {currentPage.description && (
-                <>
-                  <ChevronRight className="h-3 w-3 text-black/40" />
-                  <span className="text-black/60">{currentPage.description}</span>
-                </>
-              )}
-            </motion.div>
-          )}
-        </AnimatePresence> */}
       </div>
-    </motion.header>
+    </header>
   );
 };
+
+VendorHeader.displayName = "VendorHeader";
