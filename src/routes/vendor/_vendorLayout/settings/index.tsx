@@ -1,347 +1,637 @@
-import { createFileRoute } from '@tanstack/react-router';
-import { useMemo, useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
+import { createFileRoute } from "@tanstack/react-router";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Separator } from "@/components/ui/separator";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from '@/components/ui/alert-dialog';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { useAuth } from '@/hooks';
-import { toast } from 'react-toastify';
-import {
-  CheckCircle2,
-  Edit3,
+  Loader2,
+  Store,
   Mail,
-  MapPin,
   Phone,
-  Power,
+  MapPin,
+  Star,
+  FileText,
+  Edit2,
+  Check,
+  X,
+  Package,
+  Building2,
   Shield,
-  Upload,
-} from 'lucide-react';
-import { SettingsFormData, settingsSchema } from '@/lib';
+  Clock,
+  CheckCircle2,
+  XCircle,
+  ShoppingBag,
+  Wallet,
+  Info,
+  Globe,
+  Calendar,
+  Image as ImageIcon,
+} from "lucide-react";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { IVendor, IUpdateVendorPayload, AccountStatus } from "@/types";
+import { toast } from "react-toastify";
+import { vendorProfile } from "@/api/queries";
+import { useUpdateVendorProfile } from "@/api/queries";
+import { vendorUpdateSchema } from "@/lib";
+import { Link } from "@tanstack/react-router";
+import { LoadingState } from "@/components/ui/loading-state";
+import { ServerError } from "@/components/ui/error-state";
 
-export const Route = createFileRoute('/vendor/_vendorLayout/settings/')({
-  component: VendorSettings,
+export const Route = createFileRoute("/vendor/_vendorLayout/settings/")({
+  loader: async ({ context }) => {
+    const res =  await context.queryClient.ensureQueryData(vendorProfile());
+    console.log('Check response from vendor settings : ',res)
+    return res
+  },
+  component: VendorAccountPage,
+  pendingComponent: LoadingState,
+  errorComponent: ServerError,
 });
 
+function VendorAccountPage() {
+  const profile = Route.useLoaderData();
+  const [isEditing, setIsEditing] = useState(false);
+  const updateProfile = useUpdateVendorProfile();
 
-function VendorSettings() {
-  const { vendor } = useAuth();
-  const [isEditOpen, setIsEditOpen] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
-
-  const defaultValues = useMemo(
-    () => ({
-      businessName: vendor?.businessName || '',
-      email: vendor?.email || '',
-      phone: vendor?.phone || '',
-      description: vendor?.description || '',
-      location: vendor?.location || {
-        street: '',
-        city: '',
-        state: '',
-        country: 'Nigeria',
+  const form = useForm<IUpdateVendorPayload>({
+    resolver: zodResolver(vendorUpdateSchema as any),
+    defaultValues: {
+      fullName: profile?.fullName || "",
+      businessName: profile?.businessName || "",
+      description: profile?.description || "",
+      phone: profile?.phone || "",
+      email: profile?.email || "",
+      logoUrl: profile?.logoUrl || "",
+      location: {
+        street: profile?.location?.street || "",
+        city: profile?.location?.city || "",
+        state: profile?.location?.state || "",
+        country: profile?.location?.country || "",
       },
-    }),
-    [vendor]
-  );
-
-  const {
-    register,
-    handleSubmit,
-    formState: { errors, isDirty },
-    reset,
-  } = useForm<SettingsFormData>({
-    resolver: zodResolver(settingsSchema as any),
-    defaultValues,
+    },
   });
 
-  const onSubmit = async (data: SettingsFormData) => {
+  const onSubmit = async (data: IUpdateVendorPayload) => {
     try {
-      setIsSaving(true);
-      // In real app, call API here
-      console.log('Settings update:', data);
-      toast.success('Settings updated successfully');
-      reset(data);
-      setIsEditOpen(false);
+      await updateProfile.mutateAsync(data);
+      toast.success("Business profile updated successfully");
+      setIsEditing(false);
     } catch (error: any) {
-      toast.error(error.message || 'Failed to update settings');
-    } finally {
-      setIsSaving(false);
+      if (error.response?.status === 409) {
+        toast.error("Business name or email already in use");
+      } else {
+        toast.error("Failed to update profile. Please try again.");
+      }
     }
   };
 
-  const handleDeactivate = async () => {
-    toast.info('Account deactivation request queued. Support will contact you shortly.');
+  const vendor = profile as IVendor;
+
+  const getStatusConfig = (status: AccountStatus) => {
+    switch (status) {
+      case AccountStatus.ACTIVE:
+        return {
+          variant: "default" as const,
+          icon: CheckCircle2,
+          label: "Active",
+          color:
+            "text-brand-success bg-brand-success/10 border-brand-success/20",
+          description: "Your account is fully active and operational.",
+        };
+      case AccountStatus.UNDER_REVIEW:
+        return {
+          variant: "secondary" as const,
+          icon: Clock,
+          label: "Under Review",
+          color:
+            "text-brand-warning bg-brand-warning/10 border-brand-warning/20",
+          description: "Your account is being reviewed by our team.",
+        };
+      case AccountStatus.SUSPENDED:
+        return {
+          variant: "destructive" as const,
+          icon: XCircle,
+          label: "Suspended",
+          color: "text-brand-error bg-brand-error/10 border-brand-error/20",
+          description:
+            "Your account has been suspended. Please contact support.",
+        };
+      case AccountStatus.REJECTED:
+        return {
+          variant: "destructive" as const,
+          icon: XCircle,
+          label: "Rejected",
+          color: "text-brand-error bg-brand-error/10 border-brand-error/20",
+          description:
+            "Your application was rejected. Please contact support for details.",
+        };
+      default:
+        return {
+          variant: "secondary" as const,
+          icon: Info,
+          label: "Pending",
+          color: "text-brand-muted bg-brand-surface border-brand-primary-soft",
+          description: "Your account is being processed.",
+        };
+    }
   };
 
-  const vendorInitials =
-    vendor?.businessName
-      ?.split(' ')
-      .map((name) => name[0])
-      .join('')
-      .slice(0, 2)
-      .toUpperCase() || 'VK';
+  const statusConfig = getStatusConfig(vendor.accountStatus);
 
   return (
-    <div className="space-y-6 max-w-5xl">
-      <Card className="border-mmp-primary/20 shadow-sm">
-  <CardHeader className="bg-linear-to-r from-mmp-primary/5 to-transparent">
-          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-            <div className="flex items-center gap-4">
-              <Avatar size="lg" className="size-16 ring-2 ring-mmp-primary/20">
-                <AvatarImage src={vendor?.logoUrl || ''} alt={vendor?.businessName || 'Vendor'} />
-                <AvatarFallback className="bg-mmp-primary/10 text-mmp-primary font-semibold text-lg">
-                  {vendorInitials}
-                </AvatarFallback>
-              </Avatar>
-              <div>
-                <CardTitle className="text-2xl">{vendor?.businessName || 'Vendor Profile'}</CardTitle>
-                <CardDescription className="mt-1 flex items-center gap-2">
-                  <Shield className="h-4 w-4" />
-                  Manage how your business appears to customers.
-                </CardDescription>
-              </div>
-            </div>
+    <div className="min-h-screen">
+      {/* Header Section */}
+      {/* <div className="mb-6 sm:mb-8 lg:mb-10">
+        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-brand-dark mb-2">
+          Account Settings
+        </h1>
+        <p className="text-brand-muted text-sm sm:text-base">
+          Manage your business profile, view analytics, and track performance
+        </p>
+      </div> */}
 
-            <div className="flex flex-wrap items-center gap-2">
-              <Badge variant={vendor?.verified ? 'default' : 'secondary'} className="gap-1">
-                <CheckCircle2 className="h-3.5 w-3.5" />
-                {vendor?.verified ? 'Verified Vendor' : 'Verification Pending'}
-              </Badge>
+      {/* Account Status Alert */}
+      {vendor.accountStatus !== AccountStatus.ACTIVE && (
+        <Alert className={`mb-6 border ${statusConfig.color}`}>
+          <statusConfig.icon className="h-4 w-4" />
+          <AlertDescription className="font-medium">
+            {statusConfig.description}
+          </AlertDescription>
+        </Alert>
+      )}
 
-              <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
-                <DialogTrigger asChild>
-                  <Button>
-                    <Edit3 className="h-4 w-4 mr-2" />
+      {/* Business Profile Tab */}
+      <div className="space-y-6">
+        <div className="grid gap-6 lg:grid-cols-3">
+          {/* Business Information Form */}
+          <Card className="lg:col-span-2 border-brand-primary-soft shadow-sm hover:shadow-md transition-shadow">
+            <CardHeader className="border-b border-brand-primary-soft bg-brand-surface/50">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div>
+                  <CardTitle className="text-brand-dark flex items-center gap-2">
+                    <Building2 className="w-5 h-5 text-brand-primary" />
+                    Business Information
+                  </CardTitle>
+                  <CardDescription className="text-brand-muted mt-1">
+                    Update your business details and contact information
+                  </CardDescription>
+                </div>
+                {!isEditing && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setIsEditing(true)}
+                    className="border-brand-primary text-brand-primary hover:bg-brand-primary-soft"
+                  >
+                    <Edit2 className="w-4 h-4 mr-2" />
                     Edit Profile
                   </Button>
-                </DialogTrigger>
-                <DialogContent className="sm:max-w-2xl max-h-[85vh] overflow-y-auto">
-                  <DialogHeader>
-                    <DialogTitle>Edit Vendor Profile</DialogTitle>
-                    <DialogDescription>
-                      Update business information shown to customers in your storefront.
-                    </DialogDescription>
-                  </DialogHeader>
-
-                  <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+                )}
+              </div>
+            </CardHeader>
+            <CardContent className="p-6">
+              {isEditing ? (
+                <form
+                  onSubmit={form.handleSubmit(onSubmit)}
+                  className="space-y-6"
+                >
+                  <div className="grid gap-4 sm:grid-cols-2">
                     <div className="space-y-2">
-                      <Label htmlFor="businessName">Business Name *</Label>
-                      <Input id="businessName" {...register('businessName')} />
-                      {errors.businessName && (
-                        <p className="text-sm text-red-600">{errors.businessName.message}</p>
-                      )}
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="description">Business Description</Label>
-                      <Textarea
-                        id="description"
-                        {...register('description')}
-                        rows={4}
-                        placeholder="Tell customers about your business"
+                      <Label
+                        htmlFor="businessName"
+                        className="text-brand-dark font-medium"
+                      >
+                        Business Name *
+                      </Label>
+                      <Input
+                        id="businessName"
+                        placeholder="Enter your business name"
+                        className="border-brand-primary-soft focus:border-brand-primary focus:ring-brand-primary/20"
+                        {...form.register("businessName")}
                       />
                     </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="email">Email *</Label>
-                        <Input id="email" type="email" {...register('email')} />
-                        {errors.email && (
-                          <p className="text-sm text-red-600">{errors.email.message}</p>
-                        )}
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="phone">Phone *</Label>
-                        <Input id="phone" type="tel" {...register('phone')} />
-                        {errors.phone && (
-                          <p className="text-sm text-red-600">{errors.phone.message}</p>
-                        )}
-                      </div>
-                    </div>
-
                     <div className="space-y-2">
-                      <Label htmlFor="street">Street Address *</Label>
-                      <Input id="street" {...register('location.street')} />
-                      {errors.location?.street && (
-                        <p className="text-sm text-red-600">{errors.location.street.message}</p>
+                      <Label
+                        htmlFor="fullName"
+                        className="text-brand-dark font-medium"
+                      >
+                        Contact Name *
+                      </Label>
+                      <Input
+                        id="fullName"
+                        placeholder="Your full name"
+                        className="border-brand-primary-soft focus:border-brand-primary focus:ring-brand-primary/20"
+                        {...form.register("fullName")}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label
+                      htmlFor="description"
+                      className="text-brand-dark font-medium"
+                    >
+                      Business Description
+                    </Label>
+                    <Textarea
+                      id="description"
+                      placeholder="Tell customers about your business, products, and values..."
+                      rows={4}
+                      className="border-brand-primary-soft focus:border-brand-primary focus:ring-brand-primary/20 resize-none"
+                      {...form.register("description")}
+                    />
+                  </div>
+
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <div className="space-y-2">
+                      <Label
+                        htmlFor="email"
+                        className="text-brand-dark font-medium"
+                      >
+                        Email Address *
+                      </Label>
+                      <Input
+                        id="email"
+                        type="email"
+                        placeholder="business@example.com"
+                        className="border-brand-primary-soft focus:border-brand-primary focus:ring-brand-primary/20"
+                        {...form.register("email")}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label
+                        htmlFor="phone"
+                        className="text-brand-dark font-medium"
+                      >
+                        Phone Number
+                      </Label>
+                      <Input
+                        id="phone"
+                        placeholder="+1 234 567 8900"
+                        className="border-brand-primary-soft focus:border-brand-primary focus:ring-brand-primary/20"
+                        {...form.register("phone")}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label
+                      htmlFor="logoUrl"
+                      className="text-brand-dark font-medium"
+                    >
+                      Logo URL
+                    </Label>
+                    <Input
+                      id="logoUrl"
+                      placeholder="https://example.com/your-logo.png"
+                      className="border-brand-primary-soft focus:border-brand-primary focus:ring-brand-primary/20"
+                      {...form.register("logoUrl")}
+                    />
+                    <p className="text-xs text-brand-muted">
+                      Provide a URL for your business logo (recommended size:
+                      200x200px)
+                    </p>
+                  </div>
+
+                  <Separator className="bg-brand-primary-soft" />
+
+                  <div className="space-y-4">
+                    <h4 className="font-semibold text-brand-dark flex items-center gap-2">
+                      <MapPin className="w-4 h-4 text-brand-primary" />
+                      Business Location
+                    </h4>
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      <div className="space-y-2">
+                        <Label htmlFor="street">Street Address</Label>
+                        <Input
+                          id="street"
+                          placeholder="123 Business St"
+                          className="border-brand-primary-soft focus:border-brand-primary focus:ring-brand-primary/20"
+                          {...form.register("location.street")}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="city">City</Label>
+                        <Input
+                          id="city"
+                          placeholder="New York"
+                          className="border-brand-primary-soft focus:border-brand-primary focus:ring-brand-primary/20"
+                          {...form.register("location.city")}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="state">State</Label>
+                        <Input
+                          id="state"
+                          placeholder="NY"
+                          className="border-brand-primary-soft focus:border-brand-primary focus:ring-brand-primary/20"
+                          {...form.register("location.state")}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="country">Country</Label>
+                        <Input
+                          id="country"
+                          placeholder="United States"
+                          className="border-brand-primary-soft focus:border-brand-primary focus:ring-brand-primary/20"
+                          {...form.register("location.country")}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col sm:flex-row gap-3 pt-4">
+                    <Button
+                      type="submit"
+                      disabled={updateProfile.isPending}
+                      className="flex-1 bg-brand-primary text-white hover:bg-brand-primary-hover"
+                    >
+                      {updateProfile.isPending ? (
+                        <>
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          Saving Changes...
+                        </>
+                      ) : (
+                        <>
+                          <Check className="w-4 h-4 mr-2" />
+                          Save All Changes
+                        </>
                       )}
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="city">City *</Label>
-                        <Input id="city" {...register('location.city')} />
-                        {errors.location?.city && (
-                          <p className="text-sm text-red-600">{errors.location.city.message}</p>
-                        )}
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label htmlFor="state">State *</Label>
-                        <Input id="state" {...register('location.state')} />
-                        {errors.location?.state && (
-                          <p className="text-sm text-red-600">{errors.location.state.message}</p>
-                        )}
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label htmlFor="country">Country *</Label>
-                        <Input id="country" {...register('location.country')} />
-                        {errors.location?.country && (
-                          <p className="text-sm text-red-600">{errors.location.country.message}</p>
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="rounded-lg border p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                      <div>
-                        <Label>Business Logo</Label>
-                        <p className="text-xs text-gray-500 mt-1">
-                          PNG/JPG up to 5MB. Recommended square image.
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => {
+                        setIsEditing(false);
+                        form.reset();
+                      }}
+                      className="border-brand-muted text-brand-dark hover:bg-brand-surface"
+                    >
+                      <X className="w-4 h-4 mr-2" />
+                      Cancel
+                    </Button>
+                  </div>
+                </form>
+              ) : (
+                <div className="space-y-4">
+                  <div className="flex items-start gap-3 p-3 rounded-lg hover:bg-brand-surface transition-colors">
+                    <Store className="w-5 h-5 text-brand-primary mt-0.5" />
+                    <div className="flex-1">
+                      <p className="text-xs text-brand-muted uppercase tracking-wide mb-1">
+                        Business Name
+                      </p>
+                      <p className="font-semibold text-brand-dark">
+                        {vendor.businessName}
+                      </p>
+                      <div className="flex items-center gap-2 mt-1">
+                        <Globe className="w-3 h-3 text-brand-muted" />
+                        <p className="text-sm text-brand-muted">
+                          Slug: {vendor.slug}
                         </p>
                       </div>
-                      <Button type="button" variant="outline">
-                        <Upload className="h-4 w-4 mr-2" />
-                        Upload Logo
-                      </Button>
                     </div>
+                  </div>
 
-                    <DialogFooter>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        onClick={() => {
-                          reset(defaultValues);
-                          setIsEditOpen(false);
-                        }}
-                      >
-                        Cancel
-                      </Button>
-                      <Button type="submit" disabled={!isDirty || isSaving}>
-                        {isSaving ? 'Saving...' : 'Save Changes'}
-                      </Button>
-                    </DialogFooter>
-                  </form>
-                </DialogContent>
-              </Dialog>
+                  {vendor.description && (
+                    <>
+                      <Separator className="bg-brand-primary-soft" />
+                      <div className="flex items-start gap-3 p-3 rounded-lg hover:bg-brand-surface transition-colors">
+                        <FileText className="w-5 h-5 text-brand-primary mt-0.5" />
+                        <div className="flex-1">
+                          <p className="text-xs text-brand-muted uppercase tracking-wide mb-1">
+                            Description
+                          </p>
+                          <p className="text-brand-dark leading-relaxed">
+                            {vendor.description}
+                          </p>
+                        </div>
+                      </div>
+                    </>
+                  )}
 
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <Button variant="outline" className="text-red-600 hover:text-red-700">
-                    <Power className="h-4 w-4 mr-2" />
-                    Deactivate
-                  </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>Deactivate vendor account?</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      Your products will be hidden from customers until reactivation.
-                      You can contact support to restore access.
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction variant="destructive" onClick={handleDeactivate}>
-                      Deactivate Account
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
-            </div>
+                  <Separator className="bg-brand-primary-soft" />
+                  <div className="flex items-center gap-3 p-3 rounded-lg hover:bg-brand-surface transition-colors">
+                    <Mail className="w-5 h-5 text-brand-primary" />
+                    <div className="flex-1">
+                      <p className="text-xs text-brand-muted uppercase tracking-wide mb-1">
+                        Email
+                      </p>
+                      <p className="text-brand-dark">{vendor.email}</p>
+                    </div>
+                  </div>
+
+                  {vendor.phone && (
+                    <>
+                      <Separator className="bg-brand-primary-soft" />
+                      <div className="flex items-center gap-3 p-3 rounded-lg hover:bg-brand-surface transition-colors">
+                        <Phone className="w-5 h-5 text-brand-primary" />
+                        <div className="flex-1">
+                          <p className="text-xs text-brand-muted uppercase tracking-wide mb-1">
+                            Phone
+                          </p>
+                          <p className="text-brand-dark">{vendor.phone}</p>
+                        </div>
+                      </div>
+                    </>
+                  )}
+
+                  {(vendor.location?.street || vendor.location?.city) && (
+                    <>
+                      <Separator className="bg-brand-primary-soft" />
+                      <div className="flex items-start gap-3 p-3 rounded-lg hover:bg-brand-surface transition-colors">
+                        <MapPin className="w-5 h-5 text-brand-primary mt-0.5" />
+                        <div className="flex-1">
+                          <p className="text-xs text-brand-muted uppercase tracking-wide mb-1">
+                            Location
+                          </p>
+                          <p className="text-brand-dark">
+                            {[
+                              vendor.location?.street,
+                              vendor.location?.city,
+                              vendor.location?.state,
+                              vendor.location?.country,
+                            ]
+                              .filter(Boolean)
+                              .join(", ") || "Not set"}
+                          </p>
+                        </div>
+                      </div>
+                    </>
+                  )}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Account Status Card */}
+          <div className="space-y-6">
+            <Card className="border-brand-primary-soft shadow-sm">
+              <CardHeader className="border-b border-brand-primary-soft bg-brand-surface/50">
+                <CardTitle className="text-brand-dark flex items-center gap-2">
+                  <Shield className="w-5 h-5 text-brand-primary" />
+                  Account Status
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-6 space-y-4">
+                <div className="p-4 rounded-lg bg-brand-surface">
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="text-sm text-brand-muted">
+                      Verification Status
+                    </p>
+                    <Badge
+                      variant={vendor.verified ? "default" : "secondary"}
+                      className={
+                        vendor.verified
+                          ? "bg-brand-success/10 text-brand-success border-brand-success/20"
+                          : "bg-brand-warning/10 text-brand-warning border-brand-warning/20"
+                      }
+                    >
+                      {vendor.verified ? (
+                        <CheckCircle2 className="w-3 h-3 mr-1" />
+                      ) : (
+                        <Clock className="w-3 h-3 mr-1" />
+                      )}
+                      {vendor.verified ? "Verified" : "Unverified"}
+                    </Badge>
+                  </div>
+                </div>
+
+                <Separator className="bg-brand-primary-soft" />
+
+                <div className="p-4 rounded-lg bg-brand-surface">
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="text-sm text-brand-muted">Account Status</p>
+                    <Badge
+                      variant={statusConfig.variant}
+                      className={statusConfig.color}
+                    >
+                      <statusConfig.icon className="w-3 h-3 mr-1" />
+                      {statusConfig.label}
+                    </Badge>
+                  </div>
+                </div>
+
+                <Separator className="bg-brand-primary-soft" />
+
+                <div className="p-4 rounded-lg bg-brand-surface">
+                  <div className="flex items-center gap-3 mb-3">
+                    <Star className="w-5 h-5 text-brand-accent fill-brand-accent" />
+                    <div>
+                      <p className="text-sm text-brand-muted">Seller Rating</p>
+                      <p className="text-xl font-bold text-brand-dark">
+                        {vendor.ratingAverage.toFixed(1)}
+                        <span className="text-sm font-normal text-brand-muted">
+                          {" "}
+                          / 5.0
+                        </span>
+                      </p>
+                      <p className="text-xs text-brand-muted mt-1">
+                        Based on {vendor.ratingCount} review
+                        {vendor.ratingCount !== 1 ? "s" : ""}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {vendor.logoUrl && (
+                  <>
+                    <Separator className="bg-brand-primary-soft" />
+                    <div className="p-4 rounded-lg bg-brand-surface">
+                      <p className="text-sm text-brand-muted mb-3">
+                        Business Logo
+                      </p>
+                      <div className="relative inline-block">
+                        <img
+                          src={vendor.logoUrl}
+                          alt={vendor.businessName}
+                          className="w-24 h-24 rounded-xl object-cover border-2 border-brand-primary-soft shadow-sm"
+                        />
+                        <ImageIcon className="absolute -bottom-2 -right-2 w-5 h-5 text-brand-primary bg-white rounded-full p-1" />
+                      </div>
+                    </div>
+                  </>
+                )}
+
+                <Separator className="bg-brand-primary-soft" />
+
+                <div className="p-4 rounded-lg bg-brand-surface">
+                  <div className="flex items-center gap-3">
+                    <Calendar className="w-5 h-5 text-brand-primary" />
+                    <div>
+                      <p className="text-sm text-brand-muted">Member Since</p>
+                      <p className="font-semibold text-brand-dark">
+                        {new Date(
+                          vendor.createdAt || new Date(),
+                        ).toLocaleDateString("en-US", {
+                          year: "numeric",
+                          month: "long",
+                          day: "numeric",
+                        })}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Quick Actions Card */}
+            <Card className="border-brand-primary-soft bg-gradient-to-br from-brand-primary-soft to-white shadow-sm">
+              <CardHeader>
+                <CardTitle className="text-brand-dark text-lg">
+                  Quick Actions
+                </CardTitle>
+                <CardDescription className="text-brand-muted">
+                  Manage your store settings
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                <Button
+                  variant="outline"
+                  className="w-full justify-start border-brand-primary-soft hover:bg-brand-primary-soft"
+                  asChild
+                >
+                  <Link to="/vendor/products/new">
+                    <Package className="w-4 h-4 mr-2" />
+                    Add New Product
+                  </Link>
+                </Button>
+                <Button
+                  variant="outline"
+                  className="w-full justify-start border-brand-primary-soft hover:bg-brand-primary-soft"
+                  asChild
+                >
+                  <Link to="/vendor/orders">
+                    <ShoppingBag className="w-4 h-4 mr-2" />
+                    View Orders
+                  </Link>
+                </Button>
+                <Button
+                  variant="outline"
+                  className="w-full justify-start border-brand-primary-soft hover:bg-brand-primary-soft"
+                  asChild
+                >
+                  <Link to="/vendor/wallet">
+                    <Wallet className="w-4 h-4 mr-2" />
+                    Withdraw Earnings
+                  </Link>
+                </Button>
+              </CardContent>
+            </Card>
           </div>
-        </CardHeader>
-      </Card>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Contact Information</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4 text-sm">
-            <div className="flex items-start gap-3">
-              <Mail className="h-4 w-4 mt-0.5 text-mmp-primary" />
-              <div>
-                <p className="text-gray-500">Email</p>
-                <p className="font-medium text-gray-900">{vendor?.email || 'Not set'}</p>
-              </div>
-            </div>
-
-            <div className="flex items-start gap-3">
-              <Phone className="h-4 w-4 mt-0.5 text-mmp-primary" />
-              <div>
-                <p className="text-gray-500">Phone</p>
-                <p className="font-medium text-gray-900">{vendor?.phone || 'Not set'}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Business Location</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4 text-sm">
-            <div className="flex items-start gap-3">
-              <MapPin className="h-4 w-4 mt-0.5 text-mmp-primary" />
-              <div>
-                <p className="text-gray-500">Address</p>
-                <p className="font-medium text-gray-900">
-                  {vendor?.location?.street || 'Not set'}
-                </p>
-                <p className="text-gray-700">
-                  {[vendor?.location?.city, vendor?.location?.state, vendor?.location?.country]
-                    .filter(Boolean)
-                    .join(', ') || 'Not set'}
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        </div>
       </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Business Description</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-sm leading-relaxed text-gray-700">
-            {vendor?.description ||
-              'Add a clear business description so customers understand your brand, quality, and value.'}
-          </p>
-        </CardContent>
-      </Card>
     </div>
   );
 }

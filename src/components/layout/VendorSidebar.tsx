@@ -1,19 +1,15 @@
 import { useState } from "react";
-import { Link, useRouterState } from "@tanstack/react-router";
+import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import {
-  Home,
   Package,
   ShoppingCart,
-  Wallet,
   Settings,
   LogOut,
   ChevronRight,
   BadgeCheck,
   X,
   TrendingUp,
-  Truck,
-  Star,
   CreditCard,
   LayoutDashboard,
 } from "lucide-react";
@@ -165,9 +161,12 @@ const VendorInfo = ({
   onLogout: () => void;
   isMobile?: boolean;
 }) => {
+  const navigate = useNavigate()
   return (
     <div className="flex items-center justify-between gap-3">
-      <div className="flex items-center gap-3 flex-1 min-w-0 group cursor-pointer">
+      <div className="flex items-center gap-3 flex-1 min-w-0 group cursor-pointer" onClick={()=>{
+        navigate({to: '/vendor/settings'})
+      }}>
         <div className="relative shrink-0">
           <div className="h-12 w-12 rounded-full bg-brand-primary-soft flex items-center justify-center ring-2 ring-brand-primary/20 group-hover:ring-brand-primary/40 transition-all duration-200">
             <img

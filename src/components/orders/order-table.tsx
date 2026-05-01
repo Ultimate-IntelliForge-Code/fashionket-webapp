@@ -49,6 +49,8 @@ export const OrdersTable: React.FC<OrdersTableProps> = ({
     }
   };
 
+  console.log("Rendering OrdersTable with orders:", orders);
+
   return (
     <div className="bg-white rounded-xl border border-brand-primary-soft overflow-hidden shadow-sm">
       <div className="overflow-x-auto">

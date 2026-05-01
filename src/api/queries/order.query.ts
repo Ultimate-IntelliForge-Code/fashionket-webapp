@@ -40,6 +40,7 @@ export const orderQuery = (id: string) => ({
       throw new Error(response.error.message);
     }
 
+    console.log('Fetched Order:', response.data); // Debug log
     return response.data;
   },
 });

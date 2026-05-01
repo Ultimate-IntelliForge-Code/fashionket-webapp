@@ -28,8 +28,6 @@ export function isApiSuccess<T>(response: IApiResponse<T>): response is IApiSucc
  */
 export function isOrderCancellable(status: OrderStatus): boolean {
   return [
-    OrderStatus.PENDING_PAYMENT,
-    OrderStatus.PAID,
     OrderStatus.PROCESSING,
   ].includes(status);
 }

@@ -12,6 +12,7 @@ export interface IWithdrawal extends IBaseDocument, ITimestamps {
   amount: number; // kobo
   fee?: number;
   status: WithdrawalStatus;
+  reason: string
   method: string;
   reference: string;
   bankName: string;

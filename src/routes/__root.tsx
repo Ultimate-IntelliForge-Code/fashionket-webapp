@@ -2,46 +2,43 @@ import {
   HeadContent,
   Scripts,
   createRootRouteWithContext,
-} from "@tanstack/react-router";
-import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
-import { TanStackDevtools } from "@tanstack/react-devtools";
+} from '@tanstack/react-router';
+import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools';
+import { TanStackDevtools } from '@tanstack/react-devtools';
+import '../styles.css';
+import { QueryClientProvider } from '@tanstack/react-query';
+import { queryClient } from '@/lib/queryClient';
+import { ToastContainer } from 'react-toastify';
+import type { QueryClient } from '@tanstack/react-query';
+import { AuthInitializer } from '@/providers/auth-initializer';
 
-import "../styles.css";
-import { QueryClientProvider } from "@tanstack/react-query";
-import { queryClient } from "@/lib/queryClient";
-import { ToastContainer } from "react-toastify";
-import { QueryClient } from "@tanstack/react-query";
-import { AuthInitializer } from "@/providers/auth-initializer";
-import { useTokenRefresh } from "@/hooks";
+import { ensureAuthInitialized } from '@/lib/auth-init';
 
-// Define the type for your router context
 interface MyRouterContext {
   queryClient: QueryClient;
 }
 
 export const Route = createRootRouteWithContext<MyRouterContext>()({
+  beforeLoad: async ({ context }) => {
+    // ✅ Initialize auth at ROOT level before any child routes load
+    // This ensures /auth/validate runs BEFORE protected routes redirect
+    console.log('[ROOT] beforeLoad: Starting auth initialization...');
+    await ensureAuthInitialized(context.queryClient);
+    console.log('[ROOT] beforeLoad: Auth initialization complete');
+  },
   head: () => ({
     meta: [
-      {
-        charSet: "utf-8",
-      },
-      {
-        name: "viewport",
-        content: "width=device-width, initial-scale=1",
-      },
-      {
-        title: "Welcome to FashionKet",
-      },
+      { charSet: 'utf-8' },
+      { name: 'viewport', content: 'width=device-width, initial-scale=1' },
+      { title: 'Welcome to FashionKet' },
     ],
-    links: [],
   }),
-
   shellComponent: RootDocument,
 });
 
 function RootDocument({ children }: { children: React.ReactNode }) {
-  useTokenRefresh()
-  
+  // ✅ No hooks here — this renders outside QueryClientProvider.
+  // useTokenRefresh lives inside AuthInitializer → inside QueryClientProvider.
   return (
     <html lang="en">
       <head>
@@ -62,15 +59,8 @@ function RootDocument({ children }: { children: React.ReactNode }) {
           />
         </QueryClientProvider>
         <TanStackDevtools
-          config={{
-            position: "bottom-right",
-          }}
-          plugins={[
-            {
-              name: "Tanstack Router",
-              render: <TanStackRouterDevtoolsPanel />,
-            },
-          ]}
+          config={{ position: 'bottom-right' }}
+          plugins={[{ name: 'Tanstack Router', render: <TanStackRouterDevtoolsPanel /> }]}
         />
         <Scripts />
       </body>

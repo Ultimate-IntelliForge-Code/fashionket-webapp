@@ -1,9 +1,9 @@
 import React from "react";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { CompactPagination, Pagination } from "@/components/ui/pagination";
-import { ErrorState } from "@/components/ui/error-state";
+import { ErrorState, ServerError } from "@/components/ui/error-state";
 import {
   Clock,
   RefreshCw,
@@ -24,6 +24,8 @@ import { OrdersList } from "@/components/orders/order-list";
 import { OrdersSidebar } from "@/components/orders/order-sidebar";
 import { cn } from "@/lib/utils";
 import { IOrderQueryFilters, orderSearchSchema } from "@/lib";
+import { ensureAuthInitialized, getLoginPathFromLocation } from "@/lib/auth-init";
+import { useAuthStore } from "@/store";
 
 export const Route = createFileRoute(
   "/(root)/_rootLayout/_authenticated/orders/",
@@ -34,7 +36,16 @@ export const Route = createFileRoute(
     page: search.page,
     limit: search.limit,
   }),
-  loader: async ({ context, deps }) => {
+  loader: async ({ context, deps, location }) => {
+    await ensureAuthInitialized(context.queryClient);
+
+    if (!useAuthStore.getState().isAuthenticated) {
+      const pathname = location?.pathname ?? window.location.pathname;
+      throw redirect({
+        replace: true,
+      });
+    }
+
     const queryClient = context.queryClient;
 
     try {
@@ -59,16 +70,8 @@ export const Route = createFileRoute(
       throw error;
     }
   },
-  pendingComponent: () => (
-    <LoadingState message="Loading your orders..." />
-  ),
-  errorComponent: ({ error }) => (
-    <ErrorState 
-      title="Failed to load orders" 
-      error={error} 
-      retryText="Try Again" 
-    />
-  ),
+  pendingComponent: LoadingState,
+  errorComponent: ServerError,
 });
 
 function OrdersPage() {
@@ -86,7 +89,7 @@ function OrdersPage() {
   } = useOrdersQuery({
     page: search.page,
     limit: search.limit,
-    status: search.status,
+    ...(search.status ? { status: search.status } : {}),
   });
 
   const {
@@ -129,8 +132,12 @@ function OrdersPage() {
     window.location.reload();
   }, []);
 
-  const orders = ordersData?.data || [];
-  const paginationMeta = ordersData?.pagination;
+  const orders = Array.isArray(ordersData?.data) ? ordersData.data : [];
+  const paginationMeta = ordersData?.pagination ?? {
+    total: 0,
+    totalPages: 0,
+    page: 1,
+  };
 
   // Status filters with icons and colors
   const statusFilters = React.useMemo(() => {
@@ -147,13 +154,6 @@ function OrdersPage() {
         icon: ShoppingBag,
         color: "brand-primary",
         count: stats?.total,
-      },
-      {
-        value: OrderStatus.PENDING_PAYMENT,
-        label: "Pending Payment",
-        icon: Clock,
-        color: "brand-warning",
-        count: stats?.byStatus?.PENDING_PAYMENT?.count,
       },
       {
         value: OrderStatus.PENDING,
@@ -274,10 +274,12 @@ function OrdersPage() {
                 <div className="flex gap-2 min-w-max px-4 sm:px-0">
                   {statusFilters.map((filter) => {
                     const Icon = filter.icon;
-                    const isActive = search.status === filter.value || 
-                                   (filter.value === "all" && !search.status);
-                    const isDisabled = filter.count === 0 && filter.value !== "all";
-                    
+                    const isActive =
+                      search.status === filter.value ||
+                      (filter.value === "all" && !search.status);
+                    const isDisabled =
+                      filter.count === 0 && filter.value !== "all";
+
                     return (
                       <Button
                         key={filter.value}
@@ -288,8 +290,9 @@ function OrdersPage() {
                         className={cn(
                           "h-9 sm:h-10 px-3 sm:px-4 rounded-lg transition-all duration-200",
                           isActive && getStatusColorClass(filter.color),
-                          !isActive && "border-brand-primary-soft text-brand-dark hover:bg-brand-primary-soft",
-                          isDisabled && "opacity-50 cursor-not-allowed"
+                          !isActive &&
+                            "border-brand-primary-soft text-brand-dark hover:bg-brand-primary-soft",
+                          isDisabled && "opacity-50 cursor-not-allowed",
                         )}
                       >
                         <Icon className="mr-2 h-3.5 w-3.5 sm:h-4 sm:w-4" />
@@ -301,8 +304,10 @@ function OrdersPage() {
                             variant={isActive ? "secondary" : "outline"}
                             className={cn(
                               "ml-2 text-xs font-medium",
-                              isActive && "bg-white/20 text-white border-white/30",
-                              !isActive && "border-brand-primary-soft text-brand-muted"
+                              isActive &&
+                                "bg-white/20 text-white border-white/30",
+                              !isActive &&
+                                "border-brand-primary-soft text-brand-muted",
                             )}
                           >
                             {filter.count}

@@ -131,9 +131,12 @@ class ApiClient {
   /**
    * Core request method with proper IApiResponse handling
    */
-  private async request<T>(endpoint: string, options: RequestInit = {}): Promise<IApiResponse<T>> {
+  private async request<T>(
+    endpoint: string,
+    options: RequestInit = {},
+    retryOnUnauthorized: boolean = true
+  ): Promise<IApiResponse<T>> {
     const url = `${this.baseURL}${endpoint}`;
-
     // Prepare body and content-type headers
     const { body: preparedBody, headers: bodyHeaders } = options.body
       ? this.prepareRequestBody(options.body)
@@ -151,6 +154,17 @@ class ApiClient {
 
     try {
       const response = await fetch(url, config);
+
+      if (
+        response.status === 401 &&
+        retryOnUnauthorized &&
+        !this.isAuthEndpoint(endpoint)
+      ) {
+        const refreshed = await this.tryRefreshSession();
+        if (refreshed) {
+          return this.request<T>(endpoint, options, false);
+        }
+      }
 
       // Handle empty responses (204 No Content, etc.)
       if (response.status === 204 || response.headers.get('content-length') === '0') {
@@ -207,6 +221,31 @@ class ApiClient {
         'NETWORK_ERROR',
         error instanceof Error ? error.message : 'Network request failed'
       );
+    }
+  }
+
+  private isAuthEndpoint(endpoint: string) {
+    return endpoint.startsWith('/auth/refresh') || endpoint.startsWith('/auth/validate');
+  }
+
+  private async tryRefreshSession(): Promise<boolean> {
+    try {
+      const response = await fetch(`${this.baseURL}/auth/refresh`, {
+        method: 'GET',
+        credentials: 'include',
+      });
+
+      if (!response.ok) return false;
+
+      const contentType = response.headers.get('content-type');
+      if (contentType?.includes('application/json')) {
+        const data = await response.json();
+        return data?.success !== false;
+      }
+
+      return true;
+    } catch {
+      return false;
     }
   }
 

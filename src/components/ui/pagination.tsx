@@ -1,15 +1,15 @@
-// components/ui/pagination.tsx
 'use client';
 
 import React from 'react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import { ChevronLeft, ChevronRight, MoreHorizontal } from 'lucide-react';
+import { ChevronLeft, ChevronRight, MoreHorizontal, Search } from 'lucide-react';
 import type { IPaginationMeta } from '@/types';
 
 interface PaginationProps {
-  meta: IPaginationMeta | undefined ;
+  meta: IPaginationMeta | undefined;
   onPageChange: (page: number) => void;
+  onPageSizeChange?: (limit: number) => void;
   className?: string;
   showInfo?: boolean;
   showPageSize?: boolean;
@@ -18,11 +18,15 @@ interface PaginationProps {
 export const Pagination: React.FC<PaginationProps> = ({
   meta,
   onPageChange,
+  onPageSizeChange,
   className,
   showInfo = true,
   showPageSize = false,
 }) => {
-  const { page, totalPages, total, limit } = meta!;
+  // Safety check for undefined meta
+  if (!meta || meta.total === 0) return null;
+
+  const { page, totalPages, total, limit } = meta;
   const maxVisiblePages = 5;
 
   const getPageNumbers = () => {
@@ -66,31 +70,38 @@ export const Pagination: React.FC<PaginationProps> = ({
     }
   };
 
-  if (total === 0) return null;
+  const handlePageSizeSelect = (newLimit: number) => {
+    if (onPageSizeChange) {
+      onPageSizeChange(newLimit);
+    }
+    onPageChange(1); // Reset to page 1 when changing limit
+  };
+
+  const startItem = (page - 1) * limit + 1;
+  const endItem = Math.min(page * limit, total);
 
   return (
-    <div className={cn("flex flex-col gap-4", className)}>
+    <div className={cn("space-y-4", className)}>
+      {/* Info Section */}
       {showInfo && (
-        <div className="text-sm text-gray-600">
-          Showing <span className="font-semibold">
-            {Math.min((page - 1) * limit + 1, total)}
-          </span> to <span className="font-semibold">
-            {Math.min(page * limit, total)}
-          </span> of <span className="font-semibold">{total}</span> products
+        <div className="text-sm text-brand-muted text-center sm:text-left">
+          Showing <span className="font-semibold text-brand-dark">{startItem}</span> 
+          {' '}to <span className="font-semibold text-brand-dark">{endItem}</span> 
+          {' '}of <span className="font-semibold text-brand-dark">{total}</span> items
         </div>
       )}
 
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-        {/* Page size selector */}
-        {showPageSize && (
-          <div className="flex items-center gap-2 text-sm text-gray-600">
-            <span>Show:</span>
+        {/* Page Size Selector */}
+        {showPageSize && onPageSizeChange && (
+          <div className="flex items-center gap-2 text-sm text-brand-muted">
+            <span className="font-medium">Show:</span>
             <select 
-              className="border rounded px-2 py-1 text-sm bg-transparent"
+              className="border border-brand-primary-soft rounded-lg px-3 py-1.5 text-sm bg-white text-brand-dark focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/20 transition-all cursor-pointer hover:border-brand-primary/50"
               value={limit}
-              onChange={() => onPageChange(1)} // Reset to page 1 when changing limit
+              onChange={(e) => handlePageSizeSelect(Number(e.target.value))}
             >
-              {[12, 24, 36, 48].map((size) => (
+              {[12, 24, 36, 48, 60].map((size) => (
                 <option key={size} value={size}>
                   {size} per page
                 </option>
@@ -99,30 +110,36 @@ export const Pagination: React.FC<PaginationProps> = ({
           </div>
         )}
 
-        {/* Page navigation */}
+        {/* Page Navigation */}
         <div className="flex items-center gap-1">
-          {/* Previous button */}
+          {/* Previous Button */}
           <Button
             variant="outline"
             size="icon"
-            className="w-9 h-9"
+            className={cn(
+              "w-9 h-9 rounded-lg transition-all duration-200",
+              "border-brand-primary-soft hover:border-brand-primary hover:bg-brand-primary-soft",
+              "disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent"
+            )}
             onClick={() => handlePageChange(page - 1)}
             disabled={page === 1}
+            aria-label="Previous page"
           >
-            <ChevronLeft className="w-4 h-4" />
+            <ChevronLeft className="w-4 h-4 text-brand-dark" />
           </Button>
 
-          {/* Page numbers */}
+          {/* Page Numbers */}
           {getPageNumbers().map((pageNum, index) => (
             pageNum === 'ellipsis' ? (
               <Button
                 key={`ellipsis-${index}`}
                 variant="outline"
                 size="icon"
-                className="w-9 h-9 cursor-default hover:bg-transparent"
+                className="w-9 h-9 rounded-lg cursor-default hover:bg-transparent border-brand-primary-soft"
                 disabled
+                aria-label="More pages"
               >
-                <MoreHorizontal className="w-4 h-4" />
+                <MoreHorizontal className="w-4 h-4 text-brand-muted" />
               </Button>
             ) : (
               <Button
@@ -130,92 +147,220 @@ export const Pagination: React.FC<PaginationProps> = ({
                 variant={pageNum === page ? "default" : "outline"}
                 size="icon"
                 className={cn(
-                  "w-9 h-9 text-sm",
-                  pageNum === page && "bg-mmp-primary hover:bg-mmp-primary2 text-white"
+                  "w-9 h-9 rounded-lg transition-all duration-200 text-sm font-medium",
+                  pageNum === page 
+                    ? "bg-brand-primary text-white hover:bg-brand-primary-hover shadow-sm scale-105" 
+                    : "border-brand-primary-soft text-brand-dark hover:border-brand-primary hover:bg-brand-primary-soft"
                 )}
                 onClick={() => handlePageChange(pageNum)}
+                aria-label={`Go to page ${pageNum}`}
+                aria-current={pageNum === page ? "page" : undefined}
               >
                 {pageNum}
               </Button>
             )
           ))}
 
-          {/* Next button */}
+          {/* Next Button */}
           <Button
             variant="outline"
             size="icon"
-            className="w-9 h-9"
+            className={cn(
+              "w-9 h-9 rounded-lg transition-all duration-200",
+              "border-brand-primary-soft hover:border-brand-primary hover:bg-brand-primary-soft",
+              "disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent"
+            )}
             onClick={() => handlePageChange(page + 1)}
             disabled={page === totalPages}
+            aria-label="Next page"
           >
-            <ChevronRight className="w-4 h-4" />
+            <ChevronRight className="w-4 h-4 text-brand-dark" />
           </Button>
         </div>
 
-        {/* Jump to page (desktop only) */}
-        <div className="hidden md:flex items-center gap-2 text-sm text-gray-600">
-          <span>Go to:</span>
-          <input
-            type="number"
-            min="1"
-            max={totalPages}
-            defaultValue={page}
-            className="w-16 border rounded px-2 py-1 text-sm"
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') {
-                const inputPage = parseInt(e.currentTarget.value);
-                if (!isNaN(inputPage)) {
-                  handlePageChange(Math.min(Math.max(1, inputPage), totalPages));
+        {/* Jump to Page */}
+        <div className="hidden md:flex items-center gap-2 text-sm">
+          <span className="text-brand-muted font-medium">Go to:</span>
+          <div className="relative">
+            <input
+              type="number"
+              min="1"
+              max={totalPages}
+              defaultValue={page}
+              className="w-20 border border-brand-primary-soft rounded-lg px-3 py-1.5 text-sm text-brand-dark focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/20 transition-all [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  const inputPage = parseInt(e.currentTarget.value);
+                  if (!isNaN(inputPage) && inputPage >= 1 && inputPage <= totalPages) {
+                    handlePageChange(inputPage);
+                    e.currentTarget.value = inputPage.toString();
+                  } else {
+                    e.currentTarget.value = page.toString();
+                  }
                 }
-              }
-            }}
-          />
+              }}
+              onBlur={(e) => {
+                const inputPage = parseInt(e.target.value);
+                if (!isNaN(inputPage) && inputPage >= 1 && inputPage <= totalPages) {
+                  if (inputPage !== page) handlePageChange(inputPage);
+                }
+                e.target.value = page.toString();
+              }}
+              aria-label="Jump to page number"
+            />
+            <Search className="absolute right-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-brand-muted pointer-events-none" />
+          </div>
         </div>
       </div>
     </div>
   );
 };
 
-// Mobile-friendly compact pagination
+// Enhanced Compact Pagination for Mobile
 interface CompactPaginationProps {
   meta: IPaginationMeta;
   onPageChange: (page: number) => void;
   className?: string;
+  showPageInfo?: boolean;
 }
 
-export const  CompactPagination: React.FC<CompactPaginationProps> = ({
+export const CompactPagination: React.FC<CompactPaginationProps> = ({
   meta,
   onPageChange,
   className,
+  showPageInfo = true,
 }) => {
-  const { page, totalPages } = meta;
+  const { page, totalPages, total, limit } = meta;
+
+  const startItem = (page - 1) * limit + 1;
+  const endItem = Math.min(page * limit, total);
 
   return (
-    <div className={cn("flex items-center justify-between", className)}>
+    <div className={cn("space-y-3", className)}>
+      {/* Page Info */}
+      {showPageInfo && (
+        <div className="text-center text-xs text-brand-muted">
+          Showing {startItem} - {endItem} of {total} items
+        </div>
+      )}
+
+      <div className="flex items-center justify-between gap-3">
+        <Button
+          variant="outline"
+          size="sm"
+          className={cn(
+            "flex-1 rounded-lg border-brand-primary-soft",
+            "text-brand-dark hover:border-brand-primary hover:bg-brand-primary-soft",
+            "disabled:opacity-50 disabled:cursor-not-allowed",
+            "transition-all duration-200"
+          )}
+          onClick={() => onPageChange(page - 1)}
+          disabled={page === 1}
+          aria-label="Previous page"
+        >
+          <ChevronLeft className="w-4 h-4 mr-1" />
+          Previous
+        </Button>
+        
+        <div className="flex items-center gap-2">
+          <span className="text-sm font-medium text-brand-dark">
+            {page}
+          </span>
+          <span className="text-sm text-brand-muted">of</span>
+          <span className="text-sm font-medium text-brand-dark">
+            {totalPages}
+          </span>
+        </div>
+        
+        <Button
+          variant="outline"
+          size="sm"
+          className={cn(
+            "flex-1 rounded-lg border-brand-primary-soft",
+            "text-brand-dark hover:border-brand-primary hover:bg-brand-primary-soft",
+            "disabled:opacity-50 disabled:cursor-not-allowed",
+            "transition-all duration-200"
+          )}
+          onClick={() => onPageChange(page + 1)}
+          disabled={page === totalPages}
+          aria-label="Next page"
+        >
+          Next
+          <ChevronRight className="w-4 h-4 ml-1" />
+        </Button>
+      </div>
+
+      {/* Quick Page Input for Mobile */}
+      {totalPages > 3 && (
+        <div className="flex items-center justify-center gap-2 pt-2">
+          <span className="text-xs text-brand-muted">Jump to:</span>
+          <input
+            type="number"
+            min="1"
+            max={totalPages}
+            defaultValue={page}
+            className="w-16 border border-brand-primary-soft rounded-lg px-2 py-1 text-sm text-brand-dark text-center focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/20 transition-all"
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                const inputPage = parseInt(e.currentTarget.value);
+                if (!isNaN(inputPage) && inputPage >= 1 && inputPage <= totalPages) {
+                  onPageChange(inputPage);
+                }
+                e.currentTarget.value = page.toString();
+              }
+            }}
+            aria-label="Jump to page"
+          />
+        </div>
+      )}
+    </div>
+  );
+};
+
+// Simple Pagination for minimal use cases
+interface SimplePaginationProps {
+  currentPage: number;
+  totalPages: number;
+  onPageChange: (page: number) => void;
+  className?: string;
+}
+
+export const SimplePagination: React.FC<SimplePaginationProps> = ({
+  currentPage,
+  totalPages,
+  onPageChange,
+  className,
+}) => {
+  if (totalPages <= 1) return null;
+
+  return (
+    <div className={cn("flex items-center justify-center gap-2", className)}>
       <Button
         variant="outline"
         size="sm"
-        className="flex-1 max-w-[120px]"
-        onClick={() => onPageChange(page - 1)}
-        disabled={page === 1}
+        className="rounded-lg border-brand-primary-soft hover:border-brand-primary hover:bg-brand-primary-soft"
+        onClick={() => onPageChange(currentPage - 1)}
+        disabled={currentPage === 1}
+        aria-label="Previous page"
       >
-        <ChevronLeft className="w-4 h-4 mr-1" />
-        Previous
+        <ChevronLeft className="w-4 h-4" />
       </Button>
       
-      <span className="text-sm text-gray-600 px-4">
-        Page {page} of {totalPages}
-      </span>
+      <div className="flex items-center gap-1">
+        <span className="text-sm font-medium text-brand-dark">{currentPage}</span>
+        <span className="text-sm text-brand-muted">/</span>
+        <span className="text-sm text-brand-muted">{totalPages}</span>
+      </div>
       
       <Button
         variant="outline"
         size="sm"
-        className="flex-1 max-w-[120px]"
-        onClick={() => onPageChange(page + 1)}
-        disabled={page === totalPages}
+        className="rounded-lg border-brand-primary-soft hover:border-brand-primary hover:bg-brand-primary-soft"
+        onClick={() => onPageChange(currentPage + 1)}
+        disabled={currentPage === totalPages}
+        aria-label="Next page"
       >
-        Next
-        <ChevronRight className="w-4 h-4 ml-1" />
+        <ChevronRight className="w-4 h-4" />
       </Button>
     </div>
   );

@@ -91,7 +91,6 @@ export const vendorProductsBySlugQuery = (
     const response = await apiClient.get<any>(
       `/products/vendor/${slug}/products?${params.toString()}`
     );
-    console.log('Error', response)
     if (!response.success) {
       throw new Error(response.error.message);
     }
