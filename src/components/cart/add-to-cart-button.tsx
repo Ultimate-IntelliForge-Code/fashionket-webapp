@@ -231,12 +231,12 @@ export const AddToCartButton: React.FC<AddToCartButtonProps> = ({
       )}
 
       {/* Stock Indicator */}
-      {isLowStock && !isOutOfStock && !iconOnly && (
+      {/* {isLowStock && !isOutOfStock && !iconOnly && (
         <div className="flex items-center gap-1.5 text-xs text-brand-warning animate-pulse">
           <AlertCircle className="h-3 w-3" />
           <span>Only {remainingStock} left in stock</span>
         </div>
-      )}
+      )} */}
 
       {/* Main Add to Cart Button */}
       <Button

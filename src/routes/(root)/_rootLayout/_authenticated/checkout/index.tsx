@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -25,7 +25,6 @@ import {
   useDeleteAddress,
   useInitPayment,
 } from "@/api/mutations";
-import { addressesQuery } from "@/api/queries";
 import {
   ArrowLeft,
   Package,
@@ -49,7 +48,7 @@ import { toast } from "react-toastify";
 import { FcAddressBook } from "react-icons/fc";
 import { DeliveryMethod } from "@/types";
 import { useQueryClient } from "@tanstack/react-query";
-import { useShippingFeeQuery } from "@/api/hooks/address.hook";
+import { useAddressesQuery, useShippingFeeQuery } from "@/api/hooks/address.hook";
 import { ShippingAddressFormData, shippingAddressSchema } from "@/lib/zod";
 import { TAX_PERCENT } from "@/config/env.config";
 import { cn } from "@/lib/utils";
@@ -58,13 +57,9 @@ export const Route = createFileRoute(
   "/(root)/_rootLayout/_authenticated/checkout/",
 )({
   component: CheckoutPage,
-  loader: async ({ context }) => {
-    return await context.queryClient.ensureQueryData(addressesQuery());
-  },
 });
 
 function CheckoutPage() {
-  const addresses = Route.useLoaderData();
   const queryClient = useQueryClient();
   const { user } = useAuth();
   const { items, subtotal, itemCount, isEmpty } = useCart();
@@ -75,22 +70,30 @@ function CheckoutPage() {
   const { mutateAsync: addAddress } = useAddAddress();
   const { mutateAsync: deleteAddress } = useDeleteAddress();
 
-  const [deliveryMethod, setDeliveryMethod] = React.useState<DeliveryMethod>(
+  const [deliveryMethod, setDeliveryMethod] = useState<DeliveryMethod>(
     DeliveryMethod.DELIVERY,
   );
-  const [isProcessing, setIsProcessing] = React.useState(false);
-  const [selectedAddressId, setSelectedAddressId] = React.useState<string>("");
-  const [showAddAddressDialog, setShowAddAddressDialog] = React.useState(false);
-  const [isSubmittingAddress, setIsSubmittingAddress] = React.useState(false);
-  const [orderNotes, setOrderNotes] = React.useState("");
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [selectedAddressId, setSelectedAddressId] = useState<string>("");
+  const [showAddAddressDialog, setShowAddAddressDialog] = useState(false);
+  const [isSubmittingAddress, setIsSubmittingAddress] = useState(false);
+  const [orderNotes, setOrderNotes] = useState("");
 
   const {
     data: shippingFeeData,
     isError: isShippingError,
+    refetch: refetchShippingFee,
   } = useShippingFeeQuery(selectedAddressId);
 
+  const {
+    data: addresses,
+    isLoading: isLoadingAddresses,
+    error: addressesError,
+    refetch: refetchAddresses,
+  } = useAddressesQuery()
+
   // Calculate shipping fee
-  const shippingFee = React.useMemo(() => {
+  const shippingFee = useMemo(() => {
     if (deliveryMethod !== DeliveryMethod.DELIVERY) return 0;
     if (!selectedAddressId) return 0;
     if (isShippingError) return 0;
@@ -117,8 +120,8 @@ function CheckoutPage() {
   });
 
   // Auto-select first address if none selected
-  React.useEffect(() => {
-    if (addresses.length > 0 && !selectedAddressId) {
+  useEffect(() => {
+    if (addresses && addresses.length > 0 && !selectedAddressId) {
       setSelectedAddressId(addresses[0]._id);
     }
   }, [addresses, selectedAddressId]);
@@ -142,7 +145,7 @@ function CheckoutPage() {
   };
 
   const handleDeleteAddress = async (addressId: string) => {
-    if (addresses.length <= 1) {
+    if (!addresses || addresses.length <= 1) {
       toast.error("Cannot delete the last address");
       return;
     }
@@ -597,7 +600,7 @@ function CheckoutPage() {
                 </div>
 
                 <div className="p-6">
-                  {addresses.length === 0 ? (
+                  {addresses && addresses.length === 0 ? (
                     <div className="text-center py-8 border-2 border-dashed border-brand-primary-soft rounded-xl">
                       <MapPin className="h-12 w-12 text-brand-muted mx-auto mb-3" />
                       <h4 className="text-lg font-semibold text-brand-dark mb-2">
@@ -613,7 +616,7 @@ function CheckoutPage() {
                       onValueChange={setSelectedAddressId}
                       className="space-y-3"
                     >
-                      {addresses.map((address) => (
+                      {addresses && addresses.map((address) => (
                         <div key={address._id} className="relative">
                           <RadioGroupItem
                             value={address._id}

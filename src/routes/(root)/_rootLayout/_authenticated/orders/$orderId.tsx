@@ -15,7 +15,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ErrorState } from "@/components/ui/error-state";
 import { toast } from "react-toastify";
 import { formatCurrency, cn } from "@/lib/utils";
-import { orderQuery } from "@/api/queries/order.query";
 import { useCancelOrder, useInitPayment } from "@/api/mutations";
 import { OrderStatusBadge } from "@/components/orders/order-status-badge";
 import { OrderTimeline } from "@/components/orders/order-timeline";
@@ -44,7 +43,6 @@ import {
 } from "lucide-react";
 import { OrderStatus, PaymentStatus } from "@/types";
 import { PaymentStatusBadge } from "@/components/orders/payment-status-badge";
-import { LoadingState } from "@/components/ui/loading-state";
 import { useOrderQuery } from "@/api/hooks";
 import { ConfirmToast } from "@/components/ui/cofirm-toast";
 
@@ -52,34 +50,16 @@ export const Route = createFileRoute(
   "/(root)/_rootLayout/_authenticated/orders/$orderId",
 )({
   component: OrderDetailPage,
-  loader: async ({ context, params }) => {
-    try {
-      const order = await context.queryClient.fetchQuery(
-        orderQuery(params.orderId),
-      );
-      return { order };
-    } catch (error) {
-      console.error("Failed to load order:", error);
-      throw error;
-    }
-  },
-  pendingComponent: () => <LoadingState message="Loading order details..." />,
-  errorComponent: ({ error, reset }) => (
-    <ErrorState title="Failed to load order" error={error} onRetry={reset} />
-  ),
 });
 
 function OrderDetailPage() {
   const params = Route.useParams();
   const navigate = useNavigate();
-  const loaderData = Route.useLoaderData();
   const { mutateAsync: initPayment, isPending: isInitializingPayment } =
     useInitPayment();
 
-  const initialOrder = loaderData.order;
-
   const {
-    data: order = initialOrder,
+    data: order,
     isLoading,
     error,
     refetch,
@@ -129,6 +109,10 @@ function OrderDetailPage() {
   }, [order]);
 
   const handleCancelOrder = React.useCallback(() => {
+    if (!order) {
+      toast.error("Order ID not provided");
+      return;
+    }
     return toast.info(
       <ConfirmToast
         message="You are about to cancel this order"
@@ -157,6 +141,10 @@ function OrderDetailPage() {
 
   const handleCompletePayment = React.useCallback(async () => {
     try {
+      if (!order) {
+        toast.error("Order ID not provided");
+        return;
+      }
       const paymentData = await initPayment({
         orderId: order._id,
         callbackUrl: `${window.location.origin}/checkout/payment-status`,
@@ -172,29 +160,11 @@ function OrderDetailPage() {
     refetch();
   }, [refetch]);
 
-  if (isLoading && !initialOrder) {
+  if (isLoading) {
     return <OrderDetailLoadingSkeleton />;
   }
 
-  if (error && !initialOrder) {
-    return (
-      <div className="min-h-screen bg-brand-surface">
-        <OrderDetailHeader />
-        <div className="container mx-auto px-4 py-8">
-          <div className="max-w-2xl mx-auto">
-            <ErrorState
-              title="Failed to load order"
-              error={error}
-              onRetry={handleRetry}
-              fullScreen={false}
-            />
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (!order) {
+  if (!order || error) {
     return (
       <div className="min-h-screen bg-brand-surface">
         <OrderDetailHeader />
@@ -203,7 +173,7 @@ function OrderDetailPage() {
             <ErrorState
               title="Order not found"
               message="The order you're looking for doesn't exist or you don't have permission to view it."
-              onRetry={() => navigate({ to: "/orders" })}
+              onRetry={handleRetry}
               fullScreen={false}
             />
           </div>
@@ -514,7 +484,7 @@ function OrderDetails({ order }: { order: any }) {
             ) : (
               <div className="flex items-center justify-center p-2">
                 <div className="flex gap-2">
-                  <Store className="h-5 w-5 text-mmp-primary"/>
+                  <Store className="h-5 w-5 text-mmp-primary" />
                   <span>Pick up order</span>
                 </div>
               </div>

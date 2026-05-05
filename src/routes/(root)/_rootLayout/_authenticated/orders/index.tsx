@@ -1,9 +1,9 @@
 import React from "react";
-import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { CompactPagination, Pagination } from "@/components/ui/pagination";
-import { ErrorState, ServerError } from "@/components/ui/error-state";
+import { ErrorState } from "@/components/ui/error-state";
 import {
   Clock,
   RefreshCw,
@@ -14,8 +14,6 @@ import {
   TrendingUp,
 } from "lucide-react";
 import { OrderStatus } from "@/types";
-import { ordersQuery, orderStatsQuery } from "@/api/queries/order.query";
-import { LoadingState } from "@/components/ui/loading-state";
 import { useOrdersQuery, useOrderStatsQuery } from "@/api/hooks";
 import { OrdersHeader } from "@/components/orders/order-header";
 import { OrdersLoadingSkeleton } from "@/components/orders/order-skeleton";
@@ -24,68 +22,23 @@ import { OrdersList } from "@/components/orders/order-list";
 import { OrdersSidebar } from "@/components/orders/order-sidebar";
 import { cn } from "@/lib/utils";
 import { IOrderQueryFilters, orderSearchSchema } from "@/lib";
-import { ensureAuthInitialized, getLoginPathFromLocation } from "@/lib/auth-init";
-import { useAuthStore } from "@/store";
 
 export const Route = createFileRoute(
   "/(root)/_rootLayout/_authenticated/orders/",
 )({
   component: OrdersPage,
   validateSearch: orderSearchSchema,
-  loaderDeps: ({ search }) => ({
-    page: search.page,
-    limit: search.limit,
-  }),
-  loader: async ({ context, deps, location }) => {
-    await ensureAuthInitialized(context.queryClient);
-
-    if (!useAuthStore.getState().isAuthenticated) {
-      const pathname = location?.pathname ?? window.location.pathname;
-      throw redirect({
-        replace: true,
-      });
-    }
-
-    const queryClient = context.queryClient;
-
-    try {
-      const [orders, stats] = await Promise.all([
-        queryClient.fetchQuery(
-          ordersQuery({
-            page: deps.page,
-            limit: deps.limit,
-          }),
-        ),
-        queryClient.fetchQuery(orderStatsQuery()),
-      ]);
-
-      return {
-        initialOrders: orders,
-        initialStats: stats,
-        page: deps.page,
-        limit: deps.limit,
-      };
-    } catch (error) {
-      console.error("Failed to load orders:", error);
-      throw error;
-    }
-  },
-  pendingComponent: LoadingState,
-  errorComponent: ServerError,
 });
 
 function OrdersPage() {
-  const loaderData = Route.useLoaderData();
   const navigate = useNavigate({ from: Route.fullPath });
-
-  const initialOrders = loaderData.initialOrders;
-  const initialStats = loaderData.initialStats;
   const search = Route.useSearch();
 
   const {
-    data: ordersData = initialOrders,
+    data: ordersData,
     isLoading: ordersLoading,
     error: ordersError,
+    refetch: refetchOrders,
   } = useOrdersQuery({
     page: search.page,
     limit: search.limit,
@@ -93,10 +46,16 @@ function OrdersPage() {
   });
 
   const {
-    data: stats = initialStats,
+    data: stats,
     isLoading: statsLoading,
     error: statsError,
+    refetch: refetchStats,
   } = useOrderStatsQuery();
+
+  const handleRetry = React.useCallback(() => {
+    refetchOrders();
+    refetchStats();
+  }, [refetchOrders, refetchStats]);
 
   const updateSearchParams = React.useCallback(
     (updates: Partial<IOrderQueryFilters>) => {
@@ -128,15 +87,12 @@ function OrdersPage() {
     [updateSearchParams],
   );
 
-  const handleRetry = React.useCallback(() => {
-    window.location.reload();
-  }, []);
-
   const orders = Array.isArray(ordersData?.data) ? ordersData.data : [];
   const paginationMeta = ordersData?.pagination ?? {
     total: 0,
     totalPages: 0,
     page: 1,
+    limit: 20,
   };
 
   // Status filters with icons and colors
@@ -321,7 +277,7 @@ function OrdersPage() {
 
               {/* Orders List */}
               <OrdersList
-                orders={ordersData?.data}
+                orders={orders}
                 searchStatus={search.status}
                 statusFilters={statusFilters}
               />

@@ -1,27 +1,15 @@
-import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
-import { useAuth } from "@/hooks";
+import { createFileRoute, Outlet } from "@tanstack/react-router";
 import { VendorSideBar } from "@/components/layout/VendorSidebar";
 import { VendorHeader } from "@/components/layout/VendorHeader";
 import { AuthGuard } from "@/components/auth";
-import { useAuthStore } from "@/store";
-import { UserRole } from "@/types";
 import React from "react";
+import { UserRole } from "@/types";
 
 export const Route = createFileRoute("/vendor/_vendorLayout")({
-  beforeLoad: async ({ context }) => {
-    // ✅ Auth is already initialized at ROOT level
-    const store = useAuthStore.getState();
-
-    // Check both authenticated AND vendor role
-    if (!store.isAuthenticated || store.role !== UserRole.VENDOR) {
-      throw redirect({ to: "/vendor/login" });
-    }
-  },
   component: VendorLayout,
 });
 
 function VendorLayout() {
-  const { isAuthenticated, isVendor, isLoading } = useAuth();
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = React.useState(false);
   const [isScrolled, setIsScrolled] = React.useState(false);
 
@@ -55,20 +43,8 @@ function VendorLayout() {
     };
   }, [isMobileSidebarOpen]);
 
-  // Show loading state while checking auth
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-brand-surface">
-        <div className="text-center">
-          <div className="w-12 h-12 border-4 border-brand-primary-soft border-t-brand-primary rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-brand-muted">Loading vendor dashboard...</p>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <AuthGuard>
+    <AuthGuard requireAuth={true} allowedRoles={[UserRole.VENDOR]}>
       <div className="min-h-screen bg-brand-surface">
         {/* Sidebar */}
         <VendorSideBar
@@ -95,7 +71,7 @@ function VendorLayout() {
           {/* Main Content */}
           <main className="min-h-[calc(100vh-5rem)]">
             {/* Page Content Container */}
-            <div className="bg-white rounded-xl shadow-sm border border-brand-primary-soft overflow-hidden">
+            <div className="bg-white shadow-sm overflow-hidden">
               <div className="p-4 sm:p-6 lg:p-8">
                 <Outlet />
               </div>

@@ -1,24 +1,17 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { CheckCircle } from "lucide-react";
-import { LoadingState } from "@/components/ui/loading-state";
-import { ErrorState } from "@/components/ui/error-state";
 import { ProductForm } from "@/components/forms/product-form";
-import { categoriesQuery } from "@/api/queries";
 import { useCreateProduct } from "@/api/mutations";
 import { toast } from "react-toastify";
+import { useCategories } from "@/api/hooks";
 
 export const Route = createFileRoute("/vendor/_vendorLayout/products/new")({
   component: NewProduct,
-  pendingComponent: LoadingState,
-  errorComponent: ErrorState,
-  loader: async ({ context }) => {
-    return await context.queryClient.ensureQueryData(categoriesQuery());
-  },
 });
 
 function NewProduct() {
   const navigate = useNavigate();
-  const categories = Route.useLoaderData();
+  const { data: categories } = useCategories();
   const { mutateAsync: createProduct, isPending } = useCreateProduct();
 
   // Handle form submission
@@ -61,7 +54,7 @@ function NewProduct() {
 
       {/* Stats Card */}
       <div className="mb-8 grid grid-cols-1 md:grid-cols-3 gap-4">
-  <div className="bg-linear-to-r from-blue-50 to-blue-100 border border-blue-200 rounded-xl p-4">
+        <div className="bg-linear-to-r from-blue-50 to-blue-100 border border-blue-200 rounded-xl p-4">
           <div className="text-sm font-medium text-blue-800">
             Required Fields
           </div>
@@ -70,7 +63,7 @@ function NewProduct() {
             Name, Category, Price, Stock, Images
           </div>
         </div>
-  <div className="bg-linear-to-r from-green-50 to-green-100 border border-green-200 rounded-xl p-4">
+        <div className="bg-linear-to-r from-green-50 to-green-100 border border-green-200 rounded-xl p-4">
           <div className="text-sm font-medium text-green-800">
             Image Guidelines
           </div>
@@ -79,7 +72,7 @@ function NewProduct() {
             10MB each, first image is main
           </div>
         </div>
-  <div className="bg-linear-to-r from-purple-50 to-purple-100 border border-purple-200 rounded-xl p-4">
+        <div className="bg-linear-to-r from-purple-50 to-purple-100 border border-purple-200 rounded-xl p-4">
           <div className="text-sm font-medium text-purple-800">Tips</div>
           <div className="text-xs text-purple-700">
             Use high-quality images, accurate descriptions, and competitive
@@ -90,16 +83,18 @@ function NewProduct() {
 
       {/* Product Form */}
       <div>
-        <ProductForm
-          categories={categories}
-          onSubmit={handleSubmit}
-          isLoading={isPending}
-          isUpdate={false}
-        />
+        {categories && (
+          <ProductForm
+            categories={categories}
+            onSubmit={handleSubmit}
+            isLoading={isPending}
+            isUpdate={false}
+          />
+        )}
       </div>
 
       {/* Quick Tips */}
-  <div className="mt-8 p-6 bg-linear-to-r from-mmp-primary/5 to-mmp-primary2/5 rounded-xl border border-mmp-primary/20">
+      <div className="mt-8 p-6 bg-linear-to-r from-mmp-primary/5 to-mmp-primary2/5 rounded-xl border border-mmp-primary/20">
         <h3 className="text-lg font-semibold text-mmp-primary2 mb-3">
           💡 Tips for Better Product Listings
         </h3>

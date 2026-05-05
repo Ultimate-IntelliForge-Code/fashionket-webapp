@@ -42,28 +42,27 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { IVendor, IUpdateVendorPayload, AccountStatus } from "@/types";
 import { toast } from "react-toastify";
-import { vendorProfile } from "@/api/queries";
 import { useUpdateVendorProfile } from "@/api/queries";
 import { vendorUpdateSchema } from "@/lib";
 import { Link } from "@tanstack/react-router";
 import { LoadingState } from "@/components/ui/loading-state";
-import { ServerError } from "@/components/ui/error-state";
+import { ErrorState } from "@/components/ui/error-state";
+import { useVendorProfile } from "@/api/hooks";
 
 export const Route = createFileRoute("/vendor/_vendorLayout/settings/")({
-  loader: async ({ context }) => {
-    const res =  await context.queryClient.ensureQueryData(vendorProfile());
-    console.log('Check response from vendor settings : ',res)
-    return res
-  },
   component: VendorAccountPage,
-  pendingComponent: LoadingState,
-  errorComponent: ServerError,
 });
 
 function VendorAccountPage() {
-  const profile = Route.useLoaderData();
   const [isEditing, setIsEditing] = useState(false);
   const updateProfile = useUpdateVendorProfile();
+
+  const {
+    data: profile,
+    error: profileError,
+    isLoading: isProfileLoading,
+    refetch,
+  } = useVendorProfile();
 
   const form = useForm<IUpdateVendorPayload>({
     resolver: zodResolver(vendorUpdateSchema as any),
@@ -148,20 +147,38 @@ function VendorAccountPage() {
     }
   };
 
+  if (isProfileLoading) {
+    return (
+      <div className="min-h-screen bg-brand-surface">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-10">
+          <LoadingState />
+        </div>
+      </div>
+    );
+  }
+
+  if (profileError) {
+    return (
+      <div className="min-h-screen bg-brand-surface">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="max-w-2xl mx-auto">
+            <ErrorState
+              title="Unable to Load Orders"
+              error={profileError}
+              onRetry={() => {
+                refetch();
+              }}
+              fullScreen={false}
+            />
+          </div>
+        </div>
+      </div>
+    );
+  }
   const statusConfig = getStatusConfig(vendor.accountStatus);
 
   return (
     <div className="min-h-screen">
-      {/* Header Section */}
-      {/* <div className="mb-6 sm:mb-8 lg:mb-10">
-        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-brand-dark mb-2">
-          Account Settings
-        </h1>
-        <p className="text-brand-muted text-sm sm:text-base">
-          Manage your business profile, view analytics, and track performance
-        </p>
-      </div> */}
-
       {/* Account Status Alert */}
       {vendor.accountStatus !== AccountStatus.ACTIVE && (
         <Alert className={`mb-6 border ${statusConfig.color}`}>

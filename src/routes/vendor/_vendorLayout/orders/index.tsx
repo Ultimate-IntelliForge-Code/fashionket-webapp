@@ -10,39 +10,29 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Pagination } from '@/components/ui/pagination'
-import { LoadingState } from '@/components/ui/loading-state'
-import { ServerError } from '@/components/ui/error-state'
 import { StatsCard } from '@/components/ui/stats-card'
 import { OrdersTable } from '@/components/orders/order-table'
 import { formatCurrency, orderSearchSchema } from '@/lib'
 import { Card, CardContent } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
+import { useOrdersQuery, useOrderStatsQuery } from '@/api/hooks'
+import { is } from 'zod/v4/locales'
+import { LoadingState } from '@/components/ui/loading-state'
+import { ErrorState } from '@/components/ui/error-state'
 
 export const Route = createFileRoute('/vendor/_vendorLayout/orders/')({
   validateSearch: (search) => {
     return orderSearchSchema.parse(search)
   },
-  loaderDeps: ({ search }) => ({
-    search: search,
-  }),
-  loader: async ({ context, deps }) => {
-    const queryClient = context.queryClient
-    const [orders, stats] = await Promise.all([
-      queryClient.ensureQueryData(ordersQuery(deps.search)),
-      queryClient.ensureQueryData(orderStatsQuery()),
-    ])
-    return { orders, stats }
-  },
   component: VendorOrders,
-  pendingComponent: LoadingState,
-  errorComponent: ServerError,
 })
 
 function VendorOrders() {
   const navigate = Route.useNavigate()
   const search = Route.useSearch()
-  const { orders: ordersData, stats } = Route.useLoaderData()
+  const {data: ordersData, isLoading: ordersLoading, error: ordersError, refetch: ordersRefetch} = useOrdersQuery(search);
+  const {data: stats, isLoading: statsLoading, error: statsError, refetch: statsRefetch} = useOrderStatsQuery()
 
   const orders = ordersData?.data || []
   const meta = ordersData?.pagination
@@ -79,6 +69,36 @@ function VendorOrders() {
         page: 1,
       }),
     })
+  }
+
+    if (ordersLoading || statsLoading) {
+    return (
+      <div className="min-h-screen bg-brand-surface">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-10">
+          <LoadingState />
+        </div>
+      </div>
+    );
+  }
+
+  if (ordersError || statsError ) {
+    return (
+      <div className="min-h-screen bg-brand-surface">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="max-w-2xl mx-auto">
+            <ErrorState
+              title="Unable to Load Orders"
+              error={ordersError || statsError}
+              onRetry={() => {
+                ordersRefetch();
+                statsRefetch();
+              }}
+              fullScreen={false}
+            />
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (

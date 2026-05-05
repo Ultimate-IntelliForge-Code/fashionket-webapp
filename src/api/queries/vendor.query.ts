@@ -65,8 +65,6 @@ export const vendorBySlugQuery = (slug: string) => ({
       throw new Error(response.error.message);
     }
 
-    console.log(response)
-
     return response.data;
   },
 });

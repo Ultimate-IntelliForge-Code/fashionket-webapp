@@ -4,16 +4,16 @@ import { useUpdateOrderStatus } from "@/api/mutations";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { 
-  ArrowLeft, 
-  MapPin, 
-  CreditCard, 
-  Package, 
-  Truck, 
+import {
+  ArrowLeft,
+  MapPin,
+  CreditCard,
+  Package,
+  Truck,
   CheckCircle,
   Clock,
   AlertCircle,
-  Calendar
+  Calendar,
 } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
 import { format } from "date-fns";
@@ -31,61 +31,83 @@ import { LoadingState } from "@/components/ui/loading-state";
 import { ErrorState } from "@/components/ui/error-state";
 import { PaymentStatusBadge } from "@/components/orders/payment-status-badge";
 import { Separator } from "@/components/ui/separator";
+import { useOrderQuery } from "@/api/hooks";
 
 export const Route = createFileRoute("/vendor/_vendorLayout/orders/$orderId")({
-  loader: async ({ context, params }) => {
-    return await context.queryClient.ensureQueryData(
-      orderQuery(params.orderId),
-    );
-  },
   component: VendorOrderDetail,
-  pendingComponent: LoadingState,
-  errorComponent: ErrorState,
 });
 
 const getStatusConfig = (status: OrderStatus) => {
-  const configs: Record<OrderStatus, { color: string; bg: string; icon: any }> = {
-    PENDING: { 
-      color: "text-brand-warning", 
-      bg: "bg-brand-warning/10",
-      icon: Clock
-    },
-    PROCESSING: { 
-      color: "text-brand-primary", 
-      bg: "bg-brand-primary-soft",
-      icon: Package
-    },
-    SHIPPED: { 
-      color: "text-brand-primary", 
-      bg: "bg-brand-primary-soft",
-      icon: Truck
-    },
-    DELIVERED: { 
-      color: "text-brand-success", 
-      bg: "bg-brand-success/10",
-      icon: CheckCircle
-    },
-    CANCELLED: { 
-      color: "text-brand-error", 
-      bg: "bg-brand-error/10",
-      icon: AlertCircle
-    },
-    REFUNDED: { 
-      color: "text-brand-muted", 
-      bg: "bg-brand-muted/10",
-      icon: AlertCircle
-    },
-  };
+  const configs: Record<OrderStatus, { color: string; bg: string; icon: any }> =
+    {
+      PENDING: {
+        color: "text-brand-warning",
+        bg: "bg-brand-warning/10",
+        icon: Clock,
+      },
+      PROCESSING: {
+        color: "text-brand-primary",
+        bg: "bg-brand-primary-soft",
+        icon: Package,
+      },
+      SHIPPED: {
+        color: "text-brand-primary",
+        bg: "bg-brand-primary-soft",
+        icon: Truck,
+      },
+      DELIVERED: {
+        color: "text-brand-success",
+        bg: "bg-brand-success/10",
+        icon: CheckCircle,
+      },
+      CANCELLED: {
+        color: "text-brand-error",
+        bg: "bg-brand-error/10",
+        icon: AlertCircle,
+      },
+      REFUNDED: {
+        color: "text-brand-muted",
+        bg: "bg-brand-muted/10",
+        icon: AlertCircle,
+      },
+    };
   return configs[status];
 };
 
 function VendorOrderDetail() {
   const { orderId } = Route.useParams();
   const navigate = useNavigate();
-  const order = Route.useLoaderData();
+  const { data: order, isLoading, error, refetch } = useOrderQuery(orderId);
   const { mutateAsync: updateStatus, isPending } = useUpdateOrderStatus();
 
-  if (!order) return null;
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-brand-surface">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-10">
+          <LoadingState />
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !order) {
+    return (
+      <div className="min-h-screen bg-brand-surface">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="max-w-2xl mx-auto">
+            <ErrorState
+              title="Unable to Load Orders"
+              error={error}
+              onRetry={() => {
+                refetch();
+              }}
+              fullScreen={false}
+            />
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const handleStatusUpdate = async (newStatus: OrderStatus) => {
     try {
@@ -114,17 +136,21 @@ function VendorOrderDetail() {
           >
             <ArrowLeft className="h-5 w-5 text-brand-dark" />
           </Button>
-          
+
           <div>
             <div className="flex items-center gap-3 flex-wrap">
               <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-brand-dark">
                 Order #{order.orderNumber}
               </h1>
-              <Badge className={`${statusConfig.bg} ${statusConfig.color} border-0 px-3 py-1`}>
+              <Badge
+                className={`${statusConfig.bg} ${statusConfig.color} border-0 px-3 py-1`}
+              >
                 <statusConfig.icon className="h-3 w-3 mr-1" />
                 {order.status}
               </Badge>
-              <PaymentStatusBadge status={order.paymentStatus as PaymentStatus} />
+              <PaymentStatusBadge
+                status={order.paymentStatus as PaymentStatus}
+              />
             </div>
             <div className="flex items-center gap-2 mt-2 text-brand-muted text-sm">
               <Calendar className="h-4 w-4" />
@@ -147,20 +173,26 @@ function VendorOrderDetail() {
             </CardHeader>
             <CardContent className="p-0 divide-y divide-brand-primary-soft">
               {order.items.map((item, index) => (
-                <div key={index} className="p-4 sm:p-6 hover:bg-brand-surface/30 transition-colors">
+                <div
+                  key={index}
+                  className="p-4 sm:p-6 hover:bg-brand-surface/30 transition-colors"
+                >
                   <div className="flex gap-4">
                     {/* Product Image */}
                     <div className="h-20 w-20 rounded-lg bg-brand-surface flex items-center justify-center overflow-hidden border border-brand-primary-soft">
                       <img
-                        src={typeof item.productId === 'object' && 'images' in item.productId && item.productId.images?.length 
-                          ? item.productId.images[0] 
-                          : '/logo.png'
+                        src={
+                          typeof item.productId === "object" &&
+                          "images" in item.productId &&
+                          item.productId.images?.length
+                            ? item.productId.images[0]
+                            : "/logo.png"
                         }
                         alt={item.nameSnapshot}
                         className="h-full w-full object-cover"
                       />
                     </div>
-                    
+
                     {/* Product Details */}
                     <div className="flex-1 min-w-0">
                       <h4 className="font-semibold text-brand-dark mb-1 line-clamp-2">
@@ -172,7 +204,7 @@ function VendorOrderDetail() {
                         <span>{formatCurrency(item.priceSnapshot)} each</span>
                       </div>
                     </div>
-                    
+
                     {/* Price */}
                     <div className="text-right">
                       <p className="font-bold text-brand-dark text-lg">
@@ -189,7 +221,9 @@ function VendorOrderDetail() {
           {/* Update Status Card */}
           <Card className="border-brand-primary-soft shadow-sm">
             <CardHeader className="bg-brand-surface/50 border-b border-brand-primary-soft">
-              <CardTitle className="text-brand-dark">Update Order Status</CardTitle>
+              <CardTitle className="text-brand-dark">
+                Update Order Status
+              </CardTitle>
             </CardHeader>
             <CardContent className="p-6">
               <div className="space-y-4">
@@ -208,7 +242,9 @@ function VendorOrderDetail() {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="PENDING_PAYMENT">Pending Payment</SelectItem>
+                      <SelectItem value="PENDING_PAYMENT">
+                        Pending Payment
+                      </SelectItem>
                       <SelectItem value="PENDING">Pending</SelectItem>
                       <SelectItem value="PROCESSING">Processing</SelectItem>
                       <SelectItem value="SHIPPED">Shipped</SelectItem>
@@ -341,7 +377,9 @@ function VendorOrderDetail() {
               </CardHeader>
               <CardContent className="p-6">
                 <address className="not-italic text-sm text-brand-dark space-y-1">
-                  <p className="font-medium">{order.shippingAddress.fullName}</p>
+                  <p className="font-medium">
+                    {order.shippingAddress.fullName}
+                  </p>
                   <p>{order.shippingAddress.addressLine1}</p>
                   {order.shippingAddress.addressLine2 && (
                     <p>{order.shippingAddress.addressLine2}</p>
@@ -350,7 +388,9 @@ function VendorOrderDetail() {
                     {order.shippingAddress.city}, {order.shippingAddress.state}
                   </p>
                   <p>{order.shippingAddress.country}</p>
-                  <p className="pt-2 font-medium">{order.shippingAddress.phone}</p>
+                  <p className="pt-2 font-medium">
+                    {order.shippingAddress.phone}
+                  </p>
                 </address>
               </CardContent>
             </Card>

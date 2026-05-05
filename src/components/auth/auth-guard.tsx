@@ -85,12 +85,12 @@ function AuthLoadingScreen() {
             <div className="w-8 h-8 rounded-full border-4 border-brand-primary border-t-transparent animate-spin" />
           </div>
         </div>
-        <h2 className="text-xl sm:text-2xl font-semibold text-brand-dark mb-2">
+        {/* <h2 className="text-xl sm:text-2xl font-semibold text-brand-dark mb-2">
           Verifying your session
         </h2>
         <p className="text-brand-muted text-sm sm:text-base">
           Please wait while we secure your access...
-        </p>
+        </p> */}
         <div className="mt-8 space-y-3">
           <div className="h-2 bg-brand-primary-soft rounded-full animate-pulse" />
           <div className="h-2 bg-brand-primary-soft rounded-full animate-pulse w-3/4 mx-auto" />

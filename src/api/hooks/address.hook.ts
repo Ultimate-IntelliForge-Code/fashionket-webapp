@@ -13,6 +13,5 @@ export const useAddressQuery = (addressId: string) => {
 };
 
 export const useShippingFeeQuery = (addressId: string) => {
-  // console.log('Using shipping fee query for address ID:', addressId);
   return useQuery(shippingFeeQuery(addressId));
 };

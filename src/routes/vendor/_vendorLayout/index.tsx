@@ -32,20 +32,7 @@ import { OrdersTable } from '@/components/orders/order-table';
 import type { IVendorDashboardStats, IVendorChartsStats } from '@/types';
 
 export const Route = createFileRoute('/vendor/_vendorLayout/')({
-  loader: async ({ context }) => {
-    const queryClient = context.queryClient;
-
-    // Prefetch vendor dashboard stats
-    const [stats, charts] = await Promise.all([
-      queryClient.ensureQueryData<IVendorDashboardStats>(vendorDashboardStatsQuery()),
-      queryClient.ensureQueryData<IVendorChartsStats>(vendorChartsStatsQuery()),
-    ]);
-    console.log('Prefetched vendor dashboard data:', { stats, charts });
-    return { stats, charts };
-  },
   component: VendorDashboard,
-  pendingComponent: LoadingState,
-  errorComponent: ServerError,
 });
 
 // Custom tooltip component for charts
@@ -75,17 +62,38 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 };
 
 function VendorDashboard() {
-  const { data: stats, isLoading: statsLoading } = useQuery<IVendorDashboardStats>(vendorDashboardStatsQuery());
-  const { data: charts, isLoading: chartsLoading } = useQuery<IVendorChartsStats>(vendorChartsStatsQuery());
+  const { data: stats, isLoading: statsLoading, error: statsError , refetch: refetchStats } = useQuery<IVendorDashboardStats>(vendorDashboardStatsQuery());
+  const { data: charts, isLoading: chartsLoading, error: chartsError , refetch: refetchCharts } = useQuery<IVendorChartsStats>(vendorChartsStatsQuery());
 
   if (statsLoading || chartsLoading) {
-    return <LoadingState />;
+    return (
+      <div className="min-h-screen bg-brand-surface">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-10">
+          <LoadingState />
+        </div>
+      </div>
+    );
   }
 
-  if (!stats || !charts) {
-    return <ErrorState />;
+  if (statsError || chartsError) {
+    return (
+      <div className="min-h-screen bg-brand-surface">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="max-w-2xl mx-auto">
+            <ErrorState
+              title="Unable to Load Orders"
+              error={statsError || chartsError}
+              onRetry={() => {
+                refetchStats();
+                refetchCharts();
+              }}
+              fullScreen={false}
+            />
+          </div>
+        </div>
+      </div>
+    );
   }
-
   const totals = stats;
   const recentOrders = totals?.recentOrders || [];
   const totalProducts = totals?.totalProducts || 0;
@@ -110,7 +118,7 @@ function VendorDashboard() {
   return (
     <div className="space-y-6 sm:space-y-8">
       {/* Page Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      {/* <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold text-brand-dark">
             Dashboard
@@ -126,7 +134,7 @@ function VendorDashboard() {
             </span>
           </div>
         </div>
-      </div>
+      </div> */}
 
       {/* Stats Cards Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5">

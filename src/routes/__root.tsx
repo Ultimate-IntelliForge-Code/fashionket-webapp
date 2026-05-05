@@ -22,9 +22,7 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
   beforeLoad: async ({ context }) => {
     // ✅ Initialize auth at ROOT level before any child routes load
     // This ensures /auth/validate runs BEFORE protected routes redirect
-    console.log('[ROOT] beforeLoad: Starting auth initialization...');
     await ensureAuthInitialized(context.queryClient);
-    console.log('[ROOT] beforeLoad: Auth initialization complete');
   },
   head: () => ({
     meta: [

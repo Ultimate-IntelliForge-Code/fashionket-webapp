@@ -5,6 +5,7 @@ import {
   vendorBySlugQuery,
   vendorProductsBySlugQuery,
 } from '../queries';
+import { IProductQueryFilters } from '@/types';
 
 /**
  * Hook for fetching vendors list with filters
@@ -24,16 +25,17 @@ export const useVendorBySlug = (slug: string, enabled = true) => {
 };
 
 /**
- * Hook for fetching vendor's products
+ * Hook for fetching vendor's by slug products
  */
-export const useVendorProducts = (
+export const useVendorbySlugProducts = (
   slug: string,
-  page?: number,
-  limit?: number,
+  filters?: IProductQueryFilters,
   enabled = true
 ) => {
   return useQuery({
-    ...vendorProductsBySlugQuery(slug, { page, limit }),
+    ...vendorProductsBySlugQuery(slug, filters),
     enabled: !!slug && enabled,
   });
 };
+
+

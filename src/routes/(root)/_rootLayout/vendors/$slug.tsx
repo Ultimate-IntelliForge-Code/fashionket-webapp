@@ -1,6 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
-import { vendorBySlugQuery, vendorProductsBySlugQuery } from "@/api/queries";
 import { ProductGrid, ProductListItem } from "@/components/ui/product-card";
 import { CompactPagination, Pagination } from "@/components/ui/pagination";
 import { Filter, Grid3X3, List, RefreshCcw, X, ChevronDown } from "lucide-react";
@@ -11,6 +10,9 @@ import React from "react";
 import { IProductQueryFilters } from "@/types";
 import { cn, formatCurrency } from "@/lib/utils";
 import { VendorProfile } from "@/components/vendor/vendor-profile";
+import { useVendorBySlug, useVendorbySlugProducts } from "@/api/hooks";
+import { LoadingState } from "@/components/ui/loading-state";
+import { ErrorState } from "@/components/ui/error-state";
 
 export const Route = createFileRoute("/(root)/_rootLayout/vendors/$slug")({
   component: VendorDetailPage,
@@ -39,18 +41,6 @@ export const Route = createFileRoute("/(root)/_rootLayout/vendors/$slug")({
       sortBy: s.sortBy ?? "createdAt",
       sortOrder: s.sortOrder ?? "desc",
     })),
-  loaderDeps: ({ search }) => ({
-    page: search.page,
-    limit: search.limit,
-    search: search.search,
-    categoryId: search.categoryId,
-    brand: search.brand,
-    minPrice: search.minPrice,
-    maxPrice: search.maxPrice,
-    tags: search.tags,
-    sortBy: search.sortBy,
-    sortOrder: search.sortOrder,
-  }),
   params: {
     parse: (params) =>
       z
@@ -59,17 +49,21 @@ export const Route = createFileRoute("/(root)/_rootLayout/vendors/$slug")({
         })
         .parse(params),
   },
-  loader: async ({ context, deps, params }) => {
-    try {
-      const [vendor, data] = await Promise.all([
-        context.queryClient.ensureQueryData(vendorBySlugQuery(params.slug)),
-        context.queryClient.ensureQueryData(
-          vendorProductsBySlugQuery(params.slug, deps),
-        ),
-      ]);
+});
 
-      const products = data.data;
-      const meta = data.pagination;
+function VendorDetailPage() {
+ 
+  const navigate = Route.useNavigate();
+  const search = Route.useSearch();
+
+  const [viewMode, setViewMode] = React.useState<"grid" | "list">("grid");
+  const [isRefreshing, setIsRefreshing] = React.useState<boolean>(false);
+  const [isFilterOpen, setIsFilterOpen] = React.useState<boolean>(false);
+  const {data, isLoading, error, refetch } = useVendorbySlugProducts(Route.useParams().slug);
+  const { data: vendor, isLoading: vendorLoading, error: vendorError } = useVendorBySlug(Route.useParams().slug);
+
+    const products = data?.data || [];
+      const meta = data?.pagination || { page: 1, limit: 20, total: 0, totalPages: 0  };
 
       const brands = Array.from(
         new Set(products.map((p) => p.brand).filter(Boolean)),
@@ -79,24 +73,6 @@ export const Route = createFileRoute("/(root)/_rootLayout/vendors/$slug")({
         ? Math.max(...products.map((p) => p.price ?? 0))
         : 0;
       
-      return { vendor, products, meta, brands, tags, maxPrice };
-    } catch (err) {
-      console.error("Loader error:", err);
-      throw err;
-    }
-  },
-});
-
-function VendorDetailPage() {
-  const { vendor, products, meta, brands, tags, maxPrice } =
-    Route.useLoaderData();
-
-  const navigate = Route.useNavigate();
-  const search = Route.useSearch();
-
-  const [viewMode, setViewMode] = React.useState<"grid" | "list">("grid");
-  const [isRefreshing, setIsRefreshing] = React.useState<boolean>(false);
-  const [isFilterOpen, setIsFilterOpen] = React.useState<boolean>(false);
   
   const hasActiveFilters = React.useMemo(() => {
     return Boolean(
@@ -191,11 +167,41 @@ function VendorDetailPage() {
   const startItem = Math.min((meta.page - 1) * meta.limit + 1, totalProducts);
   const endItem = Math.min(meta.page * meta.limit, totalProducts);
 
+
+    if (isLoading || vendorLoading) {
+    return (
+      <div className="min-h-screen bg-brand-surface">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-10">
+          <LoadingState />
+        </div>
+      </div>
+    );
+  }
+
+  if (error || vendorError) {
+    return (
+      <div className="min-h-screen bg-brand-surface">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="max-w-2xl mx-auto">
+            <ErrorState
+              title="Unable to Load Orders"
+              error={error}
+              onRetry={() => {
+                refetch();
+              }}
+              fullScreen={false}
+            />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-brand-surface">
       {/* Vendor Hero Section */}
       <VendorProfile
-        vendor={vendor}
+        vendor={vendor!}
         refresh={handleRefresh}
         isRefreshing={isRefreshing}
       />

@@ -18,22 +18,12 @@ import {
   Trash2,
 } from 'lucide-react';
 import { toast } from 'react-toastify';
-import { LoadingState } from '@/components/ui/loading-state';
-import { ErrorState } from '@/components/ui/error-state';
 import { ProductForm } from '@/components/forms/product-form';
+import { ErrorState } from '@/components/ui/error-state';
+import { LoadingState } from '@/components/ui/loading-state';
 
 export const Route = createFileRoute('/vendor/_vendorLayout/products/$slug')({
-  loader: async ({ context, params }) => {
-    const queryClient = context.queryClient;
-    const [product, categories] = await Promise.all([
-      queryClient.ensureQueryData(productBySlugQuery(params.slug)),
-      queryClient.ensureQueryData(categoriesQuery()),
-    ]);
-    return { product, categories };
-  },
   component: VendorProductDetail,
-  pendingComponent: LoadingState,
-  errorComponent: ErrorState,
 });
 
 function VendorProductDetail() {
@@ -42,12 +32,41 @@ function VendorProductDetail() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   
-  const { data: product } = useQuery(productBySlugQuery(slug));
-  const { data: categories } = useQuery(categoriesQuery());
+  const { data: product, error: productError, isLoading: isProductLoading, refetch: refetchProduct } = useQuery(productBySlugQuery(slug));
+  const { data: categories, error: categoriesError, isLoading: isCategoriesLoading, refetch: refetchCategories } = useQuery(categoriesQuery());
   const { mutateAsync: updateProduct, isPending: isUpdating } = useUpdateProduct();
   const { mutateAsync: deleteProduct, isPending: isDeleting } = useDeleteProduct();
 
-  if (!product || !categories) return null;
+    if (isProductLoading || isCategoriesLoading) {
+    return (
+      <div className="min-h-screen bg-brand-surface">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-10">
+          <LoadingState />
+        </div>
+      </div>
+    );
+  }
+
+  if (productError || categoriesError || product === undefined || categories === undefined) {
+    return (
+      <div className="min-h-screen bg-brand-surface">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="max-w-2xl mx-auto">
+            <ErrorState
+              title="Unable to Load Orders"
+              error={productError ||categoriesError }
+              onRetry={() => {
+                refetchProduct();
+                refetchCategories();
+              }}
+              fullScreen={false}
+            />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
 
   const priceInNaira = product.price / 100;
   const discountedPriceInNaira =
@@ -108,6 +127,7 @@ function VendorProductDetail() {
     }
   };
 
+  
   return (
     <div className="space-y-8">
       {/* Header */}

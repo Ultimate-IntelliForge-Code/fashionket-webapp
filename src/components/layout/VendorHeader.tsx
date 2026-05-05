@@ -1,4 +1,4 @@
-import React, { useMemo, useCallback, useEffect, useState } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import { useRouter } from "@tanstack/react-router";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -21,7 +21,6 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
@@ -196,38 +195,33 @@ export const VendorHeader: React.FC<VendorHeaderProps> = ({ onMobileOpen }) => {
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  // Safe pathname access with fallback
-  const currentPath = useMemo(() => {
-    try {
-      return router?.state?.location?.pathname || "/vendor";
-    } catch (error) {
-      console.error("Error accessing router path:", error);
-      return "/vendor";
-    }
-  }, [router?.state?.location?.pathname]);
+  // Direct pathname access without memoization
+  const currentPath = router?.state?.location?.pathname
 
-  // Memoized page detection based on current route
-  const currentPageConfig = useMemo((): PageConfig => {
+  console.log("Current path outside:", currentPath);
+
+  // Function to get page config based on current route (no memoization)
+  const getCurrentPageConfig = (): PageConfig => {
+    const path = currentPath;
+
     // Add debug logging in development
-    if (process.env.NODE_ENV === "development") {
-      console.log("Current path:", currentPath);
-    }
+    console.log("Current path:", path);
 
     // Check exact match first
-    if (pageConfig[currentPath]) {
-      return pageConfig[currentPath];
+    if (pageConfig[path]) {
+      return pageConfig[path];
     }
 
     // Check dynamic routes with regex patterns
     for (const dynamicConfig of dynamicRouteConfigs) {
-      if (dynamicConfig.pattern.test(currentPath)) {
+      if (dynamicConfig.pattern.test(path)) {
         return dynamicConfig.getConfig();
       }
     }
 
     // Handle vendor sub-routes with prefix matching
-    if (currentPath.startsWith("/vendor/")) {
-      const subPath = currentPath.replace("/vendor/", "");
+    if (path.startsWith("/vendor/")) {
+      const subPath = path.replace("/vendor/", "");
       const firstSegment = subPath.split("/")[0];
 
       const subRouteMap: Record<string, PageConfig> = {
@@ -258,7 +252,7 @@ export const VendorHeader: React.FC<VendorHeaderProps> = ({ onMobileOpen }) => {
     }
 
     // Default fallback for vendor routes
-    if (currentPath.startsWith("/vendor")) {
+    if (path.startsWith("/vendor")) {
       return {
         title: "Vendor Dashboard",
         icon: Shield,
@@ -276,11 +270,16 @@ export const VendorHeader: React.FC<VendorHeaderProps> = ({ onMobileOpen }) => {
       gradient: "from-brand-primary to-brand-primary",
       showLiveBadge: false,
     };
+  };
+
+  useEffect(() => {
+    getCurrentPageConfig();
   }, [currentPath]);
-  // Memoized unread count
-  const unreadCount = useMemo(() => {
-    return notifications.filter((n) => n.isNew).length;
-  }, [notifications]);
+
+  const currentPageConfig = getCurrentPageConfig();
+
+  // Calculate unread count directly
+  const unreadCount = notifications.filter((n) => n.isNew).length;
 
   // Simulate loading new notifications
   useEffect(() => {
@@ -359,26 +358,17 @@ export const VendorHeader: React.FC<VendorHeaderProps> = ({ onMobileOpen }) => {
             {/* Page Title Section - Desktop */}
             <div className="hidden md:flex items-center gap-3 min-w-0">
               {/* Animated Icon Container */}
-              <motion.div
-                key={`${currentPath}-icon`}
-                initial={{ scale: 0.8, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={{ duration: 0.2 }}
+              <div
                 className={`h-10 w-10 rounded-lg bg-gradient-to-br ${gradientClass} flex items-center justify-center shadow-sm shrink-0`}
               >
                 <PageIcon className="h-5 w-5 text-white" />
-              </motion.div>
+              </div>
 
               <div className="min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <motion.h1
-                    key={`${currentPath}-title`}
-                    initial={{ opacity: 0, x: -10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    className="font-bold text-xl text-brand-dark truncate"
-                  >
+                  <h1 className="font-bold text-xl text-brand-dark truncate">
                     {currentPageConfig.title}
-                  </motion.h1>
+                  </h1>
 
                   {currentPageConfig.showLiveBadge && (
                     <Badge
@@ -395,27 +385,16 @@ export const VendorHeader: React.FC<VendorHeaderProps> = ({ onMobileOpen }) => {
                 </div>
 
                 {currentPageConfig.description && (
-                  <motion.p
-                    key={`${currentPath}-desc`}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 0.1 }}
-                    className="text-xs text-brand-muted mt-0.5"
-                  >
+                  <p className="text-xs text-brand-muted mt-0.5">
                     {currentPageConfig.description}
-                  </motion.p>
+                  </p>
                 )}
               </div>
             </div>
 
             {/* Mobile Page Title */}
             <div className="md:hidden flex items-center gap-2 min-w-0">
-              <motion.div
-                key={`${currentPath}-mobile`}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="flex items-center gap-2"
-              >
+              <div className="flex items-center gap-2">
                 <div
                   className={`h-8 w-8 rounded-lg bg-gradient-to-br ${gradientClass} flex items-center justify-center shrink-0`}
                 >
@@ -424,7 +403,7 @@ export const VendorHeader: React.FC<VendorHeaderProps> = ({ onMobileOpen }) => {
                 <h1 className="font-bold text-lg text-brand-dark truncate">
                   {currentPageConfig.title}
                 </h1>
-              </motion.div>
+              </div>
             </div>
           </div>
 
@@ -446,14 +425,9 @@ export const VendorHeader: React.FC<VendorHeaderProps> = ({ onMobileOpen }) => {
 
                   <AnimatePresence>
                     {unreadCount > 0 && (
-                      <motion.span
-                        initial={{ scale: 0 }}
-                        animate={{ scale: 1 }}
-                        exit={{ scale: 0 }}
-                        className="absolute -top-1 -right-1 min-w-[1.25rem] h-5 px-1 rounded-full bg-gradient-to-r from-brand-primary to-brand-accent text-[10px] text-white flex items-center justify-center border-2 border-white font-bold shadow-sm"
-                      >
+                      <span className="absolute -top-1 -right-1 min-w-[1.25rem] h-5 px-1 rounded-full bg-gradient-to-r from-brand-primary to-brand-accent text-[10px] text-white flex items-center justify-center border-2 border-white font-bold shadow-sm">
                         {unreadCount > 9 ? "9+" : unreadCount}
-                      </motion.span>
+                      </span>
                     )}
                   </AnimatePresence>
                 </Button>
@@ -538,21 +512,6 @@ export const VendorHeader: React.FC<VendorHeaderProps> = ({ onMobileOpen }) => {
                     </div>
                   )}
                 </ScrollArea>
-
-                {/* {notifications.length > 0 && (
-                  <>
-                    <DropdownMenuSeparator className="bg-brand-primary-soft" />
-                    <DropdownMenuItem 
-                      className="justify-center cursor-pointer text-brand-primary hover:text-brand-primary-hover font-medium text-sm py-3"
-                      onClick={() => {
-                        router.navigate({ to: '/vendor/notifications' });
-                        setIsNotificationsOpen(false);
-                      }}
-                    >
-                      View all notifications
-                    </DropdownMenuItem>
-                  </>
-                )} */}
               </DropdownMenuContent>
             </DropdownMenu>
 
