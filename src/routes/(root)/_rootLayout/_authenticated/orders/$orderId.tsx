@@ -1,24 +1,23 @@
-import React from 'react'
-import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
+import React from "react";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card'
-import { Separator } from '@/components/ui/separator'
-import { Skeleton } from '@/components/ui/skeleton'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { ErrorState } from '@/components/ui/error-state'
-import { toast } from 'react-toastify'
-import { formatCurrency, cn } from '@/lib/utils'
-import { orderQuery } from '@/api/queries/order.query'
-import { useCancelOrder, useInitPayment } from '@/api/mutations'
-import { OrderStatusBadge } from '@/components/orders/order-status-badge'
-import { OrderTimeline } from '@/components/orders/order-timeline'
+} from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ErrorState } from "@/components/ui/error-state";
+import { toast } from "react-toastify";
+import { formatCurrency, cn } from "@/lib/utils";
+import { useCancelOrder, useInitPayment } from "@/api/mutations";
+import { OrderStatusBadge } from "@/components/orders/order-status-badge";
+import { OrderTimeline } from "@/components/orders/order-timeline";
 import {
   ArrowLeft,
   Package,
@@ -40,92 +39,80 @@ import {
   Receipt,
   HelpCircle,
   Shield,
-  AlertCircle,
-} from 'lucide-react'
-import { OrderStatus, PaymentStatus } from '@/types'
-import { PaymentStatusBadge } from '@/components/orders/payment-status-badge'
-import { LoadingState } from '@/components/ui/loading-state'
-import { useOrderQuery } from '@/api/hooks'
-import { ConfirmToast } from '@/components/ui/cofirm-toast'
+  Store,
+} from "lucide-react";
+import { OrderStatus, PaymentStatus } from "@/types";
+import { PaymentStatusBadge } from "@/components/orders/payment-status-badge";
+import { useOrderQuery } from "@/api/hooks";
+import { ConfirmToast } from "@/components/ui/cofirm-toast";
 
 export const Route = createFileRoute(
-  '/(root)/_rootLayout/_authenticated/orders/$orderId',
+  "/(root)/_rootLayout/_authenticated/orders/$orderId",
 )({
   component: OrderDetailPage,
-  loader: async ({ context, params }) => {
-    try {
-      const order = await context.queryClient.fetchQuery(
-        orderQuery(params.orderId),
-      )
-      return { order }
-    } catch (error) {
-      console.error('Failed to load order:', error)
-      throw error
-    }
-  },
-  pendingComponent: () => <LoadingState message="Loading order details..." />,
-  errorComponent: ({ error, reset }) => (
-    <ErrorState title="Failed to load order" error={error} onRetry={reset} />
-  ),
-})
+});
 
 function OrderDetailPage() {
-  const params = Route.useParams()
-  const navigate = useNavigate()
-  const loaderData = Route.useLoaderData()
+  const params = Route.useParams();
+  const navigate = useNavigate();
   const { mutateAsync: initPayment, isPending: isInitializingPayment } =
-    useInitPayment()
-
-  const initialOrder = loaderData.order
+    useInitPayment();
 
   const {
-    data: order = initialOrder,
+    data: order,
     isLoading,
     error,
     refetch,
-  } = useOrderQuery(params.orderId)
+  } = useOrderQuery(params.orderId);
 
-  const { mutate: cancelOrder, isPending: isCancelling } = useCancelOrder()
+  const { mutate: cancelOrder, isPending: isCancelling } = useCancelOrder();
 
   const handleCopyOrderNumber = React.useCallback(() => {
     if (order) {
-      navigator.clipboard.writeText(order.orderNumber).then(() => {
-        toast.success('Order number copied to clipboard')
-      }).catch(() => {
-        toast.error('Failed to copy order number')
-      })
+      navigator.clipboard
+        .writeText(order.orderNumber)
+        .then(() => {
+          toast.success("Order number copied to clipboard");
+        })
+        .catch(() => {
+          toast.error("Failed to copy order number");
+        });
     }
-  }, [order])
+  }, [order]);
 
   const handlePrintOrder = React.useCallback(() => {
-    window.print()
-  }, [])
+    window.print();
+  }, []);
 
   const handleShareOrder = React.useCallback(async () => {
-    if (!order) return
+    if (!order) return;
 
     const shareData = {
       title: `Order #${order.orderNumber}`,
       text: `Check out my order on FashionKet`,
       url: window.location.href,
-    }
+    };
 
     try {
       if (navigator.share && navigator.canShare?.(shareData)) {
-        await navigator.share(shareData)
-        toast.success('Order shared successfully')
+        await navigator.share(shareData);
+        toast.success("Order shared successfully");
       } else {
-        await navigator.clipboard.writeText(window.location.href)
-        toast.success('Order link copied to clipboard')
+        await navigator.clipboard.writeText(window.location.href);
+        toast.success("Order link copied to clipboard");
       }
     } catch (error: any) {
-      if (error.name !== 'AbortError') {
-        toast.error('Failed to share order')
+      if (error.name !== "AbortError") {
+        toast.error("Failed to share order");
       }
     }
-  }, [order])
+  }, [order]);
 
   const handleCancelOrder = React.useCallback(() => {
+    if (!order) {
+      toast.error("Order ID not provided");
+      return;
+    }
     return toast.info(
       <ConfirmToast
         message="You are about to cancel this order"
@@ -134,64 +121,50 @@ function OrderDetailPage() {
             { id: order._id },
             {
               onSuccess: (data) => {
-                toast.success(data.message || 'Order cancelled successfully')
-                refetch()
+                toast.success(data.message || "Order cancelled successfully");
+                refetch();
               },
               onError: (error: any) => {
-                toast.error(error.message || 'Failed to cancel order')
+                toast.error(error.message || "Failed to cancel order");
               },
             },
           )
         }
       />,
-      { autoClose: false }
-    )
-  }, [order, cancelOrder, refetch])
+      { autoClose: false },
+    );
+  }, [order, cancelOrder, refetch]);
 
   const handleDownloadInvoice = React.useCallback(() => {
-    toast.info('Invoice download started')
-  }, [])
+    toast.info("Invoice download started");
+  }, []);
 
   const handleCompletePayment = React.useCallback(async () => {
     try {
+      if (!order) {
+        toast.error("Order ID not provided");
+        return;
+      }
       const paymentData = await initPayment({
         orderId: order._id,
         callbackUrl: `${window.location.origin}/checkout/payment-status`,
-      })
-      window.location.href = paymentData.authorization_url
+      });
+      window.location.href = paymentData.authorization_url;
     } catch (error: any) {
-      console.error('Payment initialization failed:', error)
-      toast.error(error.message || 'Failed to process payment')
+      console.error("Payment initialization failed:", error);
+      toast.error(error.message || "Failed to process payment");
     }
-  }, [initPayment, order?._id])
+  }, [initPayment, order?._id]);
 
   const handleRetry = React.useCallback(() => {
-    refetch()
-  }, [refetch])
+    refetch();
+  }, [refetch]);
 
-  if (isLoading && !initialOrder) {
-    return <OrderDetailLoadingSkeleton />
+  if (isLoading) {
+    return <OrderDetailLoadingSkeleton />;
   }
 
-  if (error && !initialOrder) {
-    return (
-      <div className="min-h-screen bg-brand-surface">
-        <OrderDetailHeader />
-        <div className="container mx-auto px-4 py-8">
-          <div className="max-w-2xl mx-auto">
-            <ErrorState
-              title="Failed to load order"
-              error={error}
-              onRetry={handleRetry}
-              fullScreen={false}
-            />
-          </div>
-        </div>
-      </div>
-    )
-  }
-
-  if (!order) {
+  if (!order || error) {
     return (
       <div className="min-h-screen bg-brand-surface">
         <OrderDetailHeader />
@@ -200,13 +173,13 @@ function OrderDetailPage() {
             <ErrorState
               title="Order not found"
               message="The order you're looking for doesn't exist or you don't have permission to view it."
-              onRetry={() => navigate({ to: '/orders' })}
+              onRetry={handleRetry}
               fullScreen={false}
             />
           </div>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -230,9 +203,7 @@ function OrderDetailPage() {
 
             <OrderDetails order={order} />
 
-            {order.notes && (
-              <OrderNotes notes={order.notes} />
-            )}
+            {order.notes && <OrderNotes notes={order.notes} />}
           </div>
 
           {/* Sidebar */}
@@ -255,7 +226,7 @@ function OrderDetailPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }
 
 // Header Component
@@ -286,7 +257,9 @@ function OrderDetailHeader({ order }: { order?: any }) {
                     #{order.orderNumber}
                   </p>
                   <OrderStatusBadge status={order.status} />
-                  <PaymentStatusBadge status={order.paymentStatus as PaymentStatus} />
+                  <PaymentStatusBadge
+                    status={order.paymentStatus as PaymentStatus}
+                  />
                 </div>
               </>
             ) : (
@@ -307,7 +280,7 @@ function OrderDetailHeader({ order }: { order?: any }) {
         </div>
       </div>
     </div>
-  )
+  );
 }
 
 // Order Actions Component
@@ -317,17 +290,17 @@ function OrderActions({
   onPrintOrder,
   onShareOrder,
 }: {
-  order: any
-  onCopyOrderNumber: () => void
-  onPrintOrder: () => void
-  onShareOrder: () => void
+  order: any;
+  onCopyOrderNumber: () => void;
+  onPrintOrder: () => void;
+  onShareOrder: () => void;
 }) {
   const actionButtons = [
-    { icon: Copy, label: 'Copy Order Number', onClick: onCopyOrderNumber },
-    { icon: Printer, label: 'Print Receipt', onClick: onPrintOrder },
-    { icon: Share2, label: 'Share Order', onClick: onShareOrder },
-    { icon: MessageSquare, label: 'Contact Support', href: '/contact' },
-  ]
+    { icon: Copy, label: "Copy Order Number", onClick: onCopyOrderNumber },
+    { icon: Printer, label: "Print Receipt", onClick: onPrintOrder },
+    { icon: Share2, label: "Share Order", onClick: onShareOrder },
+    { icon: MessageSquare, label: "Contact Support", href: "/contact" },
+  ];
 
   return (
     <Card className="print:hidden border-brand-primary-soft shadow-sm">
@@ -355,7 +328,10 @@ function OrderActions({
             </Button>
           ))}
           {order.status === OrderStatus.SHIPPED && (
-            <Button variant="outline" className="border-brand-primary-soft text-brand-dark hover:bg-brand-primary-soft">
+            <Button
+              variant="outline"
+              className="border-brand-primary-soft text-brand-dark hover:bg-brand-primary-soft"
+            >
               <Truck className="mr-2 h-4 w-4" />
               Track Order
             </Button>
@@ -363,7 +339,7 @@ function OrderActions({
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }
 
 // Order Timeline Card Component
@@ -385,7 +361,7 @@ function OrderTimelineCard({ order }: { order: any }) {
         <OrderTimeline order={order} />
       </CardContent>
     </Card>
-  )
+  );
 }
 
 // Order Items Component
@@ -415,12 +391,16 @@ function OrderItems({ order }: { order: any }) {
               {/* Product Image Placeholder */}
               <div className="w-20 h-20 rounded-xl bg-brand-surface border border-brand-primary-soft overflow-hidden shrink-0 flex items-center justify-center">
                 {item.imageUrl ? (
-                  <img src={item.imageUrl} alt={item.nameSnapshot} className="w-full h-full object-cover" />
+                  <img
+                    src={item.imageUrl}
+                    alt={item.nameSnapshot}
+                    className="w-full h-full object-cover"
+                  />
                 ) : (
                   <Package className="h-8 w-8 text-brand-muted" />
                 )}
               </div>
-              
+
               {/* Product Info */}
               <div className="flex-1 min-w-0">
                 <h4 className="font-semibold text-brand-dark truncate">
@@ -442,7 +422,7 @@ function OrderItems({ order }: { order: any }) {
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }
 
 // Order Details Component
@@ -458,14 +438,14 @@ function OrderDetails({ order }: { order: any }) {
       <CardContent>
         <Tabs defaultValue="shipping" className="w-full">
           <TabsList className="grid w-full grid-cols-2 bg-brand-surface">
-            <TabsTrigger 
+            <TabsTrigger
               value="shipping"
               className="data-[state=active]:bg-brand-primary data-[state=active]:text-white"
             >
               <MapPin className="h-4 w-4 mr-2" />
               Shipping
             </TabsTrigger>
-            <TabsTrigger 
+            <TabsTrigger
               value="payment"
               className="data-[state=active]:bg-brand-primary data-[state=active]:text-white"
             >
@@ -475,26 +455,40 @@ function OrderDetails({ order }: { order: any }) {
           </TabsList>
 
           <TabsContent value="shipping" className="mt-4">
-            <div className="space-y-3 bg-brand-surface/30 rounded-xl p-4">
-              <div className="flex items-center gap-2 text-brand-dark">
-                <User className="h-4 w-4 text-brand-muted" />
-                <span className="font-medium">{order.addressId.fullName || 'N/A'}</span>
+            {order.addressId ? (
+              <div className="space-y-3 bg-brand-surface/30 rounded-xl p-4">
+                <div className="flex items-center gap-2 text-brand-dark">
+                  <User className="h-4 w-4 text-brand-muted" />
+                  <span className="font-medium">
+                    {order.addressId.fullName || "N/A"}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2 text-brand-dark">
+                  <Phone className="h-4 w-4 text-brand-muted" />
+                  <span>{order.addressId.phone || "N/A"}</span>
+                </div>
+                <Separator className="bg-brand-primary-soft" />
+                <div className="text-brand-muted space-y-1">
+                  <p>{order.addressId.addressLine1}</p>
+                  {order.addressId.addressLine2 && (
+                    <p>{order.addressId.addressLine2}</p>
+                  )}
+                  <p>
+                    {order.addressId.city}, {order.addressId.state}
+                    {order.addressId.postalCode &&
+                      ` ${order.addressId.postalCode}`}
+                  </p>
+                  <p>{order.addressId.country}</p>
+                </div>
               </div>
-              <div className="flex items-center gap-2 text-brand-dark">
-                <Phone className="h-4 w-4 text-brand-muted" />
-                <span>{order.addressId.phone || 'N/A'}</span>
+            ) : (
+              <div className="flex items-center justify-center p-2">
+                <div className="flex gap-2">
+                  <Store className="h-5 w-5 text-mmp-primary" />
+                  <span>Pick up order</span>
+                </div>
               </div>
-              <Separator className="bg-brand-primary-soft" />
-              <div className="text-brand-muted space-y-1">
-                <p>{order.addressId.addressLine1}</p>
-                {order.addressId.addressLine2 && <p>{order.addressId.addressLine2}</p>}
-                <p>
-                  {order.addressId.city}, {order.addressId.state}
-                  {order.addressId.postalCode && ` ${order.addressId.postalCode}`}
-                </p>
-                <p>{order.addressId.country}</p>
-              </div>
-            </div>
+            )}
           </TabsContent>
 
           <TabsContent value="payment" className="mt-4">
@@ -502,7 +496,9 @@ function OrderDetails({ order }: { order: any }) {
               <div>
                 <p className="text-sm text-brand-muted mb-1">Payment Status</p>
                 <div className="flex items-center gap-2">
-                  <PaymentStatusBadge status={order.paymentStatus as PaymentStatus} />
+                  <PaymentStatusBadge
+                    status={order.paymentStatus as PaymentStatus}
+                  />
                   {order.paidAt && (
                     <span className="text-xs text-brand-muted flex items-center gap-1">
                       <Calendar className="h-3 w-3" />
@@ -517,15 +513,21 @@ function OrderDetails({ order }: { order: any }) {
               <div className="space-y-2">
                 <div className="flex justify-between text-sm">
                   <span className="text-brand-muted">Subtotal</span>
-                  <span className="text-brand-dark">{formatCurrency(order.subtotalAmount)}</span>
+                  <span className="text-brand-dark">
+                    {formatCurrency(order.subtotalAmount)}
+                  </span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-brand-muted">Shipping Fee</span>
-                  <span className="text-brand-dark">{formatCurrency(order.shippingFee)}</span>
+                  <span className="text-brand-dark">
+                    {formatCurrency(order.shippingFee)}
+                  </span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-brand-muted">Tax</span>
-                  <span className="text-brand-dark">{formatCurrency(order.taxAmount || 0)}</span>
+                  <span className="text-brand-dark">
+                    {formatCurrency(order.taxAmount || 0)}
+                  </span>
                 </div>
                 <Separator className="bg-brand-primary-soft" />
                 <div className="flex justify-between text-base font-bold">
@@ -540,7 +542,7 @@ function OrderDetails({ order }: { order: any }) {
         </Tabs>
       </CardContent>
     </Card>
-  )
+  );
 }
 
 // Order Notes Component
@@ -559,17 +561,28 @@ function OrderNotes({ notes }: { notes: string }) {
         </p>
       </CardContent>
     </Card>
-  )
+  );
 }
 
 // Order Summary Component
 function OrderSummary({ order }: { order: any }) {
   const summaryItems = [
-    { label: 'Order Number', value: order.orderNumber, icon: Receipt, monospace: true },
-    { label: 'Order Date', value: new Date(order.createdAt).toLocaleDateString('en-US', {
-      year: 'numeric', month: 'short', day: 'numeric'
-    }), icon: Calendar },
-  ]
+    {
+      label: "Order Number",
+      value: order.orderNumber,
+      icon: Receipt,
+      monospace: true,
+    },
+    {
+      label: "Order Date",
+      value: new Date(order.createdAt).toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+      }),
+      icon: Calendar,
+    },
+  ];
 
   return (
     <Card className="border-brand-primary-soft shadow-sm sticky top-24">
@@ -584,7 +597,12 @@ function OrderSummary({ order }: { order: any }) {
                 <Icon className="h-4 w-4" />
                 {label}
               </span>
-              <span className={cn("text-sm text-brand-dark", monospace && "font-mono")}>
+              <span
+                className={cn(
+                  "text-sm text-brand-dark",
+                  monospace && "font-mono",
+                )}
+              >
                 {value}
               </span>
             </div>
@@ -596,7 +614,9 @@ function OrderSummary({ order }: { order: any }) {
             </span>
             <div className="flex items-center gap-2">
               <OrderStatusBadge status={order.status} />
-              <PaymentStatusBadge status={order.paymentStatus as PaymentStatus} />
+              <PaymentStatusBadge
+                status={order.paymentStatus as PaymentStatus}
+              />
             </div>
           </div>
           {order.trackingNumber && (
@@ -616,16 +636,24 @@ function OrderSummary({ order }: { order: any }) {
 
         <div className="space-y-2">
           <div className="flex justify-between text-sm">
-            <span className="text-brand-muted">Items ({order.items.length})</span>
-            <span className="text-brand-dark">{formatCurrency(order.subtotalAmount)}</span>
+            <span className="text-brand-muted">
+              Items ({order.items.length})
+            </span>
+            <span className="text-brand-dark">
+              {formatCurrency(order.subtotalAmount)}
+            </span>
           </div>
           <div className="flex justify-between text-sm">
             <span className="text-brand-muted">Shipping</span>
-            <span className="text-brand-dark">{formatCurrency(order.shippingFee)}</span>
+            <span className="text-brand-dark">
+              {formatCurrency(order.shippingFee)}
+            </span>
           </div>
           <div className="flex justify-between text-sm">
             <span className="text-brand-muted">Tax</span>
-            <span className="text-brand-dark">{formatCurrency(order.taxAmount || 0)}</span>
+            <span className="text-brand-dark">
+              {formatCurrency(order.taxAmount || 0)}
+            </span>
           </div>
           <Separator className="bg-brand-primary-soft" />
           <div className="flex justify-between text-lg font-bold">
@@ -637,7 +665,7 @@ function OrderSummary({ order }: { order: any }) {
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }
 
 // Order Actions Panel Component
@@ -649,18 +677,16 @@ function OrderActionsPanel({
   onCompletePayment,
   isLoadingPayment,
 }: {
-  order: any
-  isCancelling: boolean
-  onCancelOrder: () => void
-  onDownloadInvoice: () => void
-  onCompletePayment: () => void
-  isLoadingPayment: boolean
+  order: any;
+  isCancelling: boolean;
+  onCancelOrder: () => void;
+  onDownloadInvoice: () => void;
+  onCompletePayment: () => void;
+  isLoadingPayment: boolean;
 }) {
-  const isCancellable = [
-    OrderStatus.PENDING_PAYMENT,
-    OrderStatus.PENDING,
-    OrderStatus.PROCESSING,
-  ].includes(order.status)
+  const isCancellable = [OrderStatus.PENDING, OrderStatus.PROCESSING].includes(
+    order.status,
+  );
 
   return (
     <Card className="border-brand-primary-soft shadow-sm print:hidden">
@@ -671,7 +697,7 @@ function OrderActionsPanel({
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-3">
-        {order.status === OrderStatus.PENDING_PAYMENT && (
+        {order.paymentStatus === PaymentStatus.PENDING && (
           <Button
             className="w-full bg-brand-success text-white hover:bg-brand-success/90 shadow-sm"
             onClick={onCompletePayment}
@@ -692,14 +718,20 @@ function OrderActionsPanel({
         )}
 
         {order.status === OrderStatus.PROCESSING && (
-          <Button variant="outline" className="w-full border-brand-primary-soft text-brand-dark hover:bg-brand-primary-soft">
+          <Button
+            variant="outline"
+            className="w-full border-brand-primary-soft text-brand-dark hover:bg-brand-primary-soft"
+          >
             <Truck className="mr-2 h-4 w-4" />
             Track Shipment
           </Button>
         )}
 
         {order.status === OrderStatus.DELIVERED && (
-          <Button variant="outline" className="w-full border-brand-primary-soft text-brand-dark hover:bg-brand-primary-soft">
+          <Button
+            variant="outline"
+            className="w-full border-brand-primary-soft text-brand-dark hover:bg-brand-primary-soft"
+          >
             <MessageSquare className="mr-2 h-4 w-4" />
             Leave a Review
           </Button>
@@ -736,7 +768,7 @@ function OrderActionsPanel({
         </Button>
       </CardContent>
     </Card>
-  )
+  );
 }
 
 // Help Card Component
@@ -753,13 +785,21 @@ function HelpCard() {
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-3">
-        <Button variant="outline" className="w-full border-brand-primary-soft text-brand-dark hover:bg-brand-primary-soft" asChild>
+        <Button
+          variant="outline"
+          className="w-full border-brand-primary-soft text-brand-dark hover:bg-brand-primary-soft"
+          asChild
+        >
           <Link to="/contact">
             <MessageSquare className="mr-2 h-4 w-4" />
             Chat with Support
           </Link>
         </Button>
-        <Button variant="outline" className="w-full border-brand-primary-soft text-brand-dark hover:bg-brand-primary-soft" asChild>
+        <Button
+          variant="outline"
+          className="w-full border-brand-primary-soft text-brand-dark hover:bg-brand-primary-soft"
+          asChild
+        >
           <a href="tel:0700FASHION">
             <Phone className="mr-2 h-4 w-4" />
             Call Support
@@ -782,17 +822,17 @@ function HelpCard() {
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }
 
 // Return Policy Card Component
 function ReturnPolicyCard() {
   const policies = [
-    'Eligible for returns within 14 days',
-    'Items must be in original condition',
-    'Refunds processed in 5-7 business days',
-    'Contact support for return authorization',
-  ]
+    "Eligible for returns within 14 days",
+    "Items must be in original condition",
+    "Refunds processed in 5-7 business days",
+    "Contact support for return authorization",
+  ];
 
   return (
     <Card className="border-brand-primary-soft shadow-sm print:hidden">
@@ -813,7 +853,7 @@ function ReturnPolicyCard() {
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }
 
 // Loading Skeleton Component
@@ -906,5 +946,5 @@ function OrderDetailLoadingSkeleton() {
         </div>
       </div>
     </div>
-  )
+  );
 }

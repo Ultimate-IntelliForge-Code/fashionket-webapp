@@ -1,50 +1,51 @@
-import { createFileRoute, Outlet, Navigate } from "@tanstack/react-router";
-import { useAuth } from "@/hooks";
+import { createFileRoute, Outlet } from "@tanstack/react-router";
 import { VendorSideBar } from "@/components/layout/VendorSidebar";
 import { VendorHeader } from "@/components/layout/VendorHeader";
+import { AuthGuard } from "@/components/auth";
 import React from "react";
-import { VendorAuthProvider } from "@/providers/auth-provider";
-import { motion, AnimatePresence } from "framer-motion";
+import { UserRole } from "@/types";
 
 export const Route = createFileRoute("/vendor/_vendorLayout")({
   component: VendorLayout,
 });
 
 function VendorLayout() {
-  const { isAuthenticated, isVendor } = useAuth();
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = React.useState(false);
   const [isScrolled, setIsScrolled] = React.useState(false);
 
-  // Handle scroll effect for main content
+  // Handle scroll effect with throttling for performance
   React.useEffect(() => {
+    let ticking = false;
+
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 10);
+      if (!ticking) {
+        requestAnimationFrame(() => {
+          setIsScrolled(window.scrollY > 10);
+          ticking = false;
+        });
+        ticking = true;
+      }
     };
-    window.addEventListener("scroll", handleScroll);
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  if (!isAuthenticated || !isVendor) {
-    return <Navigate to="/vendor/login" />;
-  }
+  // Prevent body scroll when mobile sidebar is open
+  React.useEffect(() => {
+    if (isMobileSidebarOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [isMobileSidebarOpen]);
 
   return (
-    <VendorAuthProvider>
-      <div className="min-h-screen bg-mmp-primary2/5">
-        {/* Mobile Sidebar Overlay with Animation */}
-        <AnimatePresence>
-          {isMobileSidebarOpen && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
-              className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm lg:hidden"
-              onClick={() => setIsMobileSidebarOpen(false)}
-            />
-          )}
-        </AnimatePresence>
-
+    <AuthGuard requireAuth={true} allowedRoles={[UserRole.VENDOR]}>
+      <div className="min-h-screen bg-brand-surface">
         {/* Sidebar */}
         <VendorSideBar
           isMobileOpen={isMobileSidebarOpen}
@@ -52,50 +53,66 @@ function VendorLayout() {
         />
 
         {/* Main Content Area */}
-        <div className="lg:pl-72 transition-all duration-300">
+        <div
+          className="lg:pl-72 transition-all duration-300 ease-in-out"
+          role="main"
+          aria-label="Vendor dashboard main content"
+        >
           {/* Header - Sticky with scroll effect */}
-          <div className={`sticky top-0 z-30 lg:z-20 transition-all duration-300 ${
-            isScrolled ? "shadow-lg" : ""
-          }`}>
+          <div
+            className={`
+              sticky top-0 z-30 lg:z-20 transition-all duration-300
+              ${isScrolled ? "shadow-md bg-white/95 backdrop-blur-sm" : "bg-white"}
+            `}
+          >
             <VendorHeader onMobileOpen={() => setIsMobileSidebarOpen(true)} />
           </div>
 
           {/* Main Content */}
-          <main className="min-h-[calc(100vh-4rem)]">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3 }}
-              className="mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-8"
-            >
-              {/* Page Content */}
-              <div className="bg-white rounded-xl shadow-sm border border-mmp-primary2/20 p-6 lg:p-8">
+          <main className="min-h-[calc(100vh-5rem)]">
+            {/* Page Content Container */}
+            <div className="bg-white shadow-sm overflow-hidden">
+              <div className="p-4 sm:p-6 lg:p-8">
                 <Outlet />
               </div>
+            </div>
 
-              {/* Footer */}
-              <footer className="mt-8 pt-6 border-t border-mmp-primary2/20">
-                <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
-                  <div className="text-xs text-mmp-primary/40">
-                    © 2024 FashionKet. All rights reserved.
-                  </div>
-                  <div className="flex items-center gap-4 text-xs text-mmp-primary/40">
-                    <a href="#" className="hover:text-mmp-primary transition-colors">
-                      Help Center
-                    </a>
-                    <a href="#" className="hover:text-mmp-primary transition-colors">
-                      Privacy Policy
-                    </a>
-                    <a href="#" className="hover:text-mmp-primary transition-colors">
-                      Terms of Service
-                    </a>
-                  </div>
+            {/* Footer */}
+            <footer className="mt-8 pt-6 border-t border-brand-primary-soft">
+              <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
+                <div className="text-xs text-brand-muted">
+                  © 2024 FashionKet. All rights reserved.
                 </div>
-              </footer>
-            </motion.div>
+                <div className="flex flex-wrap items-center justify-center gap-4 text-xs">
+                  <a
+                    href="#"
+                    className="text-brand-muted hover:text-brand-primary transition-colors duration-200"
+                  >
+                    Help Center
+                  </a>
+                  <span className="text-brand-primary-soft select-none">•</span>
+                  <a
+                    href="#"
+                    className="text-brand-muted hover:text-brand-primary transition-colors duration-200"
+                  >
+                    Privacy Policy
+                  </a>
+                  <span className="text-brand-primary-soft select-none">•</span>
+                  <a
+                    href="#"
+                    className="text-brand-muted hover:text-brand-primary transition-colors duration-200"
+                  >
+                    Terms of Service
+                  </a>
+                </div>
+              </div>
+            </footer>
           </main>
         </div>
       </div>
-    </VendorAuthProvider>
+    </AuthGuard>
   );
 }
+
+// Export with error boundary wrapper
+export default VendorLayout;

@@ -65,8 +65,6 @@ export const vendorBySlugQuery = (slug: string) => ({
       throw new Error(response.error.message);
     }
 
-    console.log(response)
-
     return response.data;
   },
 });
@@ -91,7 +89,6 @@ export const vendorProductsBySlugQuery = (
     const response = await apiClient.get<any>(
       `/products/vendor/${slug}/products?${params.toString()}`
     );
-    console.log('Error', response)
     if (!response.success) {
       throw new Error(response.error.message);
     }

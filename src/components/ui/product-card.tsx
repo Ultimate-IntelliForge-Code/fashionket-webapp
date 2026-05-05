@@ -129,7 +129,6 @@ export const ProductCard: React.FC<ProductCardProps> = ({
     e.preventDefault()
     e.stopPropagation()
     // Implement quick view modal
-    console.log('Quick view:', product.slug)
   }, [product.slug])
 
   const handleProductClick = useCallback(() => {

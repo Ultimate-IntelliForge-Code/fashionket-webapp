@@ -14,8 +14,6 @@ import {
   TrendingUp,
 } from "lucide-react";
 import { OrderStatus } from "@/types";
-import { ordersQuery, orderStatsQuery } from "@/api/queries/order.query";
-import { LoadingState } from "@/components/ui/loading-state";
 import { useOrdersQuery, useOrderStatsQuery } from "@/api/hooks";
 import { OrdersHeader } from "@/components/orders/order-header";
 import { OrdersLoadingSkeleton } from "@/components/orders/order-skeleton";
@@ -30,70 +28,34 @@ export const Route = createFileRoute(
 )({
   component: OrdersPage,
   validateSearch: orderSearchSchema,
-  loaderDeps: ({ search }) => ({
-    page: search.page,
-    limit: search.limit,
-  }),
-  loader: async ({ context, deps }) => {
-    const queryClient = context.queryClient;
-
-    try {
-      const [orders, stats] = await Promise.all([
-        queryClient.fetchQuery(
-          ordersQuery({
-            page: deps.page,
-            limit: deps.limit,
-          }),
-        ),
-        queryClient.fetchQuery(orderStatsQuery()),
-      ]);
-
-      return {
-        initialOrders: orders,
-        initialStats: stats,
-        page: deps.page,
-        limit: deps.limit,
-      };
-    } catch (error) {
-      console.error("Failed to load orders:", error);
-      throw error;
-    }
-  },
-  pendingComponent: () => (
-    <LoadingState message="Loading your orders..." />
-  ),
-  errorComponent: ({ error }) => (
-    <ErrorState 
-      title="Failed to load orders" 
-      error={error} 
-      retryText="Try Again" 
-    />
-  ),
 });
 
 function OrdersPage() {
-  const loaderData = Route.useLoaderData();
   const navigate = useNavigate({ from: Route.fullPath });
-
-  const initialOrders = loaderData.initialOrders;
-  const initialStats = loaderData.initialStats;
   const search = Route.useSearch();
 
   const {
-    data: ordersData = initialOrders,
+    data: ordersData,
     isLoading: ordersLoading,
     error: ordersError,
+    refetch: refetchOrders,
   } = useOrdersQuery({
     page: search.page,
     limit: search.limit,
-    status: search.status,
+    ...(search.status ? { status: search.status } : {}),
   });
 
   const {
-    data: stats = initialStats,
+    data: stats,
     isLoading: statsLoading,
     error: statsError,
+    refetch: refetchStats,
   } = useOrderStatsQuery();
+
+  const handleRetry = React.useCallback(() => {
+    refetchOrders();
+    refetchStats();
+  }, [refetchOrders, refetchStats]);
 
   const updateSearchParams = React.useCallback(
     (updates: Partial<IOrderQueryFilters>) => {
@@ -125,12 +87,13 @@ function OrdersPage() {
     [updateSearchParams],
   );
 
-  const handleRetry = React.useCallback(() => {
-    window.location.reload();
-  }, []);
-
-  const orders = ordersData?.data || [];
-  const paginationMeta = ordersData?.pagination;
+  const orders = Array.isArray(ordersData?.data) ? ordersData.data : [];
+  const paginationMeta = ordersData?.pagination ?? {
+    total: 0,
+    totalPages: 0,
+    page: 1,
+    limit: 20,
+  };
 
   // Status filters with icons and colors
   const statusFilters = React.useMemo(() => {
@@ -147,13 +110,6 @@ function OrdersPage() {
         icon: ShoppingBag,
         color: "brand-primary",
         count: stats?.total,
-      },
-      {
-        value: OrderStatus.PENDING_PAYMENT,
-        label: "Pending Payment",
-        icon: Clock,
-        color: "brand-warning",
-        count: stats?.byStatus?.PENDING_PAYMENT?.count,
       },
       {
         value: OrderStatus.PENDING,
@@ -274,10 +230,12 @@ function OrdersPage() {
                 <div className="flex gap-2 min-w-max px-4 sm:px-0">
                   {statusFilters.map((filter) => {
                     const Icon = filter.icon;
-                    const isActive = search.status === filter.value || 
-                                   (filter.value === "all" && !search.status);
-                    const isDisabled = filter.count === 0 && filter.value !== "all";
-                    
+                    const isActive =
+                      search.status === filter.value ||
+                      (filter.value === "all" && !search.status);
+                    const isDisabled =
+                      filter.count === 0 && filter.value !== "all";
+
                     return (
                       <Button
                         key={filter.value}
@@ -288,8 +246,9 @@ function OrdersPage() {
                         className={cn(
                           "h-9 sm:h-10 px-3 sm:px-4 rounded-lg transition-all duration-200",
                           isActive && getStatusColorClass(filter.color),
-                          !isActive && "border-brand-primary-soft text-brand-dark hover:bg-brand-primary-soft",
-                          isDisabled && "opacity-50 cursor-not-allowed"
+                          !isActive &&
+                            "border-brand-primary-soft text-brand-dark hover:bg-brand-primary-soft",
+                          isDisabled && "opacity-50 cursor-not-allowed",
                         )}
                       >
                         <Icon className="mr-2 h-3.5 w-3.5 sm:h-4 sm:w-4" />
@@ -301,8 +260,10 @@ function OrdersPage() {
                             variant={isActive ? "secondary" : "outline"}
                             className={cn(
                               "ml-2 text-xs font-medium",
-                              isActive && "bg-white/20 text-white border-white/30",
-                              !isActive && "border-brand-primary-soft text-brand-muted"
+                              isActive &&
+                                "bg-white/20 text-white border-white/30",
+                              !isActive &&
+                                "border-brand-primary-soft text-brand-muted",
                             )}
                           >
                             {filter.count}
@@ -316,7 +277,7 @@ function OrdersPage() {
 
               {/* Orders List */}
               <OrdersList
-                orders={ordersData?.data}
+                orders={orders}
                 searchStatus={search.status}
                 statusFilters={statusFilters}
               />

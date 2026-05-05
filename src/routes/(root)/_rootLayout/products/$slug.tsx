@@ -18,11 +18,13 @@ import {
   Award,
 } from "lucide-react";
 import { AddToCartButton } from "@/components/cart/add-to-cart-button";
-import { productBySlugQuery, relatedProductsQuery } from "@/api/queries";
 import type { IVariantOptions } from "@/types";
 import { ProductCard } from "@/components/ui/product-card";
 import { useCart } from "@/hooks";
 import { toast } from "react-toastify";
+import { useProductBySlug, useRelatedProducts } from "@/api/hooks";
+import { LoadingState } from "@/components/ui/loading-state";
+import { ErrorState } from "@/components/ui/error-state";
 
 export const Route = createFileRoute("/(root)/_rootLayout/products/$slug")({
   component: ProductDetailPage,
@@ -35,18 +37,9 @@ export const Route = createFileRoute("/(root)/_rootLayout/products/$slug")({
         })
         .parse(params),
   },
-  loader: async ({ context, params }) => {
-    const [product, relatedProducts] = await Promise.all([
-      context.queryClient.ensureQueryData(productBySlugQuery(params.slug)),
-      context.queryClient.ensureQueryData(relatedProductsQuery(params.slug, 8)),
-    ]);
-    return { product, relatedProducts };
-  },
 });
 
 function ProductDetailPage() {
-  const { product, relatedProducts } = Route.useLoaderData();
-
   const [selectedImage, setSelectedImage] = React.useState(0);
   const [variants, setVariants] = React.useState<IVariantOptions>({
     sizes: [],
@@ -57,6 +50,39 @@ function ProductDetailPage() {
   const [quantity, setQuantity] = React.useState(1);
   const [isWishlisted, setIsWishlisted] = React.useState(false);
   const [isAdding, setIsAdding] = React.useState(false);
+  const params = Route.useParams();
+  const { data: product, error: productError, isLoading: productLoading, refetch: productRefetch } = useProductBySlug(params.slug);
+  const { data: relatedProducts, error: relatedProductsError, isLoading: relatedProductsLoading, refetch: relatedProductsRefetch } = useRelatedProducts(params.slug);
+
+  if (productLoading || relatedProductsLoading) {
+    return (
+      <div className="min-h-screen bg-brand-surface">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-10">
+          <LoadingState />
+        </div>
+      </div>
+    );
+  }
+
+  if (productError || relatedProductsError || !product) {
+    return (
+      <div className="min-h-screen bg-brand-surface">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="max-w-2xl mx-auto">
+            <ErrorState
+              title="Unable to Load Products"
+              error={productError || relatedProductsError}
+              onRetry={() => {
+                productRefetch();
+                relatedProductsRefetch();
+              }}
+              fullScreen={false}
+            />
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const discountedPrice = product.price * (1 - product.discount / 100);
   const savings = product.price - discountedPrice;
@@ -82,8 +108,7 @@ function ProductDetailPage() {
       );
 
       if (result.success) {
-             navigate({ to: "/checkout" });
-
+        navigate({ to: "/checkout" });
       } else {
         toast.error(result.error || "Failed to add to cart");
       }
@@ -429,7 +454,7 @@ function ProductDetailPage() {
                   disabled={isOutOfStock}
                   onClick={handleBuyNow}
                 >
-                  { isAdding ? "Processing..." : "Buy Now"  }
+                  {isAdding ? "Processing..." : "Buy Now"}
                 </Button>
               </div>
               <p className="text-center text-sm text-brand-muted">
@@ -547,7 +572,7 @@ function ProductDetailPage() {
         </div>
 
         {/* Related Products Section */}
-        {relatedProducts.length > 0 && (
+        { relatedProducts && relatedProducts.length > 0 && (
           <div className="mt-12 sm:mt-16 lg:mt-20">
             <div className="mb-6 sm:mb-8 flex items-center justify-between">
               <div>

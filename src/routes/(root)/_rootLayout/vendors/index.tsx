@@ -4,15 +4,27 @@ import { z } from "zod";
 import { CompactPagination, Pagination } from "@/components/ui/pagination";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { Filter, Grid3x3, List, RefreshCw, Store, X, ChevronDown, ChevronUp, Star, Award } from "lucide-react";
-import { vendorsQuery } from "@/api/queries";
+import {
+  Filter,
+  Grid3x3,
+  List,
+  RefreshCw,
+  Store,
+  X,
+  ChevronDown,
+  ChevronUp,
+  Star,
+  Award,
+} from "lucide-react";
 import { FilterBadge } from "@/components/ui/filter-badge";
 import { VendorCard } from "@/components/vendor/vendor-card";
-import type { IVendorQueryFilters } from "@/api/queries/vendor.query";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
+import { useVendors } from "@/api/hooks";
+import { LoadingState } from "@/components/ui/loading-state";
+import { ErrorState } from "@/components/ui/error-state";
 
 export const Route = createFileRoute("/(root)/_rootLayout/vendors/")({
   component: VendorsPage,
@@ -41,45 +53,14 @@ export const Route = createFileRoute("/(root)/_rootLayout/vendors/")({
       sortOrder: s.sortOrder ?? "desc",
       verified: s.verified,
     })),
-  loaderDeps: ({ search }) => ({
-    page: search.page,
-    limit: search.limit,
-    search: search.search,
-    city: search.city,
-    state: search.state,
-    minRating: search.minRating,
-    maxRating: search.maxRating,
-    sortBy: search.sortBy,
-    sortOrder: search.sortOrder,
-    verified: search.verified,
-  }),
-  loader: async ({ context, deps }) => {
-    const filters: IVendorQueryFilters = {
-      page: deps.page,
-      limit: deps.limit,
-      search: deps.search || undefined,
-      city: deps.city,
-      state: deps.state,
-      minRating: deps.minRating,
-      maxRating: deps.maxRating,
-      sortBy: deps.sortBy,
-      sortOrder: deps.sortOrder as "asc" | "desc" | undefined,
-      verified: deps.verified,
-    };
-
-    const data = await context.queryClient.ensureQueryData(vendorsQuery(filters));
-    const vendors = data.data;
-    const meta = data.pagination;
-
-    return { vendors, meta };
-  },
 });
 
 function VendorsPage() {
-  const { vendors, meta } = Route.useLoaderData();
   const search = Route.useSearch();
   const navigate = Route.useNavigate();
-
+  const { data, isLoading, error, refetch } = useVendors(search);
+  const vendors = data?.data || [];
+  const meta = data?.pagination;
   const [viewMode, setViewMode] = React.useState<"grid" | "list">("grid");
   const [isRefreshing, setIsRefreshing] = React.useState<boolean>(false);
   const [isFilterOpen, setIsFilterOpen] = React.useState<boolean>(false);
@@ -133,7 +114,7 @@ function VendorsPage() {
   };
 
   const toggleSection = (section: keyof typeof expandedSections) => {
-    setExpandedSections(prev => ({ ...prev, [section]: !prev[section] }));
+    setExpandedSections((prev) => ({ ...prev, [section]: !prev[section] }));
   };
 
   const getSortLabel = () => {
@@ -149,22 +130,56 @@ function VendorsPage() {
     }
   };
 
+    if (isLoading) {
+    return (
+      <div className="min-h-screen bg-brand-surface">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-10">
+          <LoadingState />
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-brand-surface">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="max-w-2xl mx-auto">
+            <ErrorState
+              title="Unable to Load Vendors"
+              error={error}
+              onRetry={() => {
+                refetch();
+              }}
+              fullScreen={false}
+            />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-brand-surface">
       {/* Hero Header */}
       <div className="relative bg-gradient-to-br from-brand-primary via-brand-primary-hover to-brand-dark overflow-hidden">
         <div className="absolute inset-0 opacity-10">
-          <div className="absolute inset-0" style={{
-            backgroundImage: `radial-gradient(circle at 20% 50%, rgba(255,255,255,0.1) 0%, transparent 50%)`
-          }} />
+          <div
+            className="absolute inset-0"
+            style={{
+              backgroundImage: `radial-gradient(circle at 20% 50%, rgba(255,255,255,0.1) 0%, transparent 50%)`,
+            }}
+          />
         </div>
-        
+
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 lg:py-16">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
               <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-3 py-1 mb-3 sm:mb-4">
                 <Store className="w-4 h-4 text-brand-accent" />
-                <span className="text-xs sm:text-sm font-medium text-white">Trusted Sellers</span>
+                <span className="text-xs sm:text-sm font-medium text-white">
+                  Trusted Sellers
+                </span>
               </div>
               <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-2">
                 Our Vendors
@@ -182,10 +197,17 @@ function VendorsPage() {
             </div>
           </div>
         </div>
-        
+
         <div className="absolute bottom-0 left-0 right-0">
-          <svg className="w-full h-12 text-brand-surface" preserveAspectRatio="none" viewBox="0 0 1440 120">
-            <path fill="currentColor" d="M0,64L80,58.7C160,53,320,43,480,48C640,53,800,75,960,80C1120,85,1280,75,1360,69.3L1440,64L1440,120L1360,120C1280,120,1120,120,960,120C800,120,640,120,480,120C320,120,160,120,80,120L0,120Z" />
+          <svg
+            className="w-full h-12 text-brand-surface"
+            preserveAspectRatio="none"
+            viewBox="0 0 1440 120"
+          >
+            <path
+              fill="currentColor"
+              d="M0,64L80,58.7C160,53,320,43,480,48C640,53,800,75,960,80C1120,85,1280,75,1360,69.3L1440,64L1440,120L1360,120C1280,120,1120,120,960,120C800,120,640,120,480,120C320,120,160,120,80,120L0,120Z"
+            />
           </svg>
         </div>
       </div>
@@ -205,15 +227,22 @@ function VendorsPage() {
               {hasActiveFilters && (
                 <span className="ml-1 bg-white text-brand-primary rounded-full min-w-[20px] h-5 px-1.5 text-xs font-bold flex items-center justify-center">
                   {
-                    Object.keys(search).filter(k => 
-                      ['search', 'city', 'state', 'minRating', 'maxRating', 'verified'].includes(k) && 
-                      search[k as keyof typeof search]
+                    Object.keys(search).filter(
+                      (k) =>
+                        [
+                          "search",
+                          "city",
+                          "state",
+                          "minRating",
+                          "maxRating",
+                          "verified",
+                        ].includes(k) && search[k as keyof typeof search],
                     ).length
                   }
                 </span>
               )}
             </Button>
-            
+
             <Button
               variant="outline"
               size="sm"
@@ -221,7 +250,9 @@ function VendorsPage() {
               disabled={isRefreshing}
               className="h-9 w-9 p-0 border-brand-primary-soft hover:bg-brand-primary-soft"
             >
-              <RefreshCw className={cn("w-4 h-4", isRefreshing && "animate-spin")} />
+              <RefreshCw
+                className={cn("w-4 h-4", isRefreshing && "animate-spin")}
+              />
             </Button>
 
             {/* Sort Dropdown */}
@@ -233,29 +264,48 @@ function VendorsPage() {
                 className="gap-2 h-9 border-brand-primary-soft hover:bg-brand-primary-soft"
               >
                 <span>{getSortLabel()}</span>
-                <ChevronDown className={cn("w-3 h-3 transition-transform", isSortOpen && "rotate-180")} />
+                <ChevronDown
+                  className={cn(
+                    "w-3 h-3 transition-transform",
+                    isSortOpen && "rotate-180",
+                  )}
+                />
               </Button>
-              
+
               {isSortOpen && (
                 <>
-                  <div className="fixed inset-0 z-40" onClick={() => setIsSortOpen(false)} />
+                  <div
+                    className="fixed inset-0 z-40"
+                    onClick={() => setIsSortOpen(false)}
+                  />
                   <div className="absolute top-full right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-brand-primary-soft z-50 overflow-hidden">
                     {[
-                      { value: "createdAt", label: "Newest First", order: "desc" },
-                      { value: "rating", label: "Highest Rated", order: "desc" },
+                      {
+                        value: "createdAt",
+                        label: "Newest First",
+                        order: "desc",
+                      },
+                      {
+                        value: "rating",
+                        label: "Highest Rated",
+                        order: "desc",
+                      },
                       { value: "name", label: "Name A-Z", order: "asc" },
                     ].map((option) => (
                       <button
                         key={option.value}
                         onClick={() => {
-                          handleFilterChange({ sortBy: option.value, sortOrder: option.order as "asc" | "desc" });
+                          handleFilterChange({
+                            sortBy: option.value,
+                            sortOrder: option.order as "asc" | "desc",
+                          });
                           setIsSortOpen(false);
                         }}
                         className={cn(
                           "w-full text-left px-4 py-2 text-sm transition-colors",
                           search.sortBy === option.value
                             ? "bg-brand-primary-soft text-brand-primary font-medium"
-                            : "text-brand-dark hover:bg-brand-surface"
+                            : "text-brand-dark hover:bg-brand-surface",
                         )}
                       >
                         {option.label}
@@ -274,7 +324,8 @@ function VendorsPage() {
               onClick={() => setViewMode("grid")}
               className={cn(
                 "h-8 w-8 p-0 transition-all duration-200",
-                viewMode === "grid" && "bg-brand-primary text-white hover:bg-brand-primary-hover"
+                viewMode === "grid" &&
+                  "bg-brand-primary text-white hover:bg-brand-primary-hover",
               )}
             >
               <Grid3x3 className="w-4 h-4" />
@@ -285,7 +336,8 @@ function VendorsPage() {
               onClick={() => setViewMode("list")}
               className={cn(
                 "h-8 w-8 p-0 transition-all duration-200",
-                viewMode === "list" && "bg-brand-primary text-white hover:bg-brand-primary-hover"
+                viewMode === "list" &&
+                  "bg-brand-primary text-white hover:bg-brand-primary-hover",
               )}
             >
               <List className="w-4 h-4" />
@@ -304,7 +356,9 @@ function VendorsPage() {
               <div className="sticky top-0 bg-white border-b border-brand-primary-soft px-5 py-4 flex items-center justify-between rounded-t-2xl">
                 <div className="flex items-center gap-2">
                   <Filter className="h-5 w-5 text-brand-primary" />
-                  <h3 className="text-lg font-semibold text-brand-dark">Filters</h3>
+                  <h3 className="text-lg font-semibold text-brand-dark">
+                    Filters
+                  </h3>
                   {hasActiveFilters && (
                     <span className="text-xs bg-brand-primary-soft text-brand-primary px-2 py-0.5 rounded-full">
                       Active
@@ -320,7 +374,7 @@ function VendorsPage() {
                   <X className="h-4 w-4" />
                 </Button>
               </div>
-              
+
               <div className="p-5 pb-8 space-y-5">
                 {/* Search */}
                 <div>
@@ -330,7 +384,9 @@ function VendorsPage() {
                   <Input
                     placeholder="Search by name or description..."
                     value={search.search}
-                    onChange={(e) => handleFilterChange({ search: e.target.value })}
+                    onChange={(e) =>
+                      handleFilterChange({ search: e.target.value })
+                    }
                     className="h-10 text-sm border-brand-primary-soft focus:border-brand-primary"
                   />
                 </div>
@@ -341,7 +397,9 @@ function VendorsPage() {
                     onClick={() => toggleSection("location")}
                     className="flex w-full items-center justify-between py-2"
                   >
-                    <span className="font-medium text-brand-dark">Location</span>
+                    <span className="font-medium text-brand-dark">
+                      Location
+                    </span>
                     {expandedSections.location ? (
                       <ChevronUp className="h-4 w-4 text-brand-muted" />
                     ) : (
@@ -353,13 +411,21 @@ function VendorsPage() {
                       <Input
                         placeholder="City"
                         value={search.city}
-                        onChange={(e) => handleFilterChange({ city: e.target.value || undefined })}
+                        onChange={(e) =>
+                          handleFilterChange({
+                            city: e.target.value || undefined,
+                          })
+                        }
                         className="h-9 text-sm"
                       />
                       <Input
                         placeholder="State"
                         value={search.state}
-                        onChange={(e) => handleFilterChange({ state: e.target.value || undefined })}
+                        onChange={(e) =>
+                          handleFilterChange({
+                            state: e.target.value || undefined,
+                          })
+                        }
                         className="h-9 text-sm"
                       />
                     </div>
@@ -387,7 +453,10 @@ function VendorsPage() {
                         step={0.5}
                         value={[search.minRating || 0, search.maxRating || 5]}
                         onValueChange={([min, max]) => {
-                          handleFilterChange({ minRating: min, maxRating: max });
+                          handleFilterChange({
+                            minRating: min,
+                            maxRating: max,
+                          });
                         }}
                         className="py-4"
                       />
@@ -412,11 +481,16 @@ function VendorsPage() {
                       id="verified-mobile"
                       checked={search.verified}
                       onCheckedChange={(checked) =>
-                        handleFilterChange({ verified: checked ? true : undefined })
+                        handleFilterChange({
+                          verified: checked ? true : undefined,
+                        })
                       }
                       className="border-brand-primary-soft data-[state=checked]:bg-brand-primary data-[state=checked]:border-brand-primary"
                     />
-                    <Label htmlFor="verified-mobile" className="text-sm text-brand-dark flex items-center gap-2">
+                    <Label
+                      htmlFor="verified-mobile"
+                      className="text-sm text-brand-dark flex items-center gap-2"
+                    >
                       <Award className="w-4 h-4 text-brand-primary" />
                       Verified vendors only
                     </Label>
@@ -474,11 +548,17 @@ function VendorsPage() {
                   color="purple"
                 />
               )}
-              {(search.minRating !== undefined || search.maxRating !== undefined) && (
+              {(search.minRating !== undefined ||
+                search.maxRating !== undefined) && (
                 <FilterBadge
                   label="Rating"
                   value={`${search.minRating || 0} - ${search.maxRating || 5}★`}
-                  onRemove={() => handleFilterChange({ minRating: undefined, maxRating: undefined })}
+                  onRemove={() =>
+                    handleFilterChange({
+                      minRating: undefined,
+                      maxRating: undefined,
+                    })
+                  }
                   color="yellow"
                 />
               )}
@@ -534,10 +614,7 @@ function VendorsPage() {
             {meta && meta.totalPages > 1 && (
               <div className="mt-8 pt-4 border-t border-brand-primary-soft">
                 <div className="hidden sm:block">
-                  <Pagination
-                    meta={meta}
-                    onPageChange={handlePageChange}
-                  />
+                  <Pagination meta={meta} onPageChange={handlePageChange} />
                 </div>
                 <div className="sm:hidden">
                   <CompactPagination
@@ -557,7 +634,7 @@ function VendorsPage() {
               No vendors found
             </h3>
             <p className="text-brand-muted text-sm sm:text-base mb-6 max-w-md mx-auto">
-              {hasActiveFilters 
+              {hasActiveFilters
                 ? "Try adjusting your filters or search terms to find vendors"
                 : "Check back later as we're adding more vendors"}
             </p>

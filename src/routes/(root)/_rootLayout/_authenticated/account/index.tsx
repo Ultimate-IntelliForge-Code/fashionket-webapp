@@ -29,18 +29,13 @@ import {
   Trash2,
   Home,
   Star,
-  AlertCircle,
 } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { IUser, IUpdateUserPayload, IAddress } from "@/types";
 import { toast } from "react-toastify";
-import {
-  addressesQuery,
-  useUpdateUserProfile,
-  userProfile,
-} from "@/api/queries";
+import { useUpdateUserProfile } from "@/api/queries";
 import {
   useAddAddress,
   useDeleteAddress,
@@ -53,62 +48,44 @@ import {
   queryClient,
   cn,
 } from "@/lib";
+import { useAddressesQuery } from "@/api/hooks/address.hook";
+import { ErrorState } from "@/components/ui/error-state";
+import { LoadingState } from "@/components/ui/loading-state";
+import { useUserProfile } from "@/api/hooks";
 
 export const Route = createFileRoute(
   "/(root)/_rootLayout/_authenticated/account/",
 )({
   component: UserAccountPage,
-  pendingComponent: () => {
-    return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="text-center">
-          <Loader2 className="w-10 h-10 animate-spin text-brand-primary mx-auto mb-3" />
-          <p className="text-brand-muted text-sm">Loading your profile...</p>
-        </div>
-      </div>
-    );
-  },
-  errorComponent: () => {
-    return (
-      <div className="container mx-auto px-4 py-12">
-        <Alert variant="destructive" className="border-brand-error/20 bg-brand-error/10">
-          <AlertCircle className="h-4 w-4 text-brand-error" />
-          <AlertDescription className="text-brand-error">
-            Failed to load profile. Please try again later.
-          </AlertDescription>
-        </Alert>
-      </div>
-    );
-  },
-  loader: async ({ context }) => {
-    const [profile, addresses] = await Promise.all([
-      context.queryClient.ensureQueryData(userProfile()),
-      context.queryClient.ensureQueryData(addressesQuery()),
-    ]);
-
-    return { profile, addresses };
-  },
 });
 
 function UserAccountPage() {
-  const { profile, addresses } = Route.useLoaderData();
   const [isEditing, setIsEditing] = useState(false);
   const [isAddingAddress, setIsAddingAddress] = useState(false);
   const [editingAddressId, setEditingAddressId] = useState<string | null>(null);
-  const [selectedAddressId, setSelectedAddressId] = useState<string | null>(
-    addresses?.find((addr: IAddress) => addr.isDefault)?._id ||
-      addresses?.[0]?._id ||
-      null,
-  );
+  const [selectedAddressId, setSelectedAddressId] = useState<string | null>(null);
 
+  const {
+    data: addresses,
+    error: addressesError,
+    isLoading: isAddressesLoading,
+    refetch: refetchAddresses,
+  } = useAddressesQuery();
+
+  const {
+    data: profile,
+    error: profileError,
+    isLoading: isProfileLOading,
+    refetch: refetchProfile,
+  } = useUserProfile();
+
+  // ✅ MOVE THESE UP
   const { mutateAsync: addAddress, isPending: isAdding } = useAddAddress();
-  const { mutateAsync: deleteAddress, isPending: isDeleting } =
-    useDeleteAddress();
-  const { mutateAsync: updateAddress, isPending: isUpdating } =
-    useUpdateAddress();
+  const { mutateAsync: deleteAddress, isPending: isDeleting } = useDeleteAddress();
+  const { mutateAsync: updateAddress, isPending: isUpdating } = useUpdateAddress();
   const updateProfile = useUpdateUserProfile();
 
-  const form = useForm<IUpdateUserPayload>({
+   const form = useForm<IUpdateUserPayload>({
     resolver: zodResolver(userUpdateSchema as any),
     defaultValues: {
       fullName: profile?.fullName || "",
@@ -138,7 +115,6 @@ function UserAccountPage() {
       toast.success("Profile updated successfully");
       setIsEditing(false);
     } catch (error: any) {
-      console.log(error);
       if (error.response?.status === 409) {
         toast.error("Email already in use");
       } else {
@@ -177,7 +153,7 @@ function UserAccountPage() {
   };
 
   const handleDeleteAddress = async (addressId: string) => {
-    if (addresses.length <= 1) {
+    if (!addresses || addresses.length <= 1) {
       toast.error("Cannot delete the last address");
       return;
     }
@@ -204,6 +180,10 @@ function UserAccountPage() {
   };
 
   const handleSetDefaultAddress = async (addressId: string) => {
+    if (!addresses || addresses.length <= 1) {
+      toast.error("AddressID missing");
+      return;
+    }
     const address = addresses.find((addr: IAddress) => addr._id === addressId);
     if (address && !address.isDefault) {
       await handleUpdateAddress(addressId, { ...address, isDefault: true });
@@ -227,6 +207,37 @@ function UserAccountPage() {
   };
 
   const user = profile as IUser;
+
+
+  if (isAddressesLoading || isProfileLOading) {
+    return (
+      <div className="min-h-screen bg-brand-surface">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-10">
+          <LoadingState />
+        </div>
+      </div>
+    );
+  }
+
+  if (profileError || addressesError || !profile) {
+    return (
+      <div className="min-h-screen bg-brand-surface">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="max-w-2xl mx-auto">
+            <ErrorState
+              title="Unable to Load Account Data"
+              error={profileError}
+              onRetry={() => {
+                refetchProfile();
+                refetchAddresses();
+              }}
+              fullScreen={false}
+            />
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-12 max-w-6xl">
@@ -294,10 +305,16 @@ function UserAccountPage() {
               </CardHeader>
               <CardContent className="pt-2">
                 {isEditing ? (
-                  <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
+                  <form
+                    onSubmit={form.handleSubmit(onSubmit)}
+                    className="space-y-5"
+                  >
                     {/* Full Name Field */}
                     <div className="space-y-2">
-                      <Label htmlFor="fullName" className="text-brand-dark font-medium">
+                      <Label
+                        htmlFor="fullName"
+                        className="text-brand-dark font-medium"
+                      >
                         Full Name
                       </Label>
                       <Input
@@ -315,7 +332,10 @@ function UserAccountPage() {
 
                     {/* Email Field */}
                     <div className="space-y-2">
-                      <Label htmlFor="email" className="text-brand-dark font-medium">
+                      <Label
+                        htmlFor="email"
+                        className="text-brand-dark font-medium"
+                      >
                         Email Address
                       </Label>
                       <Input
@@ -334,7 +354,10 @@ function UserAccountPage() {
 
                     {/* Phone Field */}
                     <div className="space-y-2">
-                      <Label htmlFor="phone" className="text-brand-dark font-medium">
+                      <Label
+                        htmlFor="phone"
+                        className="text-brand-dark font-medium"
+                      >
                         Phone Number
                       </Label>
                       <Input
@@ -389,31 +412,37 @@ function UserAccountPage() {
                     <div className="flex items-start gap-3 p-3 rounded-lg hover:bg-brand-surface transition-colors">
                       <User className="w-5 h-5 text-brand-primary mt-0.5" />
                       <div className="flex-1">
-                        <p className="text-xs text-brand-muted uppercase tracking-wide">Full Name</p>
+                        <p className="text-xs text-brand-muted uppercase tracking-wide">
+                          Full Name
+                        </p>
                         <p className="text-base font-medium text-brand-dark mt-0.5">
                           {user.fullName || "Not set"}
                         </p>
                       </div>
                     </div>
-                    
+
                     <Separator className="bg-brand-primary-soft" />
-                    
+
                     <div className="flex items-start gap-3 p-3 rounded-lg hover:bg-brand-surface transition-colors">
                       <Mail className="w-5 h-5 text-brand-primary mt-0.5" />
                       <div className="flex-1">
-                        <p className="text-xs text-brand-muted uppercase tracking-wide">Email Address</p>
+                        <p className="text-xs text-brand-muted uppercase tracking-wide">
+                          Email Address
+                        </p>
                         <p className="text-base font-medium text-brand-dark mt-0.5 break-all">
                           {user.email}
                         </p>
                       </div>
                     </div>
-                    
+
                     <Separator className="bg-brand-primary-soft" />
-                    
+
                     <div className="flex items-start gap-3 p-3 rounded-lg hover:bg-brand-surface transition-colors">
                       <Phone className="w-5 h-5 text-brand-primary mt-0.5" />
                       <div className="flex-1">
-                        <p className="text-xs text-brand-muted uppercase tracking-wide">Phone Number</p>
+                        <p className="text-xs text-brand-muted uppercase tracking-wide">
+                          Phone Number
+                        </p>
                         <p className="text-base font-medium text-brand-dark mt-0.5">
                           {user.phone || "Not set"}
                         </p>
@@ -427,34 +456,40 @@ function UserAccountPage() {
             {/* Account Status Card */}
             <Card className="border-brand-primary-soft shadow-sm">
               <CardHeader className="pb-3">
-                <CardTitle className="text-lg text-brand-dark">Account Status</CardTitle>
+                <CardTitle className="text-lg text-brand-dark">
+                  Account Status
+                </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 {/* Status Badge */}
                 <div>
-                  <p className="text-xs text-brand-muted mb-2">Account Status</p>
+                  <p className="text-xs text-brand-muted mb-2">
+                    Account Status
+                  </p>
                   <Badge
                     variant={user.isActive ? "default" : "secondary"}
                     className={cn(
                       "px-3 py-1 text-sm font-medium",
                       user.isActive
                         ? "bg-brand-success/10 text-brand-success border-brand-success/20"
-                        : "bg-brand-muted/10 text-brand-muted border-brand-muted/20"
+                        : "bg-brand-muted/10 text-brand-muted border-brand-muted/20",
                     )}
                   >
                     {user.isActive ? "Active" : "Inactive"}
                   </Badge>
                 </div>
-                
+
                 <Separator className="bg-brand-primary-soft" />
-                
+
                 {/* Member Since */}
                 <div className="flex items-start gap-3">
                   <Calendar className="w-5 h-5 text-brand-primary mt-0.5" />
                   <div>
                     <p className="text-xs text-brand-muted">Member Since</p>
                     <p className="text-sm font-medium text-brand-dark mt-0.5">
-                      {new Date(user.createdAt || new Date()).toLocaleDateString("en-US", {
+                      {new Date(
+                        user.createdAt || new Date(),
+                      ).toLocaleDateString("en-US", {
                         year: "numeric",
                         month: "long",
                         day: "numeric",
@@ -462,19 +497,9 @@ function UserAccountPage() {
                     </p>
                   </div>
                 </div>
-                
+
                 <Separator className="bg-brand-primary-soft" />
-                
-                {/* User Role */}
-                <div>
-                  <p className="text-xs text-brand-muted mb-2">Account Role</p>
-                  <Badge
-                    variant="outline"
-                    className="px-3 py-1 text-sm font-medium border-brand-primary-soft text-brand-primary bg-brand-primary-soft/30"
-                  >
-                    {user.role?.toUpperCase() || "CUSTOMER"}
-                  </Badge>
-                </div>
+
               </CardContent>
             </Card>
           </div>
@@ -484,7 +509,9 @@ function UserAccountPage() {
             <CardHeader>
               <div className="flex items-center gap-2">
                 <Shield className="w-5 h-5 text-brand-primary" />
-                <CardTitle className="text-lg text-brand-dark">Security Settings</CardTitle>
+                <CardTitle className="text-lg text-brand-dark">
+                  Security Settings
+                </CardTitle>
               </div>
               <CardDescription className="text-brand-muted">
                 Manage your password and security preferences
@@ -531,7 +558,10 @@ function UserAccountPage() {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {/* Full Name */}
                     <div className="space-y-2">
-                      <Label htmlFor="addressFullName" className="text-brand-dark font-medium">
+                      <Label
+                        htmlFor="addressFullName"
+                        className="text-brand-dark font-medium"
+                      >
                         Full Name <span className="text-brand-error">*</span>
                       </Label>
                       <Input
@@ -549,7 +579,10 @@ function UserAccountPage() {
 
                     {/* Phone */}
                     <div className="space-y-2">
-                      <Label htmlFor="addressPhone" className="text-brand-dark font-medium">
+                      <Label
+                        htmlFor="addressPhone"
+                        className="text-brand-dark font-medium"
+                      >
                         Phone Number <span className="text-brand-error">*</span>
                       </Label>
                       <Input
@@ -569,7 +602,10 @@ function UserAccountPage() {
 
                   {/* Address Line 1 */}
                   <div className="space-y-2">
-                    <Label htmlFor="addressLine1" className="text-brand-dark font-medium">
+                    <Label
+                      htmlFor="addressLine1"
+                      className="text-brand-dark font-medium"
+                    >
                       Street Address <span className="text-brand-error">*</span>
                     </Label>
                     <Input
@@ -587,7 +623,10 @@ function UserAccountPage() {
 
                   {/* Address Line 2 (Optional) */}
                   <div className="space-y-2">
-                    <Label htmlFor="addressLine2" className="text-brand-dark font-medium">
+                    <Label
+                      htmlFor="addressLine2"
+                      className="text-brand-dark font-medium"
+                    >
                       Apartment, Suite, etc. (Optional)
                     </Label>
                     <Input
@@ -601,7 +640,10 @@ function UserAccountPage() {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {/* City */}
                     <div className="space-y-2">
-                      <Label htmlFor="city" className="text-brand-dark font-medium">
+                      <Label
+                        htmlFor="city"
+                        className="text-brand-dark font-medium"
+                      >
                         City <span className="text-brand-error">*</span>
                       </Label>
                       <Input
@@ -619,7 +661,10 @@ function UserAccountPage() {
 
                     {/* State */}
                     <div className="space-y-2">
-                      <Label htmlFor="state" className="text-brand-dark font-medium">
+                      <Label
+                        htmlFor="state"
+                        className="text-brand-dark font-medium"
+                      >
                         State <span className="text-brand-error">*</span>
                       </Label>
                       <Input
@@ -639,7 +684,10 @@ function UserAccountPage() {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {/* Country */}
                     <div className="space-y-2">
-                      <Label htmlFor="country" className="text-brand-dark font-medium">
+                      <Label
+                        htmlFor="country"
+                        className="text-brand-dark font-medium"
+                      >
                         Country <span className="text-brand-error">*</span>
                       </Label>
                       <Input
@@ -657,7 +705,10 @@ function UserAccountPage() {
 
                     {/* Postal Code */}
                     <div className="space-y-2">
-                      <Label htmlFor="postalCode" className="text-brand-dark font-medium">
+                      <Label
+                        htmlFor="postalCode"
+                        className="text-brand-dark font-medium"
+                      >
                         ZIP / Postal Code
                       </Label>
                       <Input
@@ -736,7 +787,8 @@ function UserAccountPage() {
                   key={address._id}
                   className={cn(
                     "border-brand-primary-soft shadow-sm hover:shadow-md transition-all",
-                    selectedAddressId === address._id && "ring-2 ring-brand-primary ring-offset-2"
+                    selectedAddressId === address._id &&
+                      "ring-2 ring-brand-primary ring-offset-2",
                   )}
                 >
                   <CardContent className="p-5">
@@ -750,7 +802,10 @@ function UserAccountPage() {
                               Default
                             </Badge>
                           )}
-                          <Badge variant="outline" className="border-brand-primary-soft text-brand-muted text-xs">
+                          <Badge
+                            variant="outline"
+                            className="border-brand-primary-soft text-brand-muted text-xs"
+                          >
                             <Home className="w-3 h-3 mr-1" />
                             Shipping Address
                           </Badge>
@@ -760,16 +815,24 @@ function UserAccountPage() {
                         <div className="space-y-1.5">
                           <p className="text-sm font-medium text-brand-dark">
                             {address.fullName && `${address.fullName} • `}
-                            <span className="text-brand-muted font-normal">{address.phone}</span>
+                            <span className="text-brand-muted font-normal">
+                              {address.phone}
+                            </span>
                           </p>
-                          <p className="text-sm text-brand-dark">{address.addressLine1}</p>
+                          <p className="text-sm text-brand-dark">
+                            {address.addressLine1}
+                          </p>
                           {address.addressLine2 && (
-                            <p className="text-sm text-brand-dark">{address.addressLine2}</p>
+                            <p className="text-sm text-brand-dark">
+                              {address.addressLine2}
+                            </p>
                           )}
                           <p className="text-sm text-brand-muted">
                             {address.city}, {address.state} {address.postalCode}
                           </p>
-                          <p className="text-sm text-brand-muted">{address.country}</p>
+                          <p className="text-sm text-brand-muted">
+                            {address.country}
+                          </p>
                         </div>
                       </div>
 
@@ -816,7 +879,9 @@ function UserAccountPage() {
                 <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-brand-primary-soft mb-4">
                   <MapPin className="w-8 h-8 text-brand-primary" />
                 </div>
-                <p className="text-brand-dark font-medium mb-2">No addresses saved</p>
+                <p className="text-brand-dark font-medium mb-2">
+                  No addresses saved
+                </p>
                 <p className="text-brand-muted text-sm mb-6">
                   Add a shipping address to make checkout faster and easier
                 </p>

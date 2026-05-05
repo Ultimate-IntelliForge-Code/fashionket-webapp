@@ -194,7 +194,6 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
 
   const handleLogout = useCallback(() => {
     // Logout logic
-    console.log('Logging out...');
     if (onMobileClose) onMobileClose();
   }, [onMobileClose]);
 

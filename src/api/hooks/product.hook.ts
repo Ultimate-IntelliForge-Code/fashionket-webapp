@@ -7,6 +7,7 @@ import {
   productBySlugQuery,
   featuredProductsQuery,
   relatedProductsQuery,
+  vendorProductsQuery,
 } from '../queries';
 import { queryKeys } from '../cache-keys';
 import { apiClient } from '../client';
@@ -85,5 +86,17 @@ export const useRelatedProducts = (productId: string, limit?: number, enabled = 
   return useQuery({
     ...relatedProductsQuery(productId, limit),
     enabled: !!productId && enabled,
+  });
+};
+
+
+/**
+ * Hook for fetching vendor's products
+ */
+export const useVendorProducts = (
+  filters?: IProductQueryFilters,
+) => {
+  return useQuery({
+    ...vendorProductsQuery(filters)
   });
 };

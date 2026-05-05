@@ -1,16 +1,15 @@
-import { createFileRoute } from '@tanstack/react-router'
-import { useState } from 'react'
-import { Button } from '@/components/ui/button'
-import { Pagination } from '@/components/ui/pagination'
-import { vendorProductsQuery } from '@/api/queries'
-import { useDeleteProduct } from '@/api/mutations'
+import { createFileRoute } from "@tanstack/react-router";
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Pagination } from "@/components/ui/pagination";
+import { useDeleteProduct } from "@/api/mutations";
 import {
   Plus,
   Package,
   TrendingUp,
   AlertCircle,
   DollarSign,
-} from 'lucide-react'
+} from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -20,101 +19,122 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '@/components/ui/alert-dialog'
-import { LoadingState } from '@/components/ui/loading-state'
-import { ErrorState } from '@/components/ui/error-state'
-import { StatsCard } from '@/components/ui/stats-card'
-import { ProductGrid } from '@/components/ui/product-card'
-import { formatCurrency, productSearchSchema } from '@/lib'
-import { IProductQueryFilters } from '@/types'
+} from "@/components/ui/alert-dialog";
+import { LoadingState } from "@/components/ui/loading-state";
+import { ErrorState } from "@/components/ui/error-state";
+import { StatsCard } from "@/components/ui/stats-card";
+import { ProductGrid } from "@/components/ui/product-card";
+import { formatCurrency, productSearchSchema } from "@/lib";
+import { IProductQueryFilters } from "@/types";
+import { useVendorProducts } from "@/api/hooks";
+import { ProductFilters } from "@/components/ui/product-filters";
 
-
-export const Route = createFileRoute(
-  '/vendor/_vendorLayout/products/',
-)({
+export const Route = createFileRoute("/vendor/_vendorLayout/products/")({
   validateSearch: (search) => {
-    return productSearchSchema.parse(search)
-  },
-  loaderDeps: ({ search }) => ({
-    search: search,
-  }),
-  loader: async ({ context, deps }) => {
-    return await context.queryClient.ensureQueryData(vendorProductsQuery(deps.search))
+    return productSearchSchema.parse(search);
   },
   component: VendorProducts,
-  pendingComponent: LoadingState,
-  errorComponent: ErrorState,
-})
+});
 
 function VendorProducts() {
-  const navigate = Route.useNavigate()
-  const search = Route.useSearch()
-  const data = Route.useLoaderData()
-  const { mutateAsync: deleteProduct } = useDeleteProduct()
+  const navigate = Route.useNavigate();
+  const search = Route.useSearch();
+  const { mutateAsync: deleteProduct } = useDeleteProduct();
 
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
-  const [productToDelete, setProductToDelete] = useState<string | null>(null)
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [productToDelete, setProductToDelete] = useState<string | null>(null);
 
-  const products = data?.data || []
-  const meta = data?.pagination
+  const { data, isLoading, error, refetch } = useVendorProducts(search);
+
+  const products = data?.data || [];
+  const meta = data?.pagination;
 
   // Calculate stats
-  const totalProducts = meta?.total || 0
-  const activeProducts = products.filter((p) => p.isActive).length
+  const totalProducts = meta?.total || 0;
+  const activeProducts = products.filter((p) => p.isActive).length;
   const lowStockProducts = products.filter(
     (p) => p.stock > 0 && p.stock <= 10,
-  ).length
-  const totalValue = products.reduce((sum, p) => sum + p.price * p.stock, 0)
+  ).length;
+  const totalValue = products.reduce((sum, p) => sum + p.price * p.stock, 0);
 
   const handlePageChange = (page: number) => {
     navigate({
       search: (prev) => ({ ...prev, page }),
-    })
-  }
+    });
+  };
 
   const handleFilterChange = (filters: Partial<IProductQueryFilters>) => {
     navigate({
       search: (prev) => ({ ...prev, ...filters, page: 1 }),
-    })
-  }
+    });
+  };
 
   const handleEdit = (productId: string) => {
-    const product = products.find((p) => p._id.toString() === productId)
+    const product = products.find((p) => p._id.toString() === productId);
     if (product) {
       navigate({
-        to: '/vendor/products/$slug',
+        to: "/vendor/products/$slug",
         params: { slug: product.slug },
-      })
+      });
     }
-  }
+  };
 
   const handleDeleteClick = (productId: string) => {
-    setProductToDelete(productId)
-    setDeleteDialogOpen(true)
-  }
+    setProductToDelete(productId);
+    setDeleteDialogOpen(true);
+  };
 
   const handleDeleteConfirm = async () => {
     if (productToDelete) {
-      await deleteProduct(productToDelete)
-      setDeleteDialogOpen(false)
-      setProductToDelete(null)
+      await deleteProduct(productToDelete);
+      setDeleteDialogOpen(false);
+      setProductToDelete(null);
     }
-  }
+  };
 
   // Get unique brands and tags for filters
   const brands = Array.from(
     new Set(products.filter((p) => p.brand).map((p) => p.brand!)),
-  )
-  const tags = Array.from(new Set(products.flatMap((p) => p.tags)))
-  const maxPrice = Math.max(...products.map((p) => p.price), 100000)
+  );
+  const tags = Array.from(new Set(products.flatMap((p) => p.tags)));
+  const maxPrice = Math.max(...products.map((p) => p.price), 100000);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-brand-surface">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-10">
+          <LoadingState />
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-brand-surface">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="max-w-2xl mx-auto">
+            <ErrorState
+              title="Unable to Load Products"
+              error={error}
+              onRetry={() => {
+                refetch();
+              }}
+              fullScreen={false}
+            />
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-end">
         <Button
-          onClick={() => navigate({ to: '/vendor/products/new' })}
-          className="bg-mmp-primary hover:bg-mmp-primary2"
+          onClick={() => navigate({ to: "/vendor/products/new" })}
+          className="bg-brand-primary text-white hover:bg-brand-primary-hover shadow-sm hover:shadow-md transition-all duration-300 rounded-lg px-6 py-2.5"
         >
           <Plus className="h-4 w-4 mr-2" />
           Add Product
@@ -155,6 +175,7 @@ function VendorProducts() {
             brands={brands}
             tags={tags}
             maxPrice={maxPrice}
+            isMobile={false}
           />
         </div> */}
 
@@ -169,7 +190,7 @@ function VendorProducts() {
                 Get started by adding your first product
               </p>
               <Button
-                onClick={() => navigate({ to: '/vendor/products/new' })}
+                onClick={() => navigate({ to: "/vendor/products/new" })}
                 className="bg-mmp-primary hover:bg-mmp-primary2"
               >
                 <Plus className="h-4 w-4 mr-2" />
@@ -218,5 +239,5 @@ function VendorProducts() {
         </AlertDialogContent>
       </AlertDialog>
     </div>
-  )
+  );
 }

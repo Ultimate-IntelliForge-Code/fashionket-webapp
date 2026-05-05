@@ -11,3 +11,4 @@ export * from './payment.hook';
 export * from './vendor.hook';
 export * from './seometa.hook'
 export * from './wallet.hook'
+export * from './profile.hook'

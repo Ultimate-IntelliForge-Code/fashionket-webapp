@@ -1,6 +1,7 @@
 export const queryKeys = {
   auth: {
     validate: () => ['auth', 'validate'] as const,
+    refresh: () => ['auth', 'refresh'] as const,
     user: () => ['auth', 'user'] as const,
     admin: () => ['auth', 'admin'] as const,
     vendor: () => ['auth', 'vendor'] as const,

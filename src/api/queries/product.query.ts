@@ -157,7 +157,6 @@ export const vendorProductsQuery = (filters?: IProductQueryFilters) => ({
       `/products/vendor?${params.toString()}`
     );
 
-    console.log(response)
     if (!response.success) {
       throw new Error(response.error.message);
     }
