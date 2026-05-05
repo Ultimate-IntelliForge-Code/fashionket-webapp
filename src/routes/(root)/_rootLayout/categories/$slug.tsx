@@ -6,12 +6,7 @@ import { cn, formatCurrency } from "@/lib/utils";
 import { ArrowLeft, Grid3x3, List, Filter, X, ChevronDown } from "lucide-react";
 import { ProductFilters } from "@/components/ui/product-filters";
 import type { IProductQueryFilters } from "@/types";
-import {
-  categoriesQuery,
-  categoryBySlugQuery,
-  productsQuery,
-} from "@/api/queries";
-import { useProducts } from "@/api/hooks";
+import { useCategories, useCategoryBySlug, useProducts } from "@/api/hooks";
 import { Pagination } from "@/components/ui/pagination";
 import { FilterBadge } from "@/components/ui/filter-badge";
 import { productSearchSchema } from "@/lib";
@@ -19,126 +14,69 @@ import { productSearchSchema } from "@/lib";
 export const Route = createFileRoute("/(root)/_rootLayout/categories/$slug")({
   component: CategoryProductsPage,
   validateSearch: productSearchSchema,
-  loaderDeps: ({ search }) => ({ search }),
-  loader: async ({ context, params, deps }) => {
-    const categories = await context.queryClient.ensureQueryData(categoriesQuery());
-    const category = await context.queryClient.ensureQueryData(
-      categoryBySlugQuery(params.slug),
-    );
-
-    if (!category) {
-      throw new Error("Category not found");
-    }
-
-    const filters: IProductQueryFilters = {
-      categorySlug: params.slug,
-      page: deps.search.page,
-      limit: deps.search.limit,
-      search: deps.search.search,
-      brand: deps.search.brand,
-      minPrice: deps.search.minPrice,
-      maxPrice: deps.search.maxPrice,
-      tags: deps.search.tags,
-      sortBy: deps.search.sortBy,
-      sortOrder: deps.search.sortOrder,
-    };
-
-    const productsData = await context.queryClient.ensureQueryData(
-      productsQuery(filters),
-    );
-
-    const allProductsData = await context.queryClient.ensureQueryData(
-      productsQuery({ categorySlug: params.slug, limit: 1000 }),
-    );
-
-    const allProducts = allProductsData.data;
-    const brands = Array.from(
-      new Set(allProducts.map((p) => p.brand).filter(Boolean)),
-    ) as string[];
-    const tags = Array.from(new Set(allProducts.flatMap((p) => p.tags)));
-    const maxPrice = Math.max(...allProducts.map((p) => p.price), 0);
-
-    return {
-      categories,
-      category,
-      initialProducts: productsData.data,
-      initialPagination: productsData.pagination,
-      brands,
-      tags,
-      maxPrice,
-    };
-  },
 });
 
 function CategoryProductsPage() {
-  const {
-    category,
-    initialProducts,
-    initialPagination,
-    brands,
-    tags,
-    maxPrice,
-  } = Route.useLoaderData();
-
-  const searchParams = Route.useSearch();
+  const search = Route.useSearch();
   const { slug } = Route.useParams();
   const navigate = Route.useNavigate();
-
   const [isFilterOpen, setIsFilterOpen] = React.useState(false);
   const [filters, setFilters] = React.useState<IProductQueryFilters>({
     categorySlug: slug,
-    page: searchParams.page || 1,
-    limit: searchParams.limit || 12,
-    search: searchParams.search,
-    brand: searchParams.brand,
-    minPrice: searchParams.minPrice,
-    maxPrice: searchParams.maxPrice,
-    tags: searchParams.tags,
-    sortBy: searchParams.sortBy,
-    sortOrder: searchParams.sortOrder,
+    page: search.page || 1,
+    limit: search.limit || 12,
+    search: search.search,
+    brand: search.brand,
+    minPrice: search.minPrice,
+    maxPrice: search.maxPrice,
+    tags: search.tags,
+    sortBy: search.sortBy,
+    sortOrder: search.sortOrder,
   });
-
   const [viewMode, setViewMode] = React.useState<"grid" | "list">("grid");
+  const { data: categories } = useCategories(search);
+  const { data: category } = useCategoryBySlug(slug);
+  const { data: allProductsData, isLoading, isFetching } = useProducts(filters);
 
-  const {
-    data: productsResponse,
-    isLoading,
-    isFetching,
-  } = useProducts(filters);
-
-  const products = productsResponse?.data ?? initialProducts;
-  const pagination = productsResponse?.pagination ?? initialPagination;
+  const allProducts = allProductsData ? allProductsData.data : [];
+  const brands = Array.from(
+    new Set(allProducts.map((p) => p.brand).filter(Boolean)),
+  ) as string[];
+  const tags = Array.from(new Set(allProducts.flatMap((p) => p.tags)));
+  const maxPrice = Math.max(...allProducts.map((p) => p.price), 0);
+  const products = allProductsData?.data;
+  const pagination = allProductsData?.pagination;
 
   React.useEffect(() => {
     const newFilters: IProductQueryFilters = {
       categorySlug: slug,
-      page: searchParams.page || 1,
-      limit: searchParams.limit || 12,
-      search: searchParams.search,
-      brand: searchParams.brand,
-      minPrice: searchParams.minPrice,
-      maxPrice: searchParams.maxPrice,
-      tags: searchParams.tags,
-      sortBy: searchParams.sortBy,
-      sortOrder: searchParams.sortOrder,
+      page: search.page || 1,
+      limit: search.limit || 12,
+      search: search.search,
+      brand: search.brand,
+      minPrice: search.minPrice,
+      maxPrice: search.maxPrice,
+      tags: search.tags,
+      sortBy: search.sortBy,
+      sortOrder: search.sortOrder,
     };
     setFilters(newFilters);
   }, [
     slug,
-    searchParams.page,
-    searchParams.limit,
-    searchParams.search,
-    searchParams.brand,
-    searchParams.minPrice,
-    searchParams.maxPrice,
-    searchParams.tags,
-    searchParams.sortBy,
-    searchParams.sortOrder,
+    search.page,
+    search.limit,
+    search.search,
+    search.brand,
+    search.minPrice,
+    search.maxPrice,
+    search.tags,
+    search.sortBy,
+    search.sortOrder,
   ]);
 
   const handleFilterChange = (newFilters: Partial<IProductQueryFilters>) => {
     const updatedSearch: Record<string, any> = {
-      ...searchParams,
+      ...search,
       ...newFilters,
       page: 1,
     };
@@ -204,19 +142,27 @@ function CategoryProductsPage() {
   };
 
   const totalProducts = pagination?.total || 0;
-  const hasActiveFilters = !!(filters.search || filters.brand || 
-    filters.minPrice !== undefined || filters.maxPrice !== undefined || filters.tags);
+  const hasActiveFilters = !!(
+    filters.search ||
+    filters.brand ||
+    filters.minPrice !== undefined ||
+    filters.maxPrice !== undefined ||
+    filters.tags
+  );
 
   return (
     <div className="min-h-screen bg-brand-surface">
       {/* Hero Section */}
       <div className="relative bg-gradient-to-br from-brand-primary via-brand-primary-hover to-brand-dark overflow-hidden">
         <div className="absolute inset-0 opacity-10">
-          <div className="absolute inset-0" style={{
-            backgroundImage: `radial-gradient(circle at 20% 50%, rgba(255,255,255,0.1) 0%, transparent 50%)`
-          }} />
+          <div
+            className="absolute inset-0"
+            style={{
+              backgroundImage: `radial-gradient(circle at 20% 50%, rgba(255,255,255,0.1) 0%, transparent 50%)`,
+            }}
+          />
         </div>
-        
+
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 lg:py-16">
           <div className="flex flex-col gap-4">
             <Button
@@ -230,22 +176,29 @@ function CategoryProductsPage() {
                 Back to Categories
               </Link>
             </Button>
-            
+
             <div className="max-w-3xl">
               <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-3">
-                {category.name}
+                {category?.name}
               </h1>
               <p className="text-white/90 text-base sm:text-lg leading-relaxed">
-                Explore our premium collection of {category.name.toLowerCase()}. 
+                Explore our premium collection of {category?.name.toLowerCase()}.
                 Find the perfect items that match your style and budget.
               </p>
             </div>
           </div>
         </div>
-        
+
         <div className="absolute bottom-0 left-0 right-0">
-          <svg className="w-full h-12 text-brand-surface" preserveAspectRatio="none" viewBox="0 0 1440 120">
-            <path fill="currentColor" d="M0,64L80,58.7C160,53,320,43,480,48C640,53,800,75,960,80C1120,85,1280,75,1360,69.3L1440,64L1440,120L1360,120C1280,120,1120,120,960,120C800,120,640,120,480,120C320,120,160,120,80,120L0,120Z" />
+          <svg
+            className="w-full h-12 text-brand-surface"
+            preserveAspectRatio="none"
+            viewBox="0 0 1440 120"
+          >
+            <path
+              fill="currentColor"
+              d="M0,64L80,58.7C160,53,320,43,480,48C640,53,800,75,960,80C1120,85,1280,75,1360,69.3L1440,64L1440,120L1360,120C1280,120,1120,120,960,120C800,120,640,120,480,120C320,120,160,120,80,120L0,120Z"
+            />
           </svg>
         </div>
       </div>
@@ -315,7 +268,7 @@ function CategoryProductsPage() {
             <div className="mb-6 space-y-4">
               <div>
                 <h2 className="text-xl sm:text-2xl font-bold text-brand-dark">
-                  {category.name}
+                  {category?.name}
                 </h2>
                 <p className="text-sm text-brand-muted mt-1">
                   {isFetching ? (
@@ -324,7 +277,7 @@ function CategoryProductsPage() {
                       Loading...
                     </span>
                   ) : (
-                    `Showing ${products.length} of ${totalProducts} products`
+                    `Showing ${products?.length} of ${totalProducts} products`
                   )}
                 </p>
               </div>
@@ -344,7 +297,13 @@ function CategoryProductsPage() {
                         Object.keys(filters).filter(
                           (k) =>
                             filters[k as keyof IProductQueryFilters] &&
-                            !["categorySlug", "page", "limit", "sortBy", "sortOrder"].includes(k)
+                            ![
+                              "categorySlug",
+                              "page",
+                              "limit",
+                              "sortBy",
+                              "sortOrder",
+                            ].includes(k),
                         ).length
                       }
                     </span>
@@ -383,7 +342,8 @@ function CategoryProductsPage() {
                     variant={viewMode === "grid" ? "default" : "ghost"}
                     className={cn(
                       "h-8 w-8 p-0 transition-all duration-200",
-                      viewMode === "grid" && "bg-brand-primary text-white hover:bg-brand-primary-hover"
+                      viewMode === "grid" &&
+                        "bg-brand-primary text-white hover:bg-brand-primary-hover",
                     )}
                     onClick={() => setViewMode("grid")}
                   >
@@ -395,7 +355,8 @@ function CategoryProductsPage() {
                     variant={viewMode === "list" ? "default" : "ghost"}
                     className={cn(
                       "h-8 w-8 p-0 transition-all duration-200",
-                      viewMode === "list" && "bg-brand-primary text-white hover:bg-brand-primary-hover"
+                      viewMode === "list" &&
+                        "bg-brand-primary text-white hover:bg-brand-primary-hover",
                     )}
                     onClick={() => setViewMode("list")}
                   >
@@ -423,11 +384,17 @@ function CategoryProductsPage() {
                       color="green"
                     />
                   )}
-                  {(filters.minPrice !== undefined || filters.maxPrice !== undefined) && (
+                  {(filters.minPrice !== undefined ||
+                    filters.maxPrice !== undefined) && (
                     <FilterBadge
                       label="Price"
                       value={`${formatCurrency(filters.minPrice || 0)} - ${formatCurrency(filters.maxPrice || maxPrice)}`}
-                      onRemove={() => handleFilterChange({ minPrice: undefined, maxPrice: undefined })}
+                      onRemove={() =>
+                        handleFilterChange({
+                          minPrice: undefined,
+                          maxPrice: undefined,
+                        })
+                      }
                       color="purple"
                     />
                   )}
@@ -443,7 +410,10 @@ function CategoryProductsPage() {
                     variant="ghost"
                     size="sm"
                     onClick={() => {
-                      navigate({ search: { page: 1, limit: 12 }, replace: true });
+                      navigate({
+                        search: { page: 1, limit: 12 },
+                        replace: true,
+                      });
                     }}
                     className="text-xs text-brand-muted hover:text-brand-dark h-7 px-2"
                   >
@@ -454,7 +424,7 @@ function CategoryProductsPage() {
             </div>
 
             {/* Loading State */}
-            {isLoading && products.length === 0 && (
+            {isLoading && products?.length === 0 && (
               <div className="flex items-center justify-center py-20">
                 <div className="text-center">
                   <div className="h-12 w-12 animate-spin rounded-full border-4 border-brand-primary-soft border-t-brand-primary mx-auto mb-4" />
@@ -464,17 +434,20 @@ function CategoryProductsPage() {
             )}
 
             {/* Empty State */}
-            {!isLoading && products.length === 0 && (
+            {!isLoading && products?.length === 0 && (
               <div className="flex flex-col items-center justify-center py-20 text-center">
                 <div className="text-6xl mb-4">🔍</div>
                 <h3 className="text-xl font-bold text-brand-dark mb-2">
                   No products found
                 </h3>
                 <p className="text-brand-muted mb-6 max-w-md">
-                  Try adjusting your filters or search terms to find what you're looking for.
+                  Try adjusting your filters or search terms to find what you're
+                  looking for.
                 </p>
                 <Button
-                  onClick={() => navigate({ search: { page: 1, limit: 12 }, replace: true })}
+                  onClick={() =>
+                    navigate({ search: { page: 1, limit: 12 }, replace: true })
+                  }
                   className="bg-brand-primary text-white hover:bg-brand-primary-hover"
                 >
                   Clear All Filters
@@ -483,7 +456,7 @@ function CategoryProductsPage() {
             )}
 
             {/* Products Display */}
-            {!isLoading && products.length > 0 && (
+            {!isLoading && products && products.length > 0 && (
               <>
                 {viewMode === "grid" ? (
                   <ProductGrid products={products} />

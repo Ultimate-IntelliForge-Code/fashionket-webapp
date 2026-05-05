@@ -1,25 +1,53 @@
-import { categoriesQuery } from '@/api/queries'
-import { Button } from '@/components/ui/button'
-import { Card } from '@/components/ui/card'
-import { createFileRoute, Link } from '@tanstack/react-router'
-import { 
-  Sparkles as SparklesIcon, 
-  Zap, 
-  Plus, 
-  TrendingUp, 
-  ShoppingBag, 
-  Clock 
-} from 'lucide-react'
+import { useCategories } from "@/api/hooks";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { ErrorState } from "@/components/ui/error-state";
+import { LoadingState } from "@/components/ui/loading-state";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import {
+  Sparkles as SparklesIcon,
+  Zap,
+  Plus,
+  TrendingUp,
+  ShoppingBag,
+  Clock,
+} from "lucide-react";
 
-export const Route = createFileRoute('/(root)/_rootLayout/categories/')({
+export const Route = createFileRoute("/(root)/_rootLayout/categories/")({
   component: CategoriesPage,
-  loader: async ({ context }) => {
-    return context.queryClient.ensureQueryData(categoriesQuery())
-  },
-})
+});
 
 function CategoriesPage() {
-  const categories = Route.useLoaderData()
+  const { data: categories, error, isLoading, refetch } = useCategories();
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-brand-surface">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-10">
+          <LoadingState />
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !categories) {
+    return (
+      <div className="min-h-screen bg-brand-surface">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="max-w-2xl mx-auto">
+            <ErrorState
+              title="Unable to Load Categories"
+              error={error}
+              onRetry={() => {
+                refetch();
+              }}
+              fullScreen={false}
+            />
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-brand-surface">
@@ -27,43 +55,54 @@ function CategoriesPage() {
       <div className="relative bg-gradient-to-br from-brand-primary via-brand-primary-hover to-brand-dark overflow-hidden">
         {/* Decorative background pattern */}
         <div className="absolute inset-0 opacity-10">
-          <div className="absolute inset-0" style={{
-            backgroundImage: `radial-gradient(circle at 20% 50%, rgba(255,255,255,0.1) 0%, transparent 50%)`
-          }} />
+          <div
+            className="absolute inset-0"
+            style={{
+              backgroundImage: `radial-gradient(circle at 20% 50%, rgba(255,255,255,0.1) 0%, transparent 50%)`,
+            }}
+          />
         </div>
-        
+
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 md:py-16 lg:py-20">
           <div className="max-w-3xl">
             <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-3 py-1 mb-4 sm:mb-6">
               <SparklesIcon className="w-4 h-4 text-brand-accent" />
-              <span className="text-xs sm:text-sm font-medium text-white">Discover Your Style</span>
+              <span className="text-xs sm:text-sm font-medium text-white">
+                Discover Your Style
+              </span>
             </div>
             <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-3 sm:mb-4 md:mb-6 leading-tight">
               Explore All Categories
             </h1>
             <p className="text-base sm:text-lg md:text-xl text-white/90 leading-relaxed max-w-2xl">
-              Browse through our extensive collection of products. We're constantly adding 
-              new categories to bring you more options!
+              Browse through our extensive collection of products. We're
+              constantly adding new categories to bring you more options!
             </p>
           </div>
         </div>
-        
+
         {/* Decorative bottom curve */}
         <div className="absolute bottom-0 left-0 right-0">
-          <svg className="w-full h-12 sm:h-16 text-brand-surface" preserveAspectRatio="none" viewBox="0 0 1440 120">
-            <path fill="currentColor" d="M0,64L80,58.7C160,53,320,43,480,48C640,53,800,75,960,80C1120,85,1280,75,1360,69.3L1440,64L1440,120L1360,120C1280,120,1120,120,960,120C800,120,640,120,480,120C320,120,160,120,80,120L0,120Z" />
+          <svg
+            className="w-full h-12 sm:h-16 text-brand-surface"
+            preserveAspectRatio="none"
+            viewBox="0 0 1440 120"
+          >
+            <path
+              fill="currentColor"
+              d="M0,64L80,58.7C160,53,320,43,480,48C640,53,800,75,960,80C1120,85,1280,75,1360,69.3L1440,64L1440,120L1360,120C1280,120,1120,120,960,120C800,120,640,120,480,120C320,120,160,120,80,120L0,120Z"
+            />
           </svg>
         </div>
       </div>
 
       {/* Main Content */}
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 lg:py-16">
-        
         {/* Categories Grid */}
         {categories.length > 0 ? (
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4 md:gap-5 lg:gap-6">
             {categories.map((category) => {
-              const imageUrl = category.icon || '/placeholder-category.png'
+              const imageUrl = category.icon || "/placeholder-category.png";
 
               return (
                 <Link
@@ -81,14 +120,14 @@ function CategoriesPage() {
                         className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                         loading="lazy"
                         onError={(e) => {
-                          const target = e.target as HTMLImageElement
-                          target.src = '/placeholder-category.png'
+                          const target = e.target as HTMLImageElement;
+                          target.src = "/placeholder-category.png";
                         }}
                       />
-                      
+
                       {/* Gradient Overlay */}
                       <div className="absolute inset-0 bg-gradient-to-t from-brand-dark/90 via-brand-dark/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                      
+
                       {/* Category Badge */}
                       <div className="absolute top-3 left-3 sm:top-4 sm:left-4">
                         <div className="bg-white/90 backdrop-blur-sm rounded-full px-2 py-0.5 sm:px-2.5 sm:py-1">
@@ -118,7 +157,7 @@ function CategoriesPage() {
                     </div>
                   </Card>
                 </Link>
-              )
+              );
             })}
           </div>
         ) : (
@@ -141,28 +180,36 @@ function CategoriesPage() {
             <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-brand-primary mb-1 sm:mb-2 group-hover:scale-110 transition-transform duration-300">
               {categories.length}+
             </div>
-            <div className="text-brand-muted text-xs sm:text-sm font-medium">Categories</div>
+            <div className="text-brand-muted text-xs sm:text-sm font-medium">
+              Categories
+            </div>
           </div>
-          
+
           <div className="bg-white rounded-xl sm:rounded-2xl p-4 sm:p-5 md:p-6 text-center shadow-sm hover:shadow-md transition-all duration-300 border border-brand-primary-soft group">
             <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-brand-accent mb-1 sm:mb-2 group-hover:scale-110 transition-transform duration-300">
               50+
             </div>
-            <div className="text-brand-muted text-xs sm:text-sm font-medium">Coming Soon</div>
+            <div className="text-brand-muted text-xs sm:text-sm font-medium">
+              Coming Soon
+            </div>
           </div>
-          
+
           <div className="bg-white rounded-xl sm:rounded-2xl p-4 sm:p-5 md:p-6 text-center shadow-sm hover:shadow-md transition-all duration-300 border border-brand-primary-soft group">
             <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-brand-success mb-1 sm:mb-2 group-hover:scale-110 transition-transform duration-300">
               10K+
             </div>
-            <div className="text-brand-muted text-xs sm:text-sm font-medium">Products</div>
+            <div className="text-brand-muted text-xs sm:text-sm font-medium">
+              Products
+            </div>
           </div>
-          
+
           <div className="bg-white rounded-xl sm:rounded-2xl p-4 sm:p-5 md:p-6 text-center shadow-sm hover:shadow-md transition-all duration-300 border border-brand-primary-soft group">
             <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-brand-warning mb-1 sm:mb-2 group-hover:scale-110 transition-transform duration-300">
               24/7
             </div>
-            <div className="text-brand-muted text-xs sm:text-sm font-medium">Support</div>
+            <div className="text-brand-muted text-xs sm:text-sm font-medium">
+              Support
+            </div>
           </div>
         </div>
 
@@ -173,7 +220,8 @@ function CategoriesPage() {
               Why Shop by Category?
             </h2>
             <p className="text-brand-muted text-sm sm:text-base max-w-2xl mx-auto">
-              Experience a smarter way to shop with our organized category system
+              Experience a smarter way to shop with our organized category
+              system
             </p>
           </div>
 
@@ -187,12 +235,12 @@ function CategoriesPage() {
                 Curated Selection
               </h3>
               <p className="text-brand-muted text-sm sm:text-base leading-relaxed">
-                Each category is carefully curated to bring you the best products 
-                from trusted sellers, ensuring quality and variety.
+                Each category is carefully curated to bring you the best
+                products from trusted sellers, ensuring quality and variety.
               </p>
               <div className="mt-4 sm:mt-5 md:mt-6">
                 <span className="text-brand-primary text-sm font-medium inline-flex items-center gap-1 group-hover:gap-2 transition-all">
-                  Learn more 
+                  Learn more
                   <TrendingUp className="w-4 h-4" />
                 </span>
               </div>
@@ -207,7 +255,7 @@ function CategoriesPage() {
                 Fast Navigation
               </h3>
               <p className="text-brand-muted text-sm sm:text-base leading-relaxed">
-                Quickly find what you're looking for with our organized category 
+                Quickly find what you're looking for with our organized category
                 structure and intelligent search filters.
               </p>
               <div className="mt-4 sm:mt-5 md:mt-6">
@@ -227,7 +275,7 @@ function CategoriesPage() {
                 Growing Daily
               </h3>
               <p className="text-brand-muted text-sm sm:text-base leading-relaxed">
-                We add new categories regularly based on customer requests and 
+                We add new categories regularly based on customer requests and
                 market trends to keep our selection fresh.
               </p>
               <div className="mt-4 sm:mt-5 md:mt-6">
@@ -254,5 +302,5 @@ function CategoriesPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }

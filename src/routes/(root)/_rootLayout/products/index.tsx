@@ -8,8 +8,10 @@ import { Button } from "@/components/ui/button";
 import { cn, formatCurrency } from "@/lib/utils";
 import type { IProductQueryFilters } from "@/types";
 import { Filter, Grid3x3, List, RefreshCw, X, Sparkles } from "lucide-react";
-import { productsQuery } from "@/api/queries";
 import { FilterBadge } from "@/components/ui/filter-badge";
+import { useProducts } from "@/api/hooks";
+import { LoadingState } from "@/components/ui/loading-state";
+import { ErrorState } from "@/components/ui/error-state";
 
 export const Route = createFileRoute("/(root)/_rootLayout/products/")({
   component: ProductsPage,
@@ -37,43 +39,57 @@ export const Route = createFileRoute("/(root)/_rootLayout/products/")({
       tags: s.tags,
       sortBy: s.sortBy ?? "createdAt",
       sortOrder: s.sortOrder ?? "desc",
-    })),
-  loaderDeps: ({ search }) => ({
-    page: search.page,
-    limit: search.limit,
-    search: search.search,
-    categoryId: search.categoryId,
-    brand: search.brand,
-    minPrice: search.minPrice,
-    maxPrice: search.maxPrice,
-    tags: search.tags,
-    sortBy: search.sortBy,
-    sortOrder: search.sortOrder,
-  }),
-  loader: async ({ context, deps }) => {
-    const data = await context.queryClient.ensureQueryData(productsQuery(deps));
-    const products = data.data;
-    const meta = data.pagination;
-
-    const brands = Array.from(
-      new Set(products.map((p) => p.brand).filter(Boolean)),
-    ) as string[];
-    const tags = Array.from(new Set(products.flatMap((p) => p.tags)));
-    const maxPrice = Math.max(...products.map((p) => p.price), 0);
-
-    return { products, meta, brands, tags, maxPrice };
-  },
+    }))
 });
 
 function ProductsPage() {
-  const { products, meta, brands, tags, maxPrice } = Route.useLoaderData();
   const search = Route.useSearch();
   const navigate = Route.useNavigate();
 
   const [viewMode, setViewMode] = React.useState<"grid" | "list">("grid");
   const [isRefreshing, setIsRefreshing] = React.useState<boolean>(false);
   const [isFilterOpen, setIsFilterOpen] = React.useState<boolean>(false);
+
+  const { data, error, isLoading, refetch } = useProducts(search);
+
+   if (isLoading) {
+      return (
+        <div className="min-h-screen bg-brand-surface">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-10">
+            <LoadingState />
+          </div>
+        </div>
+      );
+    }
   
+    if (error || !data ) {
+      return (
+        <div className="min-h-screen bg-brand-surface">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div className="max-w-2xl mx-auto">
+              <ErrorState
+                title="Unable to Load Products"
+                error={error}
+                onRetry={() => {
+                  refetch();
+                }}
+                fullScreen={false}
+              />
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+  const products = data.data;
+  const meta = data.pagination;
+
+  const brands = Array.from(
+    new Set(products.map((p) => p.brand).filter(Boolean)),
+  ) as string[];
+  const tags = Array.from(new Set(products.flatMap((p) => p.tags)));
+  const maxPrice = Math.max(...products.map((p) => p.price), 0);
+
   const hasActiveFilters = React.useMemo(() => {
     return Boolean(
       search.search ||
@@ -149,7 +165,7 @@ function ProductsPage() {
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
-    await new Promise(resolve => setTimeout(resolve, 500));
+    await new Promise((resolve) => setTimeout(resolve, 500));
     setIsRefreshing(false);
   };
 
@@ -168,18 +184,23 @@ function ProductsPage() {
       <div className="relative bg-gradient-to-br from-brand-primary via-brand-primary-hover to-brand-dark overflow-hidden">
         {/* Decorative elements */}
         <div className="absolute inset-0 opacity-10">
-          <div className="absolute inset-0" style={{
-            backgroundImage: `radial-gradient(circle at 20% 50%, rgba(255,255,255,0.1) 0%, transparent 50%)`
-          }} />
+          <div
+            className="absolute inset-0"
+            style={{
+              backgroundImage: `radial-gradient(circle at 20% 50%, rgba(255,255,255,0.1) 0%, transparent 50%)`,
+            }}
+          />
         </div>
-        
+
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-20">
           <div className="text-center max-w-3xl mx-auto">
             <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-3 py-1 mb-4 sm:mb-6">
               <Sparkles className="w-4 h-4 text-brand-accent" />
-              <span className="text-xs sm:text-sm font-medium text-white">Premium Collection</span>
+              <span className="text-xs sm:text-sm font-medium text-white">
+                Premium Collection
+              </span>
             </div>
-            
+
             <div className="flex items-center justify-center gap-3 sm:gap-4 mb-4 sm:mb-6">
               <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white">
                 Our Collection
@@ -191,13 +212,16 @@ function ProductsPage() {
                 onClick={handleRefresh}
                 disabled={isRefreshing}
               >
-                <RefreshCw className={`h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`} />
+                <RefreshCw
+                  className={`h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`}
+                />
               </Button>
             </div>
-            
+
             <p className="text-white/90 text-base sm:text-lg leading-relaxed mb-8 sm:mb-10">
-              Discover premium fashion items from top brands. Filter by category, price, 
-              brand, and more to find exactly what you're looking for.
+              Discover premium fashion items from top brands. Filter by
+              category, price, brand, and more to find exactly what you're
+              looking for.
             </p>
 
             {/* Stats */}
@@ -220,16 +244,25 @@ function ProductsPage() {
                 <div className="text-xl sm:text-2xl md:text-3xl font-bold text-white">
                   {tags.length}
                 </div>
-                <div className="text-xs sm:text-sm text-white/80">Categories</div>
+                <div className="text-xs sm:text-sm text-white/80">
+                  Categories
+                </div>
               </div>
             </div>
           </div>
         </div>
-        
+
         {/* Decorative bottom curve */}
         <div className="absolute bottom-0 left-0 right-0">
-          <svg className="w-full h-12 text-brand-surface" preserveAspectRatio="none" viewBox="0 0 1440 120">
-            <path fill="currentColor" d="M0,64L80,58.7C160,53,320,43,480,48C640,53,800,75,960,80C1120,85,1280,75,1360,69.3L1440,64L1440,120L1360,120C1280,120,1120,120,960,120C800,120,640,120,480,120C320,120,160,120,80,120L0,120Z" />
+          <svg
+            className="w-full h-12 text-brand-surface"
+            preserveAspectRatio="none"
+            viewBox="0 0 1440 120"
+          >
+            <path
+              fill="currentColor"
+              d="M0,64L80,58.7C160,53,320,43,480,48C640,53,800,75,960,80C1120,85,1280,75,1360,69.3L1440,64L1440,120L1360,120C1280,120,1120,120,960,120C800,120,640,120,480,120C320,120,160,120,80,120L0,120Z"
+            />
           </svg>
         </div>
       </div>
@@ -260,11 +293,13 @@ function ProductsPage() {
               Filters & Sort
               {hasActiveFilters && (
                 <span className="ml-2 bg-brand-primary text-white rounded-full min-w-[20px] h-5 px-1.5 text-xs font-medium flex items-center justify-center">
-                  {Object.keys(search).filter(
-                    (k) =>
-                      search[k as keyof typeof search] &&
-                      !["page", "limit", "sortBy", "sortOrder"].includes(k)
-                  ).length}
+                  {
+                    Object.keys(search).filter(
+                      (k) =>
+                        search[k as keyof typeof search] &&
+                        !["page", "limit", "sortBy", "sortOrder"].includes(k),
+                    ).length
+                  }
                 </span>
               )}
             </Button>
@@ -281,7 +316,9 @@ function ProductsPage() {
                 <div className="sticky top-0 bg-white border-b border-brand-primary-soft px-4 py-4 flex items-center justify-between rounded-t-2xl">
                   <div className="flex items-center gap-2">
                     <Filter className="h-5 w-5 text-brand-primary" />
-                    <h3 className="text-lg font-semibold text-brand-dark">Filters</h3>
+                    <h3 className="text-lg font-semibold text-brand-dark">
+                      Filters
+                    </h3>
                     {hasActiveFilters && (
                       <span className="text-xs bg-brand-primary-soft text-brand-primary px-2 py-0.5 rounded-full">
                         Active
@@ -322,8 +359,10 @@ function ProductsPage() {
                 </h2>
                 <div className="flex flex-wrap items-center gap-2 mt-1.5">
                   <p className="text-sm text-brand-muted">
-                    Showing {Math.min((meta.page - 1) * meta.limit + 1, meta.total)}-
-                    {Math.min(meta.page * meta.limit, meta.total)} of {meta.total}
+                    Showing{" "}
+                    {Math.min((meta.page - 1) * meta.limit + 1, meta.total)}-
+                    {Math.min(meta.page * meta.limit, meta.total)} of{" "}
+                    {meta.total}
                     {search.search && ` for "${search.search}"`}
                   </p>
                   {hasActiveFilters && (
@@ -350,7 +389,8 @@ function ProductsPage() {
                     variant={viewMode === "grid" ? "default" : "ghost"}
                     className={cn(
                       "h-8 w-8 p-0 transition-all duration-200",
-                      viewMode === "grid" && "bg-brand-primary text-white hover:bg-brand-primary-hover"
+                      viewMode === "grid" &&
+                        "bg-brand-primary text-white hover:bg-brand-primary-hover",
                     )}
                     onClick={() => setViewMode("grid")}
                   >
@@ -362,7 +402,8 @@ function ProductsPage() {
                     variant={viewMode === "list" ? "default" : "ghost"}
                     className={cn(
                       "h-8 w-8 p-0 transition-all duration-200",
-                      viewMode === "list" && "bg-brand-primary text-white hover:bg-brand-primary-hover"
+                      viewMode === "list" &&
+                        "bg-brand-primary text-white hover:bg-brand-primary-hover",
                     )}
                     onClick={() => setViewMode("list")}
                   >
@@ -413,11 +454,17 @@ function ProductsPage() {
                       color="green"
                     />
                   )}
-                  {(search.minPrice !== undefined || search.maxPrice !== undefined) && (
+                  {(search.minPrice !== undefined ||
+                    search.maxPrice !== undefined) && (
                     <FilterBadge
                       label="Price"
                       value={`${formatCurrency(search.minPrice || 0)} - ${formatCurrency(search.maxPrice || maxPrice)}`}
-                      onRemove={() => handleFilterChange({ minPrice: undefined, maxPrice: undefined })}
+                      onRemove={() =>
+                        handleFilterChange({
+                          minPrice: undefined,
+                          maxPrice: undefined,
+                        })
+                      }
                       color="purple"
                     />
                   )}
@@ -438,7 +485,9 @@ function ProductsPage() {
               <div className="flex items-center justify-center py-20">
                 <div className="text-center">
                   <RefreshCw className="mx-auto h-10 w-10 animate-spin text-brand-primary" />
-                  <p className="mt-4 text-brand-muted">Refreshing products...</p>
+                  <p className="mt-4 text-brand-muted">
+                    Refreshing products...
+                  </p>
                 </div>
               </div>
             ) : products.length === 0 ? (
@@ -449,7 +498,8 @@ function ProductsPage() {
                   No products found
                 </h3>
                 <p className="text-brand-muted mb-6 max-w-md">
-                  Try adjusting your filters or search term to find what you're looking for.
+                  Try adjusting your filters or search term to find what you're
+                  looking for.
                 </p>
                 {hasActiveFilters && (
                   <Button
@@ -495,7 +545,7 @@ function ProductsPage() {
 
                     {/* Page Info */}
                     <div className="mt-4 text-center text-sm text-brand-muted">
-                      Page {meta.page} of {meta.totalPages} •{' '}
+                      Page {meta.page} of {meta.totalPages} •{" "}
                       {meta.total.toLocaleString()} total products
                     </div>
                   </div>

@@ -34,8 +34,6 @@ function CartPage() {
     isEmpty,
   } = useCart();
 
-  // const [couponCode, setCouponCode] = React.useState("");
-  // const [isApplyingCoupon, setIsApplyingCoupon] = React.useState(false);
   const tax = subtotal * TAX_PERCENT;
   const total = subtotal + tax;
 
