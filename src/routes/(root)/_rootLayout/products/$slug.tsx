@@ -40,6 +40,8 @@ export const Route = createFileRoute("/(root)/_rootLayout/products/$slug")({
 });
 
 function ProductDetailPage() {
+  const params = Route.useParams();
+  const navigate = useNavigate();
   const [selectedImage, setSelectedImage] = React.useState(0);
   const [variants, setVariants] = React.useState<IVariantOptions>({
     sizes: [],
@@ -50,9 +52,19 @@ function ProductDetailPage() {
   const [quantity, setQuantity] = React.useState(1);
   const [isWishlisted, setIsWishlisted] = React.useState(false);
   const [isAdding, setIsAdding] = React.useState(false);
-  const params = Route.useParams();
-  const { data: product, error: productError, isLoading: productLoading, refetch: productRefetch } = useProductBySlug(params.slug);
-  const { data: relatedProducts, error: relatedProductsError, isLoading: relatedProductsLoading, refetch: relatedProductsRefetch } = useRelatedProducts(params.slug);
+  const {
+    data: product,
+    error: productError,
+    isLoading: productLoading,
+    refetch: productRefetch,
+  } = useProductBySlug(params.slug);
+  const {
+    data: relatedProducts,
+    error: relatedProductsError,
+    isLoading: relatedProductsLoading,
+    refetch: relatedProductsRefetch,
+  } = useRelatedProducts(params.slug);
+  const { addToCart, isLoading: cartLoading } = useCart();
 
   if (productLoading || relatedProductsLoading) {
     return (
@@ -87,8 +99,6 @@ function ProductDetailPage() {
   const discountedPrice = product.price * (1 - product.discount / 100);
   const savings = product.price - discountedPrice;
   const isOutOfStock = product.stock === 0;
-  const navigate = useNavigate();
-  const { addToCart, isLoading: cartLoading } = useCart();
 
   const handleBuyNow = async () => {
     if (product.stock <= 0) {
@@ -572,7 +582,7 @@ function ProductDetailPage() {
         </div>
 
         {/* Related Products Section */}
-        { relatedProducts && relatedProducts.length > 0 && (
+        {relatedProducts && relatedProducts.length > 0 && (
           <div className="mt-12 sm:mt-16 lg:mt-20">
             <div className="mb-6 sm:mb-8 flex items-center justify-between">
               <div>
