@@ -39,7 +39,7 @@ export const Route = createFileRoute("/(root)/_rootLayout/products/")({
       tags: s.tags,
       sortBy: s.sortBy ?? "createdAt",
       sortOrder: s.sortOrder ?? "desc",
-    }))
+    })),
 });
 
 function ProductsPage() {
@@ -51,44 +51,6 @@ function ProductsPage() {
   const [isFilterOpen, setIsFilterOpen] = React.useState<boolean>(false);
 
   const { data, error, isLoading, refetch } = useProducts(search);
-
-   if (isLoading) {
-      return (
-        <div className="min-h-screen bg-brand-surface">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-10">
-            <LoadingState />
-          </div>
-        </div>
-      );
-    }
-  
-    if (error || !data ) {
-      return (
-        <div className="min-h-screen bg-brand-surface">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <div className="max-w-2xl mx-auto">
-              <ErrorState
-                title="Unable to Load Products"
-                error={error}
-                onRetry={() => {
-                  refetch();
-                }}
-                fullScreen={false}
-              />
-            </div>
-          </div>
-        </div>
-      );
-    }
-
-  const products = data.data;
-  const meta = data.pagination;
-
-  const brands = Array.from(
-    new Set(products.map((p) => p.brand).filter(Boolean)),
-  ) as string[];
-  const tags = Array.from(new Set(products.flatMap((p) => p.tags)));
-  const maxPrice = Math.max(...products.map((p) => p.price), 0);
 
   const hasActiveFilters = React.useMemo(() => {
     return Boolean(
@@ -177,6 +139,44 @@ function ProductsPage() {
     if (sortBy === "name") return "name";
     return "createdAt";
   };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-brand-surface">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-10">
+          <LoadingState />
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !data) {
+    return (
+      <div className="min-h-screen bg-brand-surface">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="max-w-2xl mx-auto">
+            <ErrorState
+              title="Unable to Load Products"
+              error={error}
+              onRetry={() => {
+                refetch();
+              }}
+              fullScreen={false}
+            />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  const products = data.data;
+  const meta = data.pagination;
+
+  const brands = Array.from(
+    new Set(products.map((p) => p.brand).filter(Boolean)),
+  ) as string[];
+  const tags = Array.from(new Set(products.flatMap((p) => p.tags)));
+  const maxPrice = Math.max(...products.map((p) => p.price), 0);
 
   return (
     <div className="min-h-screen bg-brand-surface">
